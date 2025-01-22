@@ -30,6 +30,70 @@
 }
 
 @layer components {
+  .dark-mode.dark {
+    --color-button-fill: 22, 51, 95; /* gray-100 */
+    background: #151F45;
+    filter: none !important;
+    color: #fff;
+
+    img:where(.dark, .dark *) {
+      filter: none
+    }
+
+    *, ::before, ::after {
+      border-color: #404861;
+    }
+
+    .bg-white {
+      background: #151F45;
+    }
+
+    .text-link-blue {
+      color: #5389D0;
+    }
+
+    .text-amber-600:hover {
+      --tw-text-opacity: 0.5;
+    }
+
+    .bg-gray-100 {
+      background: #1D2957;
+    }
+
+    input {
+      color: #898EA2;
+      background-color: #202223;
+    }
+
+    .text-gray-500, .text-gray-700, .text-gray-800 {
+      color: #A9A9A9;
+    }
+
+    .hover\:bg-link-blue\/100:hover {
+      background-color: rgb(52 152 219 / 0.5);
+    }
+
+    .text-black, .text-gray-900 {
+      color: #fff;
+    }
+
+    *, ::before, ::after {
+      border-color: #404861;
+    }
+
+    .border-transparent {
+      border-color: transparent;
+    }
+
+    .bg-skin-to {
+      background: #00371E;
+    }
+
+    .text-skin-from, .bg-skin-from {
+      background: rgba(220, 38, 38, 0.5);
+    }
+  }
+
   .dark-mode {
     @apply dark:invert dark:-hue-rotate-180 dark:brightness-90;
   }
@@ -46,3 +110,11 @@
     @apply dark-no-invert;
   }
 }
+
+/*.dark\:bg-white:where(.dark, .dark *) {*/
+/*  background: #151F45 !important;*/
+/*}*/
+
+/*.dark\:bg-white:where(.dark, .dark *) input {*/
+/*  background: #202223;*/
+/*}*/

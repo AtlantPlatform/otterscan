@@ -6,16 +6,24 @@ import { commify } from "./utils/utils";
 /**
  * Set the page title.
  */
-export const usePageTitle = (title: string | undefined) => {
+export const usePageTitle = (title: string | undefined, exact?: boolean) => {
   const { config } = useContext(RuntimeContext);
+
   if (title === undefined) {
     return;
   }
-  const siteName = config.branding?.siteName || "Otterscan";
-  const networkTitle = config.branding?.networkTitle
-    ? `| ${config.branding?.networkTitle} `
-    : "";
-  document.title = `${title} ${networkTitle}| ${siteName}`;
+
+  if (exact) {
+    document.title = title;
+
+    return;
+  }
+
+  const siteName = "Ethscan";
+  // const networkTitle = config.branding?.networkTitle
+  //   ? `| ${config.branding?.networkTitle} `
+  //   : "";
+  document.title = `${title} | ${siteName}`;
 };
 
 /**
