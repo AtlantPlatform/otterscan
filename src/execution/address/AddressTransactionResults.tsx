@@ -33,6 +33,8 @@ import { AddressAwareComponentProps } from "../types";
 import PendingItem from "./PendingItem";
 import PendingPage from "./PendingPage";
 import {Helmet} from 'react-helmet-async';
+import {formatValue} from '../../components/formatter';
+import {useChainInfo} from '../../useChainInfo';
 
 const ProxyInfo: FC<AddressAwareComponentProps> = ({ address }) => {
   const { provider } = useContext(RuntimeContext);
@@ -144,19 +146,24 @@ const AddressTransactionResults: FC = () => {
   );
 
   const { data: balance } = useQuery(getBalanceQuery(provider, address));
+  const {
+    nativeCurrency: { symbol, decimals },
+  } = useChainInfo();
+  const formattedValue = formatValue(balance || 0, decimals);
+
   const description = `Details for Ethereum address ${addressOrName} including current balance, transaction history, and analytics for activity.`
   const payloadSchemaWebPage = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "url": "https://ethscan.org/address/{address}",
+    "url": `https://ethscan.org/address/${addressOrName}`,
     "name": "Ethereum Address Details",
     "mainEntity": {
       "@type": "Person",
-      "identifier": "{address}",
+      "identifier": `${addressOrName}`,
       "balance": {
         "@type": "MonetaryAmount",
         "currency": "ETH",
-        "value": "12.34"
+        "value": `${formattedValue}`
       }
     }
   })
@@ -266,6 +273,14 @@ const AddressTransactionResults: FC = () => {
         </StandardScrollableTable>
         <NavBar address={address} page={page} controller={controller} />
       </StandardSelectionBoundary>
+      <div className="faq-section">
+        <p>1. What is an Ethereum address?
+          An Ethereum address is a unique identifier used to send and receive transactions on the Ethereum blockchain. It starts with '0x' followed by 40 hexadecimal characters.</p>
+        <p>2. How can I check the balance of an Ethereum address?
+          You can view the balance of an Ethereum address on EthScan by searching for the address in the search bar.</p>
+        <p>3. What does the transaction history of an Ethereum address show?
+          The transaction history shows all incoming and outgoing transactions associated with the address, including amounts and timestamps.</p>
+      </div>
     </ContentFrame>
   );
 };

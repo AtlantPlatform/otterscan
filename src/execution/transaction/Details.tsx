@@ -5,7 +5,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { formatUnits } from "ethers";
-import { FC, memo, useContext, useState } from "react";
+import React, { FC, memo, useContext, useState } from "react";
 import BlockConfirmations from "../../components/BlockConfirmations";
 import BlockLink from "../../components/BlockLink";
 import ContentFrame from "../../components/ContentFrame";
@@ -59,6 +59,9 @@ import RewardSplit from "./RewardSplit";
 import TokenTransferItem from "./TokenTransferItem";
 import DecodedParamsTable from "./decoder/DecodedParamsTable";
 import InputDecoder from "./decoder/InputDecoder";
+import {usePageTitle} from '../../useTitle';
+import {Helmet} from 'react-helmet-async';
+import {formatValue} from '../../components/formatter';
 
 type DetailsProps = {
   txData: TransactionData;
@@ -122,8 +125,35 @@ const Details: FC<DetailsProps> = ({ txData }) => {
 
   const { totalFees } = calculateFee(txData, block);
 
+  usePageTitle(txData ? `Ethereum Transaction Overview - ${txData.transactionHash}` : undefined);
+
+  const description = `Overview of Ethereum transaction ${txData ? txData.transactionHash : ''}, including sender, recipient, value, gas price, and confirmations.`
+
+  const {
+    nativeCurrency: { decimals },
+  } = useChainInfo();
+  const formattedValue = formatValue(txData.value || 0, decimals);
+  const formattedGasPriceValue = formatValue(txData.gasPrice || 0, 18);
+
+  const payloadSchemaWebPage = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BlockchainTransaction",
+      "url": `https://ethscan.org/tx/${txData ? txData.transactionHash : ''}`,
+      "transactionHash": `${txData ? txData.transactionHash : ''}`,
+      "sender": `${txData.from}`,
+      "recipient": `${txData.to}`,
+      "value": `${formattedValue} ETH`,
+      "gasPrice": `${formattedGasPriceValue} ETH`,
+      "confirmations": `${txData.confirmedData?.confirmations || 0}`
+    }
+  )
+
   return (
     <ContentFrame tabs>
+      <Helmet>
+        <meta name="description" content={description}/>
+        <script type="application/ld+json">{payloadSchemaWebPage}</script>
+      </Helmet>
       <InfoRow title="Transaction Hash">
         <div className="flex items-baseline space-x-2 break-all">
           <span className="font-hash" data-test="tx-hash">

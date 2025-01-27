@@ -8,7 +8,7 @@ import { blockURL } from "../url";
 import { useBlockData } from "../useErigonHooks";
 import { useLatestBlockNumber } from "../useLatestBlock";
 import { RuntimeContext } from "../useRuntime";
-import { useBlockPageTitle } from "../useTitle";
+import {useBlockPageTitle, usePageTitle} from "../useTitle";
 import BlockDetails from "./BlockDetails";
 
 const Block: React.FC = () => {
@@ -30,12 +30,16 @@ const Block: React.FC = () => {
     latestBlockNumber = undefined;
   }
 
-  useBlockPageTitle(blockNumberOrHash);
+  const titleToSet = `Ethereum Block ${blockNumberOrHash} - Transactions, Gas Used, and Miner Details`
+
+  usePageTitle(titleToSet);
+
+  // useBlockPageTitle(blockNumberOrHash);
 
   return (
     <StandardFrame>
       <StandardSubtitle>
-        <div className="flex items-baseline space-x-1">
+        <h1 className="flex items-baseline space-x-1">
           <span>Block</span>
           <span className="text-base text-gray-500" data-test="block-number">
             #{blockNumberOrHash}
@@ -45,7 +49,7 @@ const Block: React.FC = () => {
             latestEntityNum={latestBlockNumber}
             urlBuilder={blockURL}
           />
-        </div>
+        </h1>
       </StandardSubtitle>
       <BlockDetails blockNumberOrHash={blockNumberOrHash} />
     </StandardFrame>

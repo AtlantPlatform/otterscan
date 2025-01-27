@@ -5,17 +5,42 @@ import { useTraceTransaction } from "../../useErigonHooks";
 import { RuntimeContext } from "../../useRuntime";
 import TransactionAddress from "../components/TransactionAddress";
 import TraceItem from "./TraceItem";
+import {usePageTitle} from '../../useTitle';
+import {Helmet} from 'react-helmet-async';
 
 type TraceProps = {
   txData: TransactionData;
+  txHash: string;
 };
 
-const Trace: React.FC<TraceProps> = ({ txData }) => {
+const Trace: React.FC<TraceProps> = ({ txData, txHash }) => {
   const { provider } = useContext(RuntimeContext);
   const traces = useTraceTransaction(provider, txData.transactionHash);
 
+  usePageTitle(`Ethereum Transaction Trace - ${txHash}`);
+
+  const description = `Detailed execution trace for Ethereum transaction ${txHash}, including call stack and gas consumption.`
+  const payloadSchemaWebPage = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "url": `https://ethscan.org/tx/${txData.transactionHash}/trace`,
+      "mainEntity": {
+        "@type": "BlockchainTransaction",
+        "transactionHash": `${txData.transactionHash}`,
+      }
+    }
+  )
+
   return (
     <ContentFrame tabs>
+      <Helmet>
+        <meta name="description" content={description}/>
+        <script type="application/ld+json">{payloadSchemaWebPage}</script>
+      </Helmet>
+      <Helmet>
+        <meta name="description" content={description}/>
+        <script type="application/ld+json">{payloadSchemaWebPage}</script>
+      </Helmet>
       <div className="mb-5 mt-4 flex flex-col items-start space-y-3 overflow-x-auto font-code text-sm">
         {traces ? (
           <>

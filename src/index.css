@@ -118,3 +118,9 @@
 /*.dark\:bg-white:where(.dark, .dark *) input {*/
 /*  background: #202223;*/
 /*}*/
+
+.faq-section {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 50px;
+}
