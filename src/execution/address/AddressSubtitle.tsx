@@ -46,7 +46,7 @@ const AddressSubtitle: FC<AddressSubtitleProps> = ({
 
   return (
     <StandardSubtitle>
-      <div className="flex items-baseline space-x-2">
+      <h1 className="flex items-baseline space-x-2">
         <Blockies
           className="self-center rounded"
           seed={address.toLowerCase()}
@@ -102,7 +102,7 @@ const AddressSubtitle: FC<AddressSubtitleProps> = ({
             </button>
           </div>
         )}
-      </div>
+      </h1>
     </StandardSubtitle>
   );
 };

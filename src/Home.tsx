@@ -12,6 +12,7 @@ import { useLatestBlockHeader } from "./useLatestBlock";
 import { RuntimeContext } from "./useRuntime";
 import { usePageTitle } from "./useTitle";
 import { commify } from "./utils/utils";
+import {Helmet} from 'react-helmet-async';
 
 const CameraScanner = lazy(() => import("./search/CameraScanner"));
 
@@ -23,11 +24,27 @@ const Home: FC = () => {
   const finalizedSlotNumber = useFinalizedSlotNumber();
   const slotTime = useSlotTimestamp(finalizedSlotNumber);
   const [isScanning, setScanning] = useState<boolean>(false);
+  const structuredJSON = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://ethscan.org",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://ethscan.org/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  );
 
-  usePageTitle("Home");
+  usePageTitle("Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | EthScan");
 
   return (
     <>
+      <Helmet>
+        <meta name="description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, logs, and more with EthScan's user-friendly explorer"/>
+        <title>Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | EthScan</title>
+        <script type="application/ld+json">{structuredJSON}</script>
+      </Helmet>
       <div className="flex justify-end py-2 px-3 lg:px-9 h-[2.875rem]">
         <SourcifyMenu />
       </div>
