@@ -8,7 +8,7 @@ type RelativePositionProps = {
 const RelativePosition: FC<RelativePositionProps> = ({ pos, total }) => (
   <span className="text-xs whitespace-nowrap">
     {pos}
-    <span className="text-sm text-gray-600"> / {total}</span>
+    <span className="text-sm opacity-50"> / {total}</span>
   </span>
 );
 

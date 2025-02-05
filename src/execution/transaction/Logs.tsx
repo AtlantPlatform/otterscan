@@ -1,14 +1,17 @@
 import { Log } from "ethers";
-import { FC, memo, useEffect } from "react";
+import React, { FC, memo, useEffect } from "react";
 import { useLocation } from "react-router";
 import ContentFrame from "../../components/ContentFrame";
 import LogEntry from "./LogEntry";
+import {usePageTitle} from '../../useTitle';
+import {Helmet} from 'react-helmet-async';
 
 type LogsProps = {
   logs: Log[] | undefined;
+  txHash: string;
 };
 
-const Logs: FC<LogsProps> = ({ logs }) => {
+const Logs: FC<LogsProps> = ({ logs, txHash }) => {
   const location = useLocation();
   useEffect(() => {
     setTimeout(() => {
@@ -23,8 +26,27 @@ const Logs: FC<LogsProps> = ({ logs }) => {
       }
     }, 200);
   }, [logs]);
+
+  usePageTitle(`Ethereum Transaction Logs - ${txHash}`);
+
+  const description = `View logs for Ethereum transaction ${txHash}, including emitted events and contract interactions.`
+  const payloadSchemaWebPage = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "url": `https://ethscan.org/tx/{${txHash}/logs`,
+      "mainEntity": {
+        "@type": "BlockchainTransaction",
+        "transactionHash": `${txHash}`,
+      }
+    }
+  )
+
   return (
     <ContentFrame tabs>
+      <Helmet>
+        <meta name="description" content={description}/>
+        <script type="application/ld+json">{payloadSchemaWebPage}</script>
+      </Helmet>
       {logs && (
         <>
           {logs.length > 0 ? (

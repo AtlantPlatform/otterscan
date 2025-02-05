@@ -19,7 +19,7 @@ const BlockTransactionHeader: React.FC<BlockTransactionHeaderProps> = ({
 
   return (
     <StandardSubtitle>
-      <div className="flex items-baseline space-x-1">
+      <h1 className="flex items-baseline space-x-1">
         <span>Transactions</span>
         <div className="flex space-x-1 text-sm text-gray-500">
           <span>For Block</span>
@@ -30,7 +30,7 @@ const BlockTransactionHeader: React.FC<BlockTransactionHeaderProps> = ({
             urlBuilder={blockTxsURL}
           />
         </div>
-      </div>
+      </h1>
     </StandardSubtitle>
   );
 };

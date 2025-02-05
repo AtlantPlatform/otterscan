@@ -1,7 +1,5 @@
 import { FC, memo, useContext } from "react";
-// @ts-expect-error
-import Otter from "./otter.png?w=128&h=128&webp";
-import ETHScanLogo from "./ethscanlogo.png";
+import ETHScanLogoSingle from "./ethscanlogosingle.png";
 import { RuntimeContext } from "./useRuntime";
 
 const Logo: FC = () => {
@@ -11,10 +9,13 @@ const Logo: FC = () => {
     <div className="flex cursor-default items-center justify-center space-x-4 font-title text-6xl font-bol">
       <img
         className="rounded-full"
-        src={ETHScanLogo}
-        alt="An otter scanning"
-        title="An otter scanning"
+        src={ETHScanLogoSingle}
+        width={96}
+        height={96}
+        alt="Ethscan logo"
+        title="Ethscan logo"
       />
+      <span data-test="logotext">Ethscan</span>
     </div>
   );
 };

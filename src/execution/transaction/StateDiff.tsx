@@ -15,9 +15,12 @@ import {
 import { RuntimeContext } from "../../useRuntime";
 import TransactionAddress from "../components/TransactionAddress";
 import Uint256Decoder from "./decoder/Uint256Decoder";
+import {usePageTitle} from '../../useTitle';
+import {Helmet} from 'react-helmet-async';
 
 type StateDiffProps = {
   txData: TransactionData;
+  txHash: string;
 };
 
 function isStateDiffGroup(
@@ -179,12 +182,30 @@ const buildStateDiffTree = (
   return result;
 };
 
-const StateDiff: React.FC<StateDiffProps> = ({ txData }) => {
+const StateDiff: React.FC<StateDiffProps> = ({ txData, txHash }) => {
   const { provider } = useContext(RuntimeContext);
   const traces = useStateDiffTrace(provider, txData.transactionHash);
 
+  usePageTitle(`Ethereum Transaction State Diff - ${txHash}`);
+
+  const description = `State diff for Ethereum transaction ${txHash}, showing account balance and storage changes.`
+  const payloadSchemaWebPage = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "url": `https://ethscan.org/tx/${txHash}/statediff`,
+      "mainEntity": {
+        "@type": "BlockchainTransaction",
+        "transactionHash": `${txHash}`,
+      }
+    }
+  )
+
   return (
     <ContentFrame tabs>
+      <Helmet>
+        <meta name="description" content={description}/>
+        <script type="application/ld+json">{payloadSchemaWebPage}</script>
+      </Helmet>
       <div className="mb-5 mt-4 flex flex-col items-start space-y-3 overflow-x-auto text-sm">
         {traces ? (
           <>

@@ -20,10 +20,11 @@ import { blockTxsURL } from "../url";
 import { useChainInfo } from "../useChainInfo";
 import { useBlockData, useL1Epoch } from "../useErigonHooks";
 import { RuntimeContext } from "../useRuntime";
-import { useBlockPageTitle } from "../useTitle";
+import {useBlockPageTitle, usePageTitle} from "../useTitle";
 import { commify } from "../utils/utils";
 import BlockReward from "./components/BlockReward";
 import DecoratedAddressLink from "./components/DecoratedAddressLink";
+import {Helmet} from 'react-helmet-async';
 
 interface BlockDetailsProps {
   blockNumberOrHash: undefined | string;
@@ -39,7 +40,11 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   } = useChainInfo();
 
   const { data: block, isLoading } = useBlockData(provider, blockNumberOrHash);
-  useBlockPageTitle(blockNumberOrHash);
+  // useBlockPageTitle(blockNumberOrHash);
+
+  const titleToSet = `Ethereum Block ${blockNumberOrHash} - Transactions, Gas Used, and Miner Details`
+
+  usePageTitle(titleToSet);
 
   const extraStr = useMemo(() => {
     return block && toUtf8String(block.extraData, Utf8ErrorFuncs.replace);
@@ -57,11 +62,61 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   const l1Epoch = useL1Epoch(provider, block ? block.number : null);
   const l1ExplorerUrl: string | undefined =
     config.opChainSettings?.l1ExplorerURL;
+  const description = `Details for Ethereum block ${blockNumberOrHash}, including transaction count, miner address, gas used, and timestamp.`
+  const payloadSchemaWebPage = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "url": `https://ethscan.org/block/${blockNumberOrHash}`,
+      "mainEntity": {
+        "@type": "BlockchainBlock",
+        "blockNumber": `${blockNumberOrHash}`,
+        "miner": `${block?.miner}`,
+        "timestamp": `${block?.timestamp ? (new Date(block.timestamp * 1000)).toISOString() : ''}`,
+        "transactionCount": `${block?.transactionCount}`
+      }
+    }
+  )
+  const payloadSchemaFaqPage = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is a block in the Ethereum blockchain?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A block is a package of data that contains a list of transactions, a timestamp, and other metadata, secured and added to the Ethereum blockchain."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I find details about a specific Ethereum block?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Enter the block number or hash in the EthScan search bar to view detailed information, including transactions and miner data."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the role of the miner in a block?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Miners validate and confirm transactions, grouping them into blocks and securing the Ethereum blockchain by solving computational challenges."
+          }
+        }
+      ]
+    }
+  )
 
   return (
     <>
+      <Helmet>
+        <meta name="description" content={description}/>
+        <script type="application/ld+json">{payloadSchemaWebPage}</script>
+        <script type="application/ld+json">{payloadSchemaFaqPage}</script>
+      </Helmet>
       {block === null && (
-        <BlockNotFound blockNumberOrHash={blockNumberOrHash} />
+        <BlockNotFound blockNumberOrHash={blockNumberOrHash}/>
       )}
       {block === undefined && (
         <ContentFrame>
@@ -76,7 +131,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
             </span>
           </InfoRow>
           <InfoRow title="Timestamp">
-            <Timestamp value={block.timestamp} />
+            <Timestamp value={block.timestamp}/>
           </InfoRow>
           <InfoRow title="Transactions">
             <NavLink
@@ -89,13 +144,13 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
             in this block
           </InfoRow>
           <InfoRow title="Mined by">
-            <DecoratedAddressLink address={block.miner} miner />
+            <DecoratedAddressLink address={block.miner} miner/>
           </InfoRow>
           <InfoRow title="Block Reward">
-            <BlockReward block={block} />
+            <BlockReward block={block}/>
           </InfoRow>
           <InfoRow title="Uncles Reward">
-            <NativeTokenAmount value={block.unclesReward} />
+            <NativeTokenAmount value={block.unclesReward}/>
           </InfoRow>
           <InfoRow title="Size">{commify(block.size)} bytes</InfoRow>
           {block.baseFeePerGas !== null &&
@@ -122,11 +177,11 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
               <div className="flex items-baseline space-x-1">
                 <span className="flex space-x-1 text-orange-500">
                   <span title="Burnt fees">
-                    <FontAwesomeIcon icon={faBurn} size="1x" />
+                    <FontAwesomeIcon icon={faBurn} size="1x"/>
                   </span>
                   <span>
                     <span className="line-through">
-                      <FormattedBalance value={burntFees} />
+                      <FormattedBalance value={burntFees}/>
                     </span>{" "}
                     {symbol}
                   </span>
@@ -142,7 +197,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
                   total={commify(formatUnits(block.gasLimit, 0))}
                 />
               </div>
-              <PercentageBar perc={gasUsedPerc!} />
+              <PercentageBar perc={gasUsedPerc!}/>
             </div>
           </InfoRow>
           {block.blobGasUsed !== null && block.blobGasUsed !== undefined && (
@@ -161,7 +216,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
             <span className="break-all font-data">{block.extraData}</span>)
           </InfoRow>
           <InfoRow title={`${name} Price`}>
-            <NativeTokenPrice blockTag={block.number} />
+            <NativeTokenPrice blockTag={block.number}/>
           </InfoRow>
           <InfoRow title="Difficulty">
             {commify(block.difficulty.toString())}
@@ -172,17 +227,17 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
               : "N/A"}
           </InfoRow>
           <InfoRow title="Hash">
-            <HexValue value={block.hash ?? "<unknown>"} />
+            <HexValue value={block.hash ?? "<unknown>"}/>
           </InfoRow>
           <InfoRow title="Parent Hash">
-            <BlockLink blockTag={block.parentHash} />
+            <BlockLink blockTag={block.parentHash}/>
           </InfoRow>
           {block.parentBeaconBlockRoot && (
             <InfoRow title="Parent Beacon Block Root">
               {config?.beaconAPI === undefined ? (
-                <HexValue value={block.parentBeaconBlockRoot} />
+                <HexValue value={block.parentBeaconBlockRoot}/>
               ) : (
-                <SlotLink slot={block.parentBeaconBlockRoot} />
+                <SlotLink slot={block.parentBeaconBlockRoot}/>
               )}
             </InfoRow>
           )}
@@ -195,14 +250,14 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
             </InfoRow>
           )}
           <InfoRow title="Sha3Uncles">
-            <HexValue value={block.sha3Uncles} />
+            <HexValue value={block.sha3Uncles}/>
           </InfoRow>
           <InfoRow title="State Root">
-            <HexValue value={block.stateRoot} />
+            <HexValue value={block.stateRoot}/>
           </InfoRow>
           {block.receiptsRoot !== null && block.receiptsRoot !== undefined && (
             <InfoRow title="Receipts Root">
-              <HexValue value={block.receiptsRoot} />
+              <HexValue value={block.receiptsRoot}/>
             </InfoRow>
           )}
           <InfoRow title="Nonce">
@@ -210,6 +265,15 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
           </InfoRow>
         </ContentFrame>
       )}
+      <div className="faq-section">
+        <p>1. What is a block in the Ethereum blockchain?
+          A block is a package of data that contains a list of transactions, a timestamp, and other metadata, secured and added to the Ethereum blockchain.
+        </p>
+        <p>2. How can I find details about a specific Ethereum block?
+          Enter the block number or hash in the EthScan search bar to view detailed information, including transactions and miner data.</p>
+        <p>3. What is the role of the miner in a block?
+          Miners validate and confirm transactions, grouping them into blocks and securing the Ethereum blockchain by solving computational challenges.</p>
+      </div>
     </>
   );
 };

@@ -61,7 +61,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
           />
         </td>
         {/* Set both min and max widths to reduce column width changes when items of different lengths appear */}
-        <td className="min-w-32 max-w-32">
+        <td className="min-w-32 max-w-32 table-cell-text">
           {tx.to !== null && <MethodName data={tx.data} to={tx.to} />}
         </td>
         <td className="max-w-28">
