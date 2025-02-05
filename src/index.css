@@ -62,7 +62,7 @@
 
     input {
       color: #898EA2;
-      background-color: #202223;
+      background-color: #131D45;
     }
 
     .text-gray-500, .text-gray-700, .text-gray-800 {
@@ -91,6 +91,39 @@
 
     .text-skin-from, .bg-skin-from {
       background: rgba(220, 38, 38, 0.5);
+    }
+
+    .percentage-value {
+      color: #fff;
+    }
+
+    .mix-blend-multiply {
+      mix-blend-mode: normal;
+    }
+
+    .table-cell-text {
+      color: #31439B;
+    }
+
+    .address-link {
+      color: #fff;
+    }
+
+    .text-area {
+      background: #1D2B60;
+      border: 1px solid #2F4494;
+    }
+
+    .qr-icon {
+      color: #fff;
+    }
+
+    .text-skin-from {
+      color: #fff;
+    }
+
+    .send-transaction {
+      color: #fff;
     }
   }
 

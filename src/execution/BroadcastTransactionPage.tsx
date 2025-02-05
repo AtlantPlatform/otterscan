@@ -136,7 +136,7 @@ const BroadcastTransactionPage: React.FC = () => {
           ></StandardTextarea>
           <div>
             <button
-              className="bg-skin-button-fill text-skin-button hover:bg-skin-button-hover-fill py-1 px-2 rounded border inline-flex items-center"
+              className="bg-skin-button-fill text-skin-button hover:bg-skin-button-hover-fill py-1 px-2 rounded border inline-flex items-center send-transaction"
               onClick={submitTx}
             >
               Send Transaction

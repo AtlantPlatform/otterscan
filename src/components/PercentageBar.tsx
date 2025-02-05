@@ -13,7 +13,7 @@ const PercentageBar: FC<PercentageBarProps> = ({ perc }) => (
         style={{ width: `${100 - perc}%` }}
       ></div>
       <div className="text-sans absolute flex h-full w-full text-gray-600 mix-blend-multiply">
-        <span className="m-auto">{perc}%</span>
+        <span className="m-auto percentage-value">{perc}%</span>
       </div>
     </div>
   </div>

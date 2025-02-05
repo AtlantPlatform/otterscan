@@ -82,7 +82,7 @@ const Home: FC = () => {
               onClick={() => setScanning(true)}
               title="Scan an ETH address using your camera"
             >
-              <FontAwesomeIcon icon={faQrcode} />
+              <FontAwesomeIcon icon={faQrcode} className="qr-icon"/>
             </button>
           </div>
           <button

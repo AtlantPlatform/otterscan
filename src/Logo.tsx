@@ -1,7 +1,4 @@
 import { FC, memo, useContext } from "react";
-// @ts-expect-error
-import Otter from "./otter.png?w=128&h=128&webp";
-import ETHScanLogo from "./ethscanlogo.png";
 import ETHScanLogoSingle from "./ethscanlogosingle.png";
 import { RuntimeContext } from "./useRuntime";
 

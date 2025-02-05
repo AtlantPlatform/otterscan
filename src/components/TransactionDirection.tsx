@@ -56,7 +56,7 @@ const TransactionDirection: React.FC<TransactionDirectionProps> = ({
         direction !== undefined
           ? "rounded-lg px-2 py-1"
           : "flex h-5 w-5 items-center justify-center rounded-full"
-      } text-xs font-bold`}
+      } text-xs font-bold table-cell-text`}
     >
       {flags === Flags.MINER ? (
         <FontAwesomeIcon icon={faCoins} size="1x" />

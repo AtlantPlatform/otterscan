@@ -19,7 +19,7 @@ const MethodName: React.FC<MethodNameProps> = ({ data, to = undefined }) => {
       <p
         className={`truncate ${
           fromVerifiedContract ? "text-verified-contract" : ""
-        }`}
+        } table-cell-text`}
         title={methodTitle}
       >
         {methodName}
