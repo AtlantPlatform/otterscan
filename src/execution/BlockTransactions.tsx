@@ -117,13 +117,17 @@ const BlockTransactions: React.FC = () => {
         isLoading={isLoading}
       />
       <div className="faq-section">
-        <p>1. What is an Ethereum transaction?
-          An Ethereum transaction is a transfer of data or value between addresses on the Ethereum blockchain, often including smart contract interactions.
+        <p>1. What is an Ethereum transaction?<br/>
+          An Ethereum transaction is a transfer of data or value between addresses on the Ethereum blockchain, often
+          including smart contract interactions.
         </p>
-        <p>2. How can I check the details of a transaction on EthScan?
+        <br/>
+        <p>2. How can I check the details of a transaction on EthScan?<br/>
           Enter the transaction hash in the EthScan search bar to view details like sender, recipient, and gas fees.</p>
+        <br/>
         <p>3. What do gas fees in a transaction mean?
-          Gas fees are the costs paid to execute a transaction on the Ethereum network. They compensate miners for their work and secure the network.</p>
+          Gas fees are the costs paid to execute a transaction on the Ethereum network. They compensate miners for their
+          work and secure the network.</p>
       </div>
     </StandardFrame>
   );

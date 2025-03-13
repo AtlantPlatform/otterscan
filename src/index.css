@@ -30,11 +30,29 @@
 }
 
 @layer components {
+  .dark-mode {
+    .logo-text-white {
+      display: block;
+    }
+
+    .logo-text-dark {
+      display: none;
+    }
+  }
+
   .dark-mode.dark {
     --color-button-fill: 22, 51, 95; /* gray-100 */
     background: #151F45;
     filter: none !important;
     color: #fff;
+
+    .logo-text-white {
+      display: none;
+    }
+
+    .logo-text-dark {
+      display: block;
+    }
 
     img:where(.dark, .dark *) {
       filter: none

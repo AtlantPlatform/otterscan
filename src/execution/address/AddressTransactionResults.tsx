@@ -140,9 +140,7 @@ const AddressTransactionResults: FC = () => {
     : undefined;
 
   usePageTitle(
-    resolvedName && resolvedNameTrusted
-      ? `${resolvedName} | Address ${addressOrName}`
-      : `Ethereum Address ${addressOrName}  - Balance, Transactions, and Analytics`,
+    `Ethereum Address ${addressOrName} - Balance, Transactions, and Analytics`,
   );
 
   const { data: balance } = useQuery(getBalanceQuery(provider, address));
@@ -274,12 +272,16 @@ const AddressTransactionResults: FC = () => {
         <NavBar address={address} page={page} controller={controller} />
       </StandardSelectionBoundary>
       <div className="faq-section">
-        <p>1. What is an Ethereum address?
-          An Ethereum address is a unique identifier used to send and receive transactions on the Ethereum blockchain. It starts with '0x' followed by 40 hexadecimal characters.</p>
-        <p>2. How can I check the balance of an Ethereum address?
+        <p>1. What is an Ethereum address?<br/>
+          An Ethereum address is a unique identifier used to send and receive transactions on the Ethereum blockchain.
+          It starts with '0x' followed by 40 hexadecimal characters.</p>
+        <br/>
+        <p>2. How can I check the balance of an Ethereum address?<br/>
           You can view the balance of an Ethereum address on EthScan by searching for the address in the search bar.</p>
-        <p>3. What does the transaction history of an Ethereum address show?
-          The transaction history shows all incoming and outgoing transactions associated with the address, including amounts and timestamps.</p>
+        <br/>
+        <p>3. What does the transaction history of an Ethereum address show?<br/>
+          The transaction history shows all incoming and outgoing transactions associated with the address, including
+          amounts and timestamps.</p>
       </div>
     </ContentFrame>
   );

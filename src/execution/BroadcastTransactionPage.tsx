@@ -39,6 +39,20 @@ const BroadcastTransactionPage: React.FC = () => {
   usePageTitle(`Broadcast Ethereum Transactions`);
   const description = `Broadcast raw Ethereum transactions to the network easily with EthScan's secure broadcasting tool.`
 
+  const payloadSchemaFaqPageBaseInfo = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "url": "https://ethscan.org/broadcast",
+      "mainEntity": {
+        "@type": "SoftwareApplication",
+        "name": "EthScan Broadcast Tool",
+        "operatingSystem": "All",
+        "applicationCategory": "Blockchain"
+      }
+    }
+
+  )
+
   const payloadSchemaFaqPageAdditionalInfo = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "HowTo",
@@ -119,6 +133,7 @@ const BroadcastTransactionPage: React.FC = () => {
     <StandardFrame>
       <Helmet>
         <meta name="description" content={description}/>
+        <script type="application/ld+json">{payloadSchemaFaqPageBaseInfo}</script>
         <script type="application/ld+json">{payloadSchemaFaqPageAdditionalInfo}</script>
         <script type="application/ld+json">{payloadSchemaFaqPage}</script>
       </Helmet>
@@ -132,7 +147,20 @@ const BroadcastTransactionPage: React.FC = () => {
           <StandardTextarea
             onChange={(e) => setRawTx(e.target.value)}
             readOnly={false}
-            placeholder={"0x..."}
+            placeholder={"Prepare the Raw Transaction Data:\n" +
+              "Generate the raw transaction data using your Ethereum wallet or development tools.\n" +
+              "Ensure the transaction data is encoded in hexadecimal format (hex).\n\n" +
+              "Paste the Raw Transaction Data:\n" +
+              "Copy the raw transaction data from your wallet or tool.\n" +
+              "Paste it into the provided input field labeled \"Raw Transaction Data.\"\n\n" +
+              "Verify the Data:\n" +
+              "Double-check the data to ensure no extra spaces or incorrect characters are included.\n" +
+              "Review the transaction's key parameters like recipient address, value, and gas limit if visible.\n\n" +
+              "Click 'Broadcast':\n" +
+              "Press the Broadcast button to submit the transaction to the Ethereum network.\n\n" +
+              "Confirm Submission:\n" +
+              "Once the transaction is successfully broadcasted, you’ll receive a confirmation with the transaction hash.\n" +
+              "Use the transaction hash to track the status on EthScan.\n"}
           ></StandardTextarea>
           <div>
             <button

@@ -266,13 +266,18 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
         </ContentFrame>
       )}
       <div className="faq-section">
-        <p>1. What is a block in the Ethereum blockchain?
-          A block is a package of data that contains a list of transactions, a timestamp, and other metadata, secured and added to the Ethereum blockchain.
+        <p>1. What is a block in the Ethereum blockchain?<br/>
+          A block is a package of data that contains a list of transactions, a timestamp, and other metadata, secured
+          and added to the Ethereum blockchain.
         </p>
-        <p>2. How can I find details about a specific Ethereum block?
-          Enter the block number or hash in the EthScan search bar to view detailed information, including transactions and miner data.</p>
-        <p>3. What is the role of the miner in a block?
-          Miners validate and confirm transactions, grouping them into blocks and securing the Ethereum blockchain by solving computational challenges.</p>
+        <br/>
+        <p>2. How can I find details about a specific Ethereum block?<br/>
+          Enter the block number or hash in the EthScan search bar to view detailed information, including transactions
+          and miner data.</p>
+        <br/>
+        <p>3. What is the role of the miner in a block?<br/>
+          Miners validate and confirm transactions, grouping them into blocks and securing the Ethereum blockchain by
+          solving computational challenges.</p>
       </div>
     </>
   );

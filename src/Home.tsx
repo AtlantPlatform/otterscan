@@ -36,7 +36,7 @@ const Home: FC = () => {
     }
   );
 
-  usePageTitle("Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | EthScan");
+  usePageTitle("Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | EthScan", true);
 
   return (
     <>

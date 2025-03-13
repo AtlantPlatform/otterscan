@@ -8,6 +8,8 @@ import { useGenericSearch } from "./search/search";
 import { RuntimeContext } from "./useRuntime";
 
 import ETHScanLogoSingle from "./ethscanlogosingle.png";
+import ETHScanLogoSingleText from "./LogoText.png";
+import ETHScanLogoSingleTextDark from "./LogoTextDark.png";
 
 const CameraScanner = lazy(() => import("./search/CameraScanner"));
 
@@ -31,11 +33,24 @@ const Header: FC = () => {
                 alt="Ethscan logo"
                 title="Ethscan logo"
               />
-              <span>Ethscan</span>
+              <img
+                className="logo-text-dark"
+                src={ETHScanLogoSingleText}
+                width={95}
+                alt="Ethscan logo text"
+                title="Ethscan logo text"
+              />
+              <img
+                className="logo-text-white"
+                src={ETHScanLogoSingleTextDark}
+                width={95}
+                alt="Ethscan logo text"
+                title="Ethscan logo text"
+              />
             </div>
           </Link>
           <div className="inline sm:hidden">
-            <SourcifyMenu />
+            <SourcifyMenu/>
           </div>
         </div>
         <div className="flex items-baseline gap-x-3">
