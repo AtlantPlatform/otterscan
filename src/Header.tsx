@@ -75,7 +75,7 @@ const Header: FC = () => {
                 title="btcscan link"
               />
             </a>
-            <a className="active-root-link p-1" href="/">
+            <a className="p-1" href="/">
               <img
                 src={ETHLogo}
                 width={32}
