@@ -162,6 +162,10 @@
   }
 }
 
+.active-root-link {
+  border: 1px solid #ffbb00 !important;
+}
+
 /*.dark\:bg-white:where(.dark, .dark *) {*/
 /*  background: #151F45 !important;*/
 /*}*/

@@ -10,6 +10,10 @@ import { RuntimeContext } from "./useRuntime";
 import ETHScanLogoSingle from "./ethscanlogosingle.png";
 import ETHScanLogoSingleText from "./LogoText.png";
 import ETHScanLogoSingleTextDark from "./LogoTextDark.png";
+import MempoolLogo from "./icons/BTCMempool-menu-logo.svg";
+import BTCLogo from "./icons/Bitcoin-menu-logo.svg";
+import ETHLogo from "./icons/Ethereum2-menu-logo.svg";
+import MoneroLogo from "./icons/Monero-menu-logo.svg";
 
 const CameraScanner = lazy(() => import("./search/CameraScanner"));
 
@@ -54,10 +58,52 @@ const Header: FC = () => {
           </div>
         </div>
         <div className="flex items-baseline gap-x-3">
+          <div className="flex align-middle gap-x-4">
+            <a className="p-1" href="https://btcmempool.org/" rel="external" target="_blank">
+              <img
+                src={MempoolLogo}
+                width={95}
+                alt="btcmempool link"
+                title="btcmempool link"
+              />
+            </a>
+            <a className="p-1" href="https://btcscan.org/" rel="external" target="_blank">
+              <img
+                src={BTCLogo}
+                width={32}
+                alt="btcscan link"
+                title="btcscan link"
+              />
+            </a>
+            <a className="active-root-link p-1" href="/">
+              <img
+                src={ETHLogo}
+                width={32}
+                alt="link to homepage"
+                title="link to homepage"
+              />
+            </a>
+            <a className="p-1" href="https://xmrscan.org/" rel="external" target="_blank">
+              <img
+                src={MoneroLogo}
+                width={32}
+                alt="xmrscan link"
+                title="xmrscan link"
+              />
+            </a>
+          </div>
+          <div className="hidden sm:inline self-stretch">
+            <SourcifyMenu/>
+          </div>
+        </div>
+      </div>
+        <div
+          className="flex flex-col sm:flex-row items-baseline space-y-1 sm:space-y-0 justify-between px-3 lg:px-9 py-2">
+        <div className="flex grow justify-end items-baseline gap-x-3">
           {(provider._network.chainId === 1n ||
             config.priceOracleInfo?.nativeTokenPrice?.ethUSDOracleAddress) && (
             <div className="hidden lg:inline">
-              <PriceBox />
+              <PriceBox/>
             </div>
           )}
           <form
@@ -86,7 +132,7 @@ const Header: FC = () => {
               onClick={() => setScanning(true)}
               title="Scan an ETH address using your camera"
             >
-              <FontAwesomeIcon icon={faQrcode} />
+              <FontAwesomeIcon icon={faQrcode}/>
             </button>
             <button
               className="rounded-r border-b border-r border-t bg-skin-button-fill px-2 py-1 text-sm text-skin-button hover:bg-skin-button-hover-fill focus:outline-none"
@@ -95,9 +141,6 @@ const Header: FC = () => {
               Search
             </button>
           </form>
-          <div className="hidden sm:inline self-stretch">
-            <SourcifyMenu />
-          </div>
         </div>
       </div>
     </>
