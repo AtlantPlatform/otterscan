@@ -14,6 +14,13 @@ import MempoolLogo from "./icons/BTCMempool-menu-logo.svg";
 import BTCLogo from "./icons/Bitcoin-menu-logo.svg";
 import ETHLogo from "./icons/Ethereum2-menu-logo.svg";
 import MoneroLogo from "./icons/Monero-menu-logo.svg";
+import BTCIcon from './icons/btc-icon.svg'
+import ETHIcon from './icons/eth-icon.svg'
+import XMRIcon from './icons/xmr-icon.svg'
+import MoneroIcon from './icons/monero-icon.svg'
+import MempoolIcon from './icons/mempool-icon.svg'
+import BTCFeeIcon from './icons/btc-fee-icon.svg'
+import BTCFeesIcon from './icons/btc-fees-icon-action.svg'
 
 const CameraScanner = lazy(() => import("./search/CameraScanner"));
 
@@ -58,37 +65,61 @@ const Header: FC = () => {
           </div>
         </div>
         <div className="flex items-baseline gap-x-3">
-          <div className="flex align-middle gap-x-4">
-            <a className="p-1" href="https://btcmempool.org/" rel="external" target="_blank">
-              <img
-                src={MempoolLogo}
-                width={95}
-                alt="btcmempool link"
-                title="btcmempool link"
-              />
-            </a>
+          <div className="flex align-middle gap-x-1">
             <a className="p-1" href="https://btcscan.org/" rel="external" target="_blank">
               <img
-                src={BTCLogo}
+                src={BTCIcon}
                 width={32}
-                alt="btcscan link"
-                title="btcscan link"
+                alt="btcmempool icon"
+                title="btcmempool icon"
               />
             </a>
-            <a className="p-1" href="/">
+            <a className="p-1" href="https://ethscan.org/" rel="external" target="_blank">
               <img
-                src={ETHLogo}
+                src={ETHIcon}
                 width={32}
-                alt="link to homepage"
-                title="link to homepage"
+                alt="ethscan icon"
+                title="ethscan icon"
               />
             </a>
             <a className="p-1" href="https://xmrscan.org/" rel="external" target="_blank">
               <img
-                src={MoneroLogo}
+                src={XMRIcon}
                 width={32}
-                alt="xmrscan link"
-                title="xmrscan link"
+                alt="xmrscan icon"
+                title="xmrscan icon"
+              />
+            </a>
+            <a className="p-1" href="https://moneroexplorer.org/" rel="external" target="_blank">
+              <img
+                src={MoneroIcon}
+                width={32}
+                alt="moneroexplorer icon"
+                title="moneroexplorer icon"
+              />
+            </a>
+            <a className="p-1" href="https://btcmempool.org/" rel="external" target="_blank">
+              <img
+                src={MempoolIcon}
+                width={32}
+                alt="btcmempool icon"
+                title="btcmempool icon"
+              />
+            </a>
+            <a className="p-1" href="https://btcfee.org/" rel="external" target="_blank">
+              <img
+                src={BTCFeeIcon}
+                width={32}
+                alt="btcfee icon"
+                title="btcfee icon"
+              />
+            </a>
+            <a className="p-1" href="https://btcfees.org/" rel="external" target="_blank">
+              <img
+                src={BTCFeesIcon}
+                width={32}
+                alt="btcfees icon"
+                title="btcfees icon"
               />
             </a>
           </div>
@@ -97,8 +128,8 @@ const Header: FC = () => {
           </div>
         </div>
       </div>
-        <div
-          className="flex flex-col sm:flex-row items-baseline space-y-1 sm:space-y-0 justify-between px-3 lg:px-9 py-2">
+      <div
+        className="flex flex-col sm:flex-row items-baseline space-y-1 sm:space-y-0 justify-between px-3 lg:px-9 py-2">
         <div className="flex grow justify-end items-baseline gap-x-3">
           {(provider._network.chainId === 1n ||
             config.priceOracleInfo?.nativeTokenPrice?.ethUSDOracleAddress) && (
