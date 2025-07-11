@@ -17,6 +17,7 @@ root.render(
     <HelmetProvider>
       <Helmet>
         <link rel="preload" href={spaceGrotesk} as="font" type="font/woff2" />
+        <script src="https://analytics.ahrefs.com/analytics.js" data-key="trm7GqzX/ZpzFhsBA7bHyA" async></script>
         <script>
           {`if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
               document.documentElement.classList.add('dark');
