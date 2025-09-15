@@ -31,66 +31,48 @@ const RecentTransactions: React.FC = () => {
 
   const latestBlock = useLatestBlockHeader(provider);
   
-  // State to hold combined transactions from multiple blocks
-  const [allTransactions, setAllTransactions] = useState<ProcessedTransaction[]>([]);
-  const [isLoadingAll, setIsLoadingAll] = useState(true);
-  const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
-  const blocksToCheck = 10; // Check more blocks to have enough transactions for pagination
-  
   // Calculate starting block based on page number
-  const startingBlockOffset = (pageNumber - 1) * 3; // Skip blocks for previous pages
-  const blockNumber = latestBlock && latestBlock.number > startingBlockOffset + currentBlockIndex 
-    ? latestBlock.number - startingBlockOffset - currentBlockIndex 
-    : undefined;
+  const startingBlockOffset = (pageNumber - 1) * 2; // Skip 2 blocks per page
+  const targetBlockNumber = latestBlock && latestBlock.number > startingBlockOffset
+    ? latestBlock.number - startingBlockOffset 
+    : latestBlock?.number;
   
-  const { data: currentBlockTxs, isLoading: isLoadingBlock } = useBlockTransactions(
+  // Fetch from current and previous block to ensure we have enough transactions
+  const { data: primaryBlockTxs, isLoading: isLoadingPrimary } = useBlockTransactions(
     provider,
-    blockNumber,
+    targetBlockNumber,
     0,
-    30 // Load 30 transactions per block
+    50 // Fetch more transactions to ensure we have enough
   );
   
-  // Collect transactions from multiple blocks
-  useEffect(() => {
-    if (!latestBlock) return;
-    
-    if (currentBlockTxs && currentBlockTxs.txs) {
-      setAllTransactions(prev => [...prev, ...currentBlockTxs.txs]);
-    }
-    
-    // Continue fetching if we haven't reached our target and current request is done
-    if (currentBlockIndex < blocksToCheck - 1 && !isLoadingBlock && blockNumber !== undefined) {
-      // Fetch next block
-      setCurrentBlockIndex(prev => prev + 1);
-    } else if (currentBlockIndex >= blocksToCheck - 1 || blockNumber === undefined) {
-      // Done fetching all blocks or no valid block number
-      setIsLoadingAll(false);
-    }
-  }, [currentBlockTxs, currentBlockIndex, isLoadingBlock, latestBlock, blocksToCheck, blockNumber]);
+  // Always fetch from previous block as fallback
+  const secondaryBlockNumber = targetBlockNumber && targetBlockNumber > 1 ? targetBlockNumber - 1 : undefined;
+  const { data: secondaryBlockTxs, isLoading: isLoadingSecondary } = useBlockTransactions(
+    provider,
+    secondaryBlockNumber,
+    0,
+    50
+  );
   
-  // Reset when latest block or page changes
-  useEffect(() => {
-    setAllTransactions([]);
-    setCurrentBlockIndex(0);
-    setIsLoadingAll(true);
-  }, [latestBlock?.number, pageNumber]);
+  // Combine transactions from both blocks
+  const allTxs = [
+    ...(primaryBlockTxs?.txs || []),
+    ...(secondaryBlockTxs?.txs || [])
+  ];
   
-  // Ensure loading starts when latestBlock becomes available
-  useEffect(() => {
-    if (latestBlock && allTransactions.length === 0 && !isLoadingBlock && currentBlockIndex === 0) {
-      // Force a re-render to trigger the data fetching
-      setIsLoadingAll(true);
+  // Sort by block number and transaction index to maintain proper order
+  const sortedTxs = allTxs.sort((a, b) => {
+    if (a.blockNumber !== b.blockNumber) {
+      return b.blockNumber - a.blockNumber; // Newer blocks first
     }
-  }, [latestBlock, allTransactions.length, isLoadingBlock, currentBlockIndex]);
+    return a.idx - b.idx; // Same block, sort by transaction index
+  });
   
-  // Paginate the collected transactions
-  const totalTxs = allTransactions.length;
-  const startIdx = 0; // Always show from start since we're fetching different blocks per page
-  const endIdx = Math.min(TRANSACTIONS_PER_PAGE, allTransactions.length);
-  const transactions = allTransactions.slice(startIdx, endIdx);
+  const transactions = sortedTxs.slice(0, TRANSACTIONS_PER_PAGE);
+  const isLoadingAll = isLoadingPrimary || isLoadingSecondary;
   
   // Estimate total transactions (approximate)
-  const estimatedTotal = latestBlock ? latestBlock.number * 10 : 1000;
+  const estimatedTotal = latestBlock ? latestBlock.number * 50 : 1000;
 
   usePageTitle("Recent Transactions");
 

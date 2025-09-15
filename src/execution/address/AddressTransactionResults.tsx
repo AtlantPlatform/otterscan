@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { formatEther } from "ethers";
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { useOutletContext, useParams, useSearchParams } from "react-router";
 import ContentFrame from "../../components/ContentFrame";
@@ -271,6 +272,17 @@ const AddressTransactionResults: FC = () => {
         </StandardScrollableTable>
         <NavBar address={address} page={page} controller={controller} />
       </StandardSelectionBoundary>
+      {/* SEO Summary Section */}
+      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Address Summary</h2>
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          Ethereum address {address} {resolvedName && resolvedNameTrusted ? `(ENS: ${resolvedName})` : ''} 
+          {hasCode ? ' is a smart contract' : ' is an externally owned account (EOA)'}
+          {balance !== undefined && balance !== null ? ` with a balance of ${formatEther(balance)} ETH` : ''}.
+          This page displays the address balance, transaction history, token transfers, and {hasCode ? 'contract information including source code, ABI, and read/write functions' : 'all associated blockchain activities'}.
+          View detailed analytics including ERC20/ERC721 token transfers, withdrawals, and blocks rewarded for this address.
+        </p>
+      </div>
       <div className="faq-section">
         <p>1. What is an Ethereum address?<br/>
           An Ethereum address is a unique identifier used to send and receive transactions on the Ethereum blockchain.

@@ -111,17 +111,6 @@ const AddressMainPage: React.FC = () => {
               address={checksummedAddress}
               isENS={isENS}
             />
-            {/* SEO Summary Section */}
-            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Address Summary</h2>
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                Ethereum address {checksummedAddress} {isENS ? `(ENS: ${addressOrName})` : ''} 
-                {hasCode ? ' is a smart contract' : ' is an externally owned account (EOA)'}
-                {balance !== undefined && balance !== null ? ` with a balance of ${formatEther(balance)} ETH` : ''}.
-                This page displays the address balance, transaction history, token transfers, and {hasCode ? 'contract information including source code, ABI, and read/write functions' : 'all associated blockchain activities'}.
-                View detailed analytics including ERC20/ERC721 token transfers, withdrawals, and blocks rewarded for this address.
-              </p>
-            </div>
             <TabGroup>
               <TabList className="flex space-x-2 rounded-t-lg border-l border-r border-t bg-white">
                 <NavTab href={`/address/${addressOrName}`}>Overview</NavTab>
