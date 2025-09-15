@@ -1,12 +1,13 @@
 import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams, NavLink } from "react-router";
 import { Helmet } from "react-helmet-async";
 import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
 import StandardSelectionBoundary from "../selection/StandardSelectionBoundary";
 import TransactionItem from "../search/TransactionItem";
+import TransactionLink from "../components/TransactionLink";
 import { FeeDisplay } from "../search/useFeeToggler";
 import { ProcessedTransaction } from "../types";
 import { useBlockTransactions } from "../useErigonHooks";
@@ -38,7 +39,9 @@ const RecentTransactions: React.FC = () => {
   
   // Calculate starting block based on page number
   const startingBlockOffset = (pageNumber - 1) * 3; // Skip blocks for previous pages
-  const blockNumber = latestBlock ? latestBlock.number - startingBlockOffset - currentBlockIndex : undefined;
+  const blockNumber = latestBlock && latestBlock.number > startingBlockOffset + currentBlockIndex 
+    ? latestBlock.number - startingBlockOffset - currentBlockIndex 
+    : undefined;
   
   const { data: currentBlockTxs, isLoading: isLoadingBlock } = useBlockTransactions(
     provider,
@@ -55,14 +58,15 @@ const RecentTransactions: React.FC = () => {
       setAllTransactions(prev => [...prev, ...currentBlockTxs.txs]);
     }
     
-    if (currentBlockIndex < blocksToCheck - 1 && !isLoadingBlock) {
+    // Continue fetching if we haven't reached our target and current request is done
+    if (currentBlockIndex < blocksToCheck - 1 && !isLoadingBlock && blockNumber !== undefined) {
       // Fetch next block
       setCurrentBlockIndex(prev => prev + 1);
-    } else if (currentBlockIndex >= blocksToCheck - 1) {
-      // Done fetching all blocks
+    } else if (currentBlockIndex >= blocksToCheck - 1 || blockNumber === undefined) {
+      // Done fetching all blocks or no valid block number
       setIsLoadingAll(false);
     }
-  }, [currentBlockTxs, currentBlockIndex, isLoadingBlock, latestBlock, blocksToCheck]);
+  }, [currentBlockTxs, currentBlockIndex, isLoadingBlock, latestBlock, blocksToCheck, blockNumber]);
   
   // Reset when latest block or page changes
   useEffect(() => {
@@ -70,6 +74,14 @@ const RecentTransactions: React.FC = () => {
     setCurrentBlockIndex(0);
     setIsLoadingAll(true);
   }, [latestBlock?.number, pageNumber]);
+  
+  // Ensure loading starts when latestBlock becomes available
+  useEffect(() => {
+    if (latestBlock && allTransactions.length === 0 && !isLoadingBlock && currentBlockIndex === 0) {
+      // Force a re-render to trigger the data fetching
+      setIsLoadingAll(true);
+    }
+  }, [latestBlock, allTransactions.length, isLoadingBlock, currentBlockIndex]);
   
   // Paginate the collected transactions
   const totalTxs = allTransactions.length;
@@ -163,7 +175,12 @@ const RecentTransactions: React.FC = () => {
                         <span className={`text-xs px-1 py-0.5 rounded ${tx.status === 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                           {tx.status === 0 ? 'Failed' : 'Success'}
                         </span>
-                        <span className="text-sm text-blue-600 font-mono">{tx.hash.substring(0, 10)}...</span>
+                        <NavLink 
+                          to={`/tx/${tx.hash}`}
+                          className="text-sm text-blue-600 dark:text-blue-400 font-mono hover:text-blue-800 dark:hover:text-blue-300"
+                        >
+                          {tx.hash.substring(0, 10)}...
+                        </NavLink>
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
@@ -174,7 +191,12 @@ const RecentTransactions: React.FC = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Block</span>
-                      <span className="text-sm text-blue-600">{tx.blockNumber}</span>
+                      <NavLink 
+                        to={`/block/${tx.blockNumber}`}
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                      >
+                        {tx.blockNumber}
+                      </NavLink>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Date/Time</span>

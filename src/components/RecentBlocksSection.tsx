@@ -105,6 +105,7 @@ const RecentBlocksSection: React.FC = () => {
         {recentBlocks.map((block) => {
           const gasUsedPercent = block.gasLimit ? (Number(block.gasUsed) * 100 / Number(block.gasLimit)).toFixed(2) : "0";
           const blockReward = block.blockReward + block.feeReward;
+          const gasTarget = block.gasLimit / 2n; // ELASTICITY_MULTIPLIER = 2
           const timestamp = new Date(block.timestamp * 1000);
           const formattedTime = timestamp.toLocaleString('en-US', {
             month: 'short',
@@ -117,29 +118,47 @@ const RecentBlocksSection: React.FC = () => {
           });
           
           return (
-            <div key={block.hash} className="bg-gray-50 rounded p-3 space-y-2">
+            <div key={block.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-semibold text-gray-700">Block</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Block</span>
                 <BlockLink blockTag={block.number} />
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Age</span>
-                <span className="text-sm text-gray-800" title={formattedTime}>{formattedTime}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Date/Time</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200" title={formattedTime}>{formattedTime}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Txns</span>
-                <span className="text-sm text-blue-600">{commify(block.transactionCount)}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Txns</span>
+                <NavLink 
+                  to={`/block/${block.number}/txs`}
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                >
+                  {commify(block.transactionCount)}
+                </NavLink>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Gas Used</span>
-                <div className="text-sm text-gray-800">
-                  <span>{commify(block.gasUsed.toString())}</span>
-                  <span className="text-xs text-gray-500 ml-1">({gasUsedPercent}%)</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Gas Used</span>
+                <div className="text-sm text-right">
+                  <div className={`${
+                    block.gasUsed > gasTarget
+                      ? "text-emerald-500"
+                      : block.gasUsed < gasTarget
+                        ? "text-red-500"
+                        : "text-gray-800 dark:text-gray-200"
+                  }`}>
+                    {commify(block.gasUsed.toString())} ({gasUsedPercent}%)
+                  </div>
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Reward</span>
-                <span className="text-sm text-gray-800">{formatEther(blockReward).substring(0, 8)} {symbol}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Base Fee</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200">
+                  {block.baseFeePerGas ? (Number(block.baseFeePerGas) / 1_000_000_000).toFixed(2) : '0'} Gwei
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Rewards</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200">{formatEther(blockReward).substring(0, 8)} {symbol}</span>
               </div>
             </div>
           );

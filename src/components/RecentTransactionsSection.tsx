@@ -124,48 +124,52 @@ const RecentTransactionsSection: React.FC = () => {
           });
           
           return (
-            <div key={tx.hash} className="bg-gray-50 rounded p-3 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-semibold text-gray-700">Transaction</span>
-                <div className="flex items-center space-x-1">
-                  <FontAwesomeIcon 
-                    icon={tx.status === 0 ? faTimesCircle : faCheckCircle} 
-                    className={`text-xs ${tx.status === 0 ? 'text-red-500' : 'text-green-500'}`}
-                    title={tx.status === 0 ? 'Failed' : 'Success'}
-                  />
-                  <TransactionLink
-                    txHash={tx.hash}
-                    fail={tx.status === 0}
-                  />
+            <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</span>
+                <div className="flex items-center space-x-2 max-w-[60%]">
+                  <span className={`text-xs px-1 py-0.5 rounded flex-shrink-0 ${
+                    tx.status === 0 
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' 
+                      : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                  }`}>
+                    {tx.status === 0 ? 'Failed' : 'Success'}
+                  </span>
+                  <NavLink 
+                    to={`/tx/${tx.hash}`}
+                    className="text-sm text-blue-600 dark:text-blue-400 font-mono hover:text-blue-800 dark:hover:text-blue-300"
+                  >
+                    {tx.hash.substring(0, 10)}...
+                  </NavLink>
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Method</span>
-                <div className="text-xs bg-gray-100 px-2 py-1 rounded">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Method</span>
+                <div className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
                   {tx.to && <MethodName data={tx.data} to={tx.to} />}
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Age</span>
-                <span className="text-sm text-gray-800" title={formattedTime}>{formattedTime}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Age</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200" title={formattedTime}>{formattedTime}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Value</span>
-                <span className="text-sm text-gray-800">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Value</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200">
                   {tx.value && tx.value > 0n ? (
                     <span>{formatEther(tx.value).substring(0, 8)} {symbol}</span>
                   ) : (
-                    <span className="text-gray-400">0 {symbol}</span>
+                    <span className="text-gray-400 dark:text-gray-600">0 {symbol}</span>
                   )}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Fee</span>
-                <span className="text-sm text-gray-800">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Fee</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200">
                   {tx.fee ? (
                     <span>{formatEther(tx.fee).substring(0, 8)} {symbol}</span>
                   ) : (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-gray-400 dark:text-gray-600">-</span>
                   )}
                 </span>
               </div>

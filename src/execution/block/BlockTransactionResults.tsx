@@ -1,4 +1,5 @@
 import { FC, memo } from "react";
+import { NavLink } from "react-router";
 import ContentFrame from "../../components/ContentFrame";
 import StandardScrollableTable from "../../components/StandardScrollableTable";
 import StandardTBody from "../../components/StandardTBody";
@@ -82,78 +83,52 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
             return (
               <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3">
                 <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction Hash</span>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className={`text-xs px-1 py-0.5 rounded ${tx.status === 0 ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'}`}>
-                        {tx.status === 0 ? 'Failed' : 'Success'}
-                      </span>
-                      <TransactionLink txHash={tx.hash} fail={tx.status === 0} />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Method</span>
-                    <div className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded mt-1 inline-block">
-                      {tx.to && <MethodName data={tx.data} to={tx.to} />}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Block</span>
-                    <div className="mt-1">
-                      <BlockLink blockTag={tx.blockNumber} />
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">From</span>
-                  <div className="font-mono text-sm text-gray-800 dark:text-gray-200 mt-1">
-                    {tx.from.substring(0, 10)}...{tx.from.substring(tx.from.length - 8)}
-                  </div>
-                </div>
-                
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">To</span>
-                  <div className="font-mono text-sm text-gray-800 dark:text-gray-200 mt-1">
-                    {tx.to ? `${tx.to.substring(0, 10)}...${tx.to.substring(tx.to.length - 8)}` : 'Contract Creation'}
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Value</span>
-                    <div className="text-sm text-gray-800 dark:text-gray-200 mt-1">
-                      {tx.value && tx.value > 0n ? (
-                        <span>{formatEther(tx.value)} ETH</span>
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-600">0 ETH</span>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {feeDisplay === FeeDisplay.TX_FEE && "Txn Fee"}
-                      {feeDisplay === FeeDisplay.TX_FEE_USD && "Txn Fee (USD)"}
-                      {feeDisplay === FeeDisplay.GAS_PRICE && "Gas Price"}
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</span>
+                  <div className="flex items-center space-x-2 max-w-[60%]">
+                    <span className={`text-xs px-1 py-0.5 rounded flex-shrink-0 ${
+                      tx.status === 0 
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' 
+                        : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                    }`}>
+                      {tx.status === 0 ? 'Failed' : 'Success'}
                     </span>
-                    <div className="text-sm text-gray-800 dark:text-gray-200 mt-1">
-                      {tx.fee ? (
-                        <span>{formatEther(tx.fee)} ETH</span>
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-600">-</span>
-                      )}
-                    </div>
+                    <NavLink 
+                      to={`/tx/${tx.hash}`}
+                      className="text-sm text-blue-600 dark:text-blue-400 font-mono hover:text-blue-800 dark:hover:text-blue-300 truncate"
+                    >
+                      {tx.hash.substring(0, 10)}...
+                    </NavLink>
                   </div>
                 </div>
-                
-                <div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Date/Time</span>
-                  <div className="text-sm text-gray-800 dark:text-gray-200 mt-1" title={formattedTime}>
-                    {formattedTime}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Method</span>
+                  <div className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                    {tx.to && <MethodName data={tx.data} to={tx.to} />}
                   </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Age</span>
+                  <span className="text-sm text-gray-800 dark:text-gray-200" title={formattedTime}>{formattedTime}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Value</span>
+                  <span className="text-sm text-gray-800 dark:text-gray-200">
+                    {tx.value && tx.value > 0n ? (
+                      <span>{formatEther(tx.value).substring(0, 8)} ETH</span>
+                    ) : (
+                      <span className="text-gray-400 dark:text-gray-600">0 ETH</span>
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Fee</span>
+                  <span className="text-sm text-gray-800 dark:text-gray-200">
+                    {tx.fee ? (
+                      <span>{formatEther(tx.fee).substring(0, 8)} ETH</span>
+                    ) : (
+                      <span className="text-gray-400 dark:text-gray-600">-</span>
+                    )}
+                  </span>
                 </div>
               </div>
             );
