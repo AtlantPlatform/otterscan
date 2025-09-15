@@ -79,7 +79,7 @@ const AddressMainPage: React.FC = () => {
     hasCodeQuery(provider, checksummedAddress, "latest"),
   );
   const { data: balance } = useQuery(
-    getBalanceQuery(provider, checksummedAddress),
+    checksummedAddress ? getBalanceQuery(provider, checksummedAddress) : { queryKey: [], queryFn: () => null, enabled: false },
   );
 
   const match = useSourcifyMetadata(
@@ -117,7 +117,7 @@ const AddressMainPage: React.FC = () => {
               <p className="text-sm text-gray-700 dark:text-gray-300">
                 Ethereum address {checksummedAddress} {isENS ? `(ENS: ${addressOrName})` : ''} 
                 {hasCode ? ' is a smart contract' : ' is an externally owned account (EOA)'}
-                {balance !== undefined ? ` with a balance of ${formatEther(balance)} ETH` : ''}.
+                {balance !== undefined && balance !== null ? ` with a balance of ${formatEther(balance)} ETH` : ''}.
                 This page displays the address balance, transaction history, token transfers, and {hasCode ? 'contract information including source code, ABI, and read/write functions' : 'all associated blockchain activities'}.
                 View detailed analytics including ERC20/ERC721 token transfers, withdrawals, and blocks rewarded for this address.
               </p>
