@@ -76,7 +76,12 @@ const RecentBlocksSection: React.FC = () => {
                     {formattedTime}
                   </td>
                   <td>
-                    <span className="text-blue-600">{commify(block.transactionCount)}</span>
+                    <NavLink 
+                      to={`/block/${block.number}/txs`}
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {commify(block.transactionCount)}
+                    </NavLink>
                   </td>
                   <td>
                     <DecoratedAddressLink address={block.miner} />
