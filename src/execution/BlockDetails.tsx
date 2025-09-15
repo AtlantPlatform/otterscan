@@ -1,6 +1,6 @@
 import { faBurn } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Utf8ErrorFuncs, formatUnits, toUtf8String } from "ethers";
+import { Utf8ErrorFuncs, formatUnits, formatEther, toUtf8String } from "ethers";
 import { FC, useContext, useMemo } from "react";
 import { NavLink } from "react-router";
 import BlockLink from "../components/BlockLink";
@@ -124,6 +124,17 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
         </ContentFrame>
       )}
       {block && (
+        <>
+          {/* SEO Summary Section */}
+          <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Block Summary</h2>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Ethereum block #{commify(block.number)} was mined on {new Date(block.timestamp * 1000).toLocaleString()} by {block.miner}. 
+              This block contains {block.transactionCount} transaction{block.transactionCount !== 1 ? 's' : ''} with a total gas usage of {commify(formatUnits(block.gasUsed, 0))} out of {commify(formatUnits(block.gasLimit, 0))} gas limit. 
+              The block reward was {formatEther(block.blockReward + block.feeReward)} {symbol}, with a base fee of {block.baseFeePerGas ? formatUnits(block.baseFeePerGas, 9) : '0'} Gwei. 
+              The block hash is {block.hash} and the parent block is #{block.number - 1}.
+            </p>
+          </div>
         <ContentFrame isLoading={isLoading}>
           <InfoRow title="Block Height">
             <span className="font-bold" data-test="block-height-text">
@@ -264,6 +275,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
             <span className="font-data">{block.nonce}</span>
           </InfoRow>
         </ContentFrame>
+        </>
       )}
       <div className="faq-section">
         <p>1. What is a block in the Ethereum blockchain?<br/>

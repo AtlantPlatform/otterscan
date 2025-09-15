@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { isAddress } from "ethers";
-import { FC, lazy, Suspense } from "react";
+import { FC, lazy, Suspense, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import {
   Await,
@@ -14,9 +14,10 @@ import {
 } from "react-router";
 import ErrorFallback from "./components/ErrorFallback";
 import ConnectionErrorPanel from "./ConnectionErrorPanel";
-import Footer from "./Footer";
 import Home from "./Home";
 import Main from "./Main";
+import { SourcifySource } from "./sourcify/useSourcify";
+import { AppConfig, AppConfigContext } from "./useAppConfig";
 import {
   addressAttributesQuery,
   erc20HoldingsQuery,
@@ -79,6 +80,8 @@ const SlotByBlockRoot = lazy(() => import("./consensus/slot/SlotByBlockRoot"));
 const Validator = lazy(() => import("./consensus/Validator"));
 const LiveBlocks = lazy(() => import("./special/london/LiveBlocks"));
 const Faucets = lazy(() => import("./Faucets"));
+const RecentBlocks = lazy(() => import("./pages/RecentBlocks"));
+const RecentTransactions = lazy(() => import("./pages/RecentTransactions"));
 const PageNotFound = lazy(() => import("./PageNotFound"));
 const BroadcastTransactionPage = lazy(
   () => import("./execution/BroadcastTransactionPage"),
@@ -87,6 +90,24 @@ const BroadcastTransactionPage = lazy(
 const config = loadOtterscanConfig();
 
 const runtime = populateChainInfo(createRuntime(config));
+
+const AppConfigProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [sourcifySource, setSourcifySource] = useState<SourcifySource>(
+    SourcifySource.CENTRAL_SERVER,
+  );
+  const appConfig = useMemo((): AppConfig => {
+    return {
+      sourcifySource,
+      setSourcifySource,
+    };
+  }, [sourcifySource, setSourcifySource]);
+
+  return (
+    <AppConfigContext.Provider value={appConfig}>
+      {children}
+    </AppConfigContext.Provider>
+  );
+};
 
 /**
  * Triggers both config loading and runtime probing/building in parallel.
@@ -209,7 +230,7 @@ const addressOts2List: (typeName: TransactionSearchType) => LoaderFunction =
               queryClient.prefetchQuery(query);
             }
           })
-          .catch((e) => {});
+          .catch(() => {});
       }
     });
     return null;
@@ -236,15 +257,12 @@ const Layout: FC = () => {
       <Await resolve={data.config}>
         {(config: OtterscanConfig) => (
           // Wait for runtime building + probing; suspend while probing;
-          // don't show probe splash if hardcoded chainId
-          <Suspense
+          // Show empty page instead of connection screen
+          <Suspense 
             fallback={
-              config.experimentalFixedChainId === undefined && (
-                <ConnectionErrorPanel
-                  connStatus={ConnectionStatus.CONNECTING}
-                  nodeURL={config.erigonURL!}
-                />
-              )
+              <div className="flex h-screen flex-col">
+                <div className="flex-1"></div>
+              </div>
             }
           >
             <Await resolve={data.rt} errorElement={<ProbeErrorHandler />}>
@@ -255,11 +273,12 @@ const Layout: FC = () => {
                     <ChainInfoContext.Provider
                       value={runtime.config!.chainInfo}
                     >
-                      <div className="flex h-screen flex-col">
-                        <WarningHeader />
-                        <Outlet />
-                        <Footer />
-                      </div>
+                      <AppConfigProvider>
+                        <div className="flex h-screen flex-col">
+                          <WarningHeader />
+                          <Outlet />
+                        </div>
+                      </AppConfigProvider>
                     </ChainInfoContext.Provider>
                   </RuntimeContext.Provider>
                 </QueryClientProvider>
@@ -373,6 +392,8 @@ const router = createBrowserRouter(
         <Route path="validator/:validatorIndex">
           <Route path="*" element={<Validator />} />
         </Route>
+        <Route path="blocks/recent" element={<RecentBlocks />} />
+        <Route path="tx/recent" element={<RecentTransactions />} />
         <Route path="faucets" element={<Faucets />} />
         <Route path="broadcastTx" element={<BroadcastTransactionPage />} />
         <Route path="*" element={<PageNotFound />} />

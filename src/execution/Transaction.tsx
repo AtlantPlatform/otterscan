@@ -41,6 +41,19 @@ const Transaction: FC = () => {
             </ContentFrame>
           )}
           {txData && (
+            <>
+              {/* SEO Summary Section */}
+              <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Transaction Summary</h2>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Ethereum transaction {txHash} {txData.confirmedData ? 
+                    `was confirmed in block #${txData.confirmedData.blockNumber} with status ${txData.confirmedData.status === 1 ? 'success' : 'failed'}. 
+                    The transaction was sent from ${txData.from} to ${txData.to || 'contract creation'} with a value of ${txData.value} wei. 
+                    Gas used was ${txData.confirmedData.gasUsed} out of ${txData.gasLimit} gas limit, with a gas price of ${txData.gasPrice} wei. 
+                    The transaction includes ${txData.confirmedData.logs?.length || 0} log events.` :
+                    'is pending confirmation.'}
+                </p>
+              </div>
             <StandardSelectionBoundary>
               <TabGroup>
                 <TabList className="flex space-x-2 rounded-t-lg border-l border-r border-t bg-white">
@@ -70,6 +83,7 @@ const Transaction: FC = () => {
                 </Routes>
               </Suspense>
             </StandardSelectionBoundary>
+            </>
           )}
         </StandardFrame>
       </BlockNumberContext.Provider>
