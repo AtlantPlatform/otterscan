@@ -32,11 +32,11 @@
 @layer components {
   .dark-mode {
     .logo-text-white {
-      display: block;
+      display: block !important;
     }
 
     .logo-text-dark {
-      display: none;
+      display: none !important;
     }
   }
 
@@ -47,11 +47,11 @@
     color: #fff;
 
     .logo-text-white {
-      display: none;
+      display: none !important;
     }
 
     .logo-text-dark {
-      display: block;
+      display: block !important;
     }
 
     img:where(.dark, .dark *) {
@@ -155,6 +155,36 @@
 
   img {
     @apply dark-no-invert;
+  }
+
+  .logo-main {
+    width: 24px !important;
+    height: 24px !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+  }
+
+  @screen lg {
+    .logo-main {
+      width: 60px !important;
+      height: 60px !important;
+      display: block !important;
+      flex-shrink: 0 !important;
+    }
+  }
+
+  .logo-text {
+    height: 18px !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  @screen lg {
+    .logo-text {
+      height: 24px !important;
+      width: auto !important;
+      flex-shrink: 0 !important;
+    }
   }
 
   video {

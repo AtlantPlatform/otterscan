@@ -59,7 +59,6 @@ import RewardSplit from "./RewardSplit";
 import TokenTransferItem from "./TokenTransferItem";
 import DecodedParamsTable from "./decoder/DecodedParamsTable";
 import InputDecoder from "./decoder/InputDecoder";
-import {usePageTitle} from '../../useTitle';
 import {Helmet} from 'react-helmet-async';
 import {formatValue} from '../../components/formatter';
 
@@ -125,7 +124,6 @@ const Details: FC<DetailsProps> = ({ txData }) => {
 
   const { totalFees } = calculateFee(txData, block);
 
-  usePageTitle(txData ? `Ethereum Transaction Overview - ${txData.transactionHash}` : undefined);
 
   const description = `Overview of Ethereum transaction ${txData ? txData.transactionHash : ''}, including sender, recipient, value, gas price, and confirmations.`
 
@@ -622,27 +620,6 @@ const Details: FC<DetailsProps> = ({ txData }) => {
             The transaction includes ${txData.confirmedData.logs?.length || 0} log events.` :
             'is pending confirmation.'}
         </p>
-      </div>
-      <div className="faq-section">
-        <p>1. Why does this transaction include multiple internal calls and how are they decoded?<br/>
-          Internal calls result from smart contract executions that trigger additional calls or value transfers. EthScan
-          uses trace_transaction data to visualize these operations, decoding input/output using verified contract ABIs
-          when available. If the contract is unverified, decoding may be limited to function signatures and raw
-          calldata.
-        </p>
-        <br/>
-        <p>2. What factors influence the effective gas price shown, and how does it differ from the base fee?<br/>
-          The effective gas price reflects the total amount paid per unit of gas and includes both the base fee (as
-          dictated by EIP-1559) and the priority fee (tip to miners). Variability in base fee depends on network
-          congestion at the time of inclusion. EthScan displays all components: baseFeePerGas, maxFeePerGas, and
-          maxPriorityFeePerGas.</p>
-        <br/>
-        <p>3. How can I determine whether a transaction interacted with a proxy contract or an implementation
-          contract?<br/>
-          EthScan detects common proxy patterns (e.g., OpenZeppelin Transparent Proxy, EIP-1967) and flags transactions
-          accordingly. Users can inspect the to and input fields alongside delegatecall traces to confirm if the call
-          was routed through a proxy. When available, contract verification metadata is used to label implementation
-          addresses.</p>
       </div>
     </>
   );

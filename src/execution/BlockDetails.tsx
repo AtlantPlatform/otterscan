@@ -20,7 +20,6 @@ import { blockTxsURL } from "../url";
 import { useChainInfo } from "../useChainInfo";
 import { useBlockData, useL1Epoch } from "../useErigonHooks";
 import { RuntimeContext } from "../useRuntime";
-import {useBlockPageTitle, usePageTitle} from "../useTitle";
 import { commify } from "../utils/utils";
 import BlockReward from "./components/BlockReward";
 import DecoratedAddressLink from "./components/DecoratedAddressLink";
@@ -42,9 +41,6 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   const { data: block, isLoading } = useBlockData(provider, blockNumberOrHash);
   // useBlockPageTitle(blockNumberOrHash);
 
-  const titleToSet = `Ethereum Block ${blockNumberOrHash} - Transactions, Gas Used, and Miner Details`
-
-  usePageTitle(titleToSet);
 
   const extraStr = useMemo(() => {
     return block && toUtf8String(block.extraData, Utf8ErrorFuncs.replace);
@@ -111,6 +107,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   return (
     <>
       <Helmet>
+        <title>Ethereum Block {blockNumberOrHash} - Transactions, Gas Used, and Miner Details</title>
         <meta name="description" content={description}/>
         <script type="application/ld+json">{payloadSchemaWebPage}</script>
         <script type="application/ld+json">{payloadSchemaFaqPage}</script>
@@ -277,20 +274,6 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
           </div>
         </>
       )}
-      <div className="faq-section">
-        <p>1. What is a block in the Ethereum blockchain?<br/>
-          A block is a package of data that contains a list of transactions, a timestamp, and other metadata, secured
-          and added to the Ethereum blockchain.
-        </p>
-        <br/>
-        <p>2. How can I find details about a specific Ethereum block?<br/>
-          Enter the block number or hash in the EthScan search bar to view detailed information, including transactions
-          and miner data.</p>
-        <br/>
-        <p>3. What is the role of the miner in a block?<br/>
-          Miners validate and confirm transactions, grouping them into blocks and securing the Ethereum blockchain by
-          solving computational challenges.</p>
-      </div>
     </>
   );
 };

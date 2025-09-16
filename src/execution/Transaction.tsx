@@ -10,7 +10,6 @@ import { BlockNumberContext } from "../useBlockTagContext";
 import { useTxData } from "../useErigonHooks";
 import { RuntimeContext } from "../useRuntime";
 import { SelectedTransactionContext } from "../useSelectedTransaction";
-import { usePageTitle } from "../useTitle";
 import {Helmet} from 'react-helmet-async';
 
 const Details = lazy(() => import("./transaction/Details"));
@@ -30,6 +29,10 @@ const Transaction: FC = () => {
   return (
     <SelectedTransactionContext.Provider value={txData}>
       <BlockNumberContext.Provider value={txData?.confirmedData?.blockNumber}>
+        <Helmet>
+          <title>Transaction {txHash.slice(0, 10)}... | Ethscan</title>
+          <meta name="description" content={`View details for Ethereum transaction ${txHash} including gas fees, input data, logs, and trace information.`} />
+        </Helmet>
         <StandardFrame>
           <h1 className="pb-2 text-xl text-gray-700">Transaction Details</h1>
           {txData === null && (

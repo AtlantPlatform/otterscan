@@ -283,18 +283,6 @@ const AddressTransactionResults: FC = () => {
           View detailed analytics including ERC20/ERC721 token transfers, withdrawals, and blocks rewarded for this address.
         </p>
       </div>
-      <div className="faq-section">
-        <p>1. What is an Ethereum address?<br/>
-          An Ethereum address is a unique identifier used to send and receive transactions on the Ethereum blockchain.
-          It starts with '0x' followed by 40 hexadecimal characters.</p>
-        <br/>
-        <p>2. How can I check the balance of an Ethereum address?<br/>
-          You can view the balance of an Ethereum address on EthScan by searching for the address in the search bar.</p>
-        <br/>
-        <p>3. What does the transaction history of an Ethereum address show?<br/>
-          The transaction history shows all incoming and outgoing transactions associated with the address, including
-          amounts and timestamps.</p>
-      </div>
     </ContentFrame>
   );
 };

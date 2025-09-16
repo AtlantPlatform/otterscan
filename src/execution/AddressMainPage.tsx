@@ -19,6 +19,7 @@ import { useAddressOrENS } from "../useResolvedAddresses";
 import { RuntimeContext } from "../useRuntime";
 import AddressSubtitle from "./address/AddressSubtitle";
 import { AddressAwareComponentProps } from "./types";
+import { Helmet } from 'react-helmet-async';
 
 const ProxyTabs: React.FC<AddressAwareComponentProps> = ({ address }) => {
   const { addressOrName } = useParams();
@@ -95,6 +96,10 @@ const AddressMainPage: React.FC = () => {
 
   return (
     <StandardFrame>
+      <Helmet>
+        <title>Ethereum Address {addressOrName} | Balance and Transactions</title>
+        <meta name="description" content={`View Ethereum address ${addressOrName} details including current balance${balance ? ` (${formatEther(balance)} ETH)` : ''}, transaction history, and contract information.`} />
+      </Helmet>
       {error ? (
         <AddressOrENSNameNotFound
           addressOrENSName={addressOrName}
