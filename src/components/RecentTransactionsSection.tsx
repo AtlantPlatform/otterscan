@@ -4,7 +4,7 @@ import { formatEther } from "ethers";
 import React, { useContext } from "react";
 import { NavLink } from "react-router";
 import { useChainInfo } from "../useChainInfo";
-import { useRecentTransactions } from "../useRecentData";
+import { useRecentTransactionsStatic } from "../useRecentData";
 import { RuntimeContext } from "../useRuntime";
 import { commify } from "../utils/utils";
 import MethodName from "./MethodName";
@@ -12,7 +12,7 @@ import TransactionLink from "./TransactionLink";
 
 const RecentTransactionsSection: React.FC = () => {
   const { provider } = useContext(RuntimeContext);
-  const recentTransactions = useRecentTransactions(provider, 5);
+  const recentTransactions = useRecentTransactionsStatic(provider, 5);
   const {
     nativeCurrency: { symbol },
   } = useChainInfo();

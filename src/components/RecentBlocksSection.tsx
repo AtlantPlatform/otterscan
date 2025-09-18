@@ -4,7 +4,7 @@ import { formatEther } from "ethers";
 import React, { useContext } from "react";
 import { NavLink } from "react-router";
 import { useChainInfo } from "../useChainInfo";
-import { useRecentBlocks } from "../useRecentData";
+import { useRecentBlocksStatic } from "../useRecentData";
 import { RuntimeContext } from "../useRuntime";
 import { commify } from "../utils/utils";
 import DecoratedAddressLink from "../execution/components/DecoratedAddressLink";
@@ -12,7 +12,7 @@ import BlockLink from "./BlockLink";
 
 const RecentBlocksSection: React.FC = () => {
   const { provider } = useContext(RuntimeContext);
-  const recentBlocks = useRecentBlocks(provider, 5);
+  const recentBlocks = useRecentBlocksStatic(provider, 5);
   const {
     nativeCurrency: { symbol },
   } = useChainInfo();
