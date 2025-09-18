@@ -34,7 +34,7 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
   return (
     <>
       <div className="px-3 lg:px-9">
-        <ContentFrame isLoading={isLoading}>
+        <ContentFrame isLoading={isLoading} marginSize="none">
           {/* Desktop Table */}
           <div className="hidden sm:block">
         <StandardScrollableTable isAuto={true}>
