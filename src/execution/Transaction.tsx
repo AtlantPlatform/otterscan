@@ -34,22 +34,6 @@ const Transaction: FC = () => {
           <meta name="description" content={`View details for Ethereum transaction ${txHash} including gas fees, input data, logs, and trace information.`} />
           <link rel="canonical" href={`https://ethscan.org/tx/${txHash}`} />
 
-          {/* Open Graph meta tags */}
-          <meta property="og:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
-          <meta property="og:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
-          <meta property="og:type" content="website" />
-          <meta property="og:url" content={`https://ethscan.org/tx/${txHash}`} />
-          <meta property="og:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
-          <meta property="og:image:width" content="1280" />
-          <meta property="og:image:height" content="640" />
-          <meta property="og:site_name" content="Ethscan" />
-
-          {/* Twitter Card meta tags */}
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
-          <meta name="twitter:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
-          <meta name="twitter:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
-          <meta name="twitter:site" content="@ethscan" />
         </Helmet>
         <StandardFrame>
           <StandardSubtitle>
