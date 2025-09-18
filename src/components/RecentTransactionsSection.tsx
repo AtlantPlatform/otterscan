@@ -30,16 +30,16 @@ const RecentTransactionsSection: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center mb-4">
+    <div className="bg-white sm:rounded-lg sm:shadow-md overflow-hidden">
+      <div className="flex items-center mb-4 px-3 lg:px-9 sm:px-6 pt-6">
         <h2 className="text-lg font-semibold flex items-center space-x-2">
           <FontAwesomeIcon icon={faExchangeAlt} className="text-gray-500" />
           <span>Latest Transactions</span>
         </h2>
       </div>
-      
+
       {/* Desktop Table */}
-      <div className="hidden sm:block overflow-x-scroll">
+      <div className="hidden sm:block overflow-x-scroll px-6 pb-6">
         <table className="w-full table-auto border-gray-200 px-2 py-2 text-left text-sm [&>*>tr]:items-baseline">
           <thead>
             <tr className="bg-gray-100 text-gray-500 [&>th]:truncate [&>th:first-child]:pl-2 [&>th:last-child]:pr-2 [&>th]:px-1 [&>th]:py-2">
@@ -110,7 +110,7 @@ const RecentTransactionsSection: React.FC = () => {
       </div>
       
       {/* Mobile Cards */}
-      <div className="block sm:hidden space-y-3">
+      <div className="block sm:hidden space-y-3 px-3">
         {recentTransactions.map((tx) => {
           const timestamp = new Date(tx.timestamp * 1000);
           const formattedTime = timestamp.toLocaleString('en-US', {
@@ -124,7 +124,7 @@ const RecentTransactionsSection: React.FC = () => {
           });
           
           return (
-            <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+            <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3 min-w-0">
               <div className="flex justify-between items-start">
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</span>
                 <div className="flex items-center space-x-2 max-w-[60%]">
@@ -179,7 +179,7 @@ const RecentTransactionsSection: React.FC = () => {
       </div>
       
       {/* View More Button at Bottom */}
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center mt-4 px-3 lg:px-9 sm:px-6 pb-6">
         <NavLink
           to="/tx/recent"
           className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1 px-4 py-2 border border-blue-600 rounded"

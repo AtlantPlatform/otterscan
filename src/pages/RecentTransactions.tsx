@@ -90,39 +90,40 @@ const RecentTransactions: React.FC = () => {
 
 
   return (
-    <StandardFrame>
-      <Helmet>
-        <title>Recent Transactions | Ethscan</title>
-        <meta name="description" content="Browse the latest Ethereum transactions with detailed information about transfers, fees, and methods." />
-        <link rel="canonical" href="https://ethscan.org/tx/recent" />
+    <div className="min-h-screen overflow-x-hidden">
+      <StandardFrame>
+        <Helmet>
+          <title>Recent Transactions | Ethscan</title>
+          <meta name="description" content="Browse the latest Ethereum transactions with detailed information about transfers, fees, and methods." />
+          <link rel="canonical" href="https://ethscan.org/tx/recent" />
 
-      </Helmet>
+        </Helmet>
 
-      <div className="px-9 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold flex items-center space-x-3">
-            <FontAwesomeIcon icon={faExchangeAlt} className="text-gray-500" />
-            <span>Recent Transactions</span>
-          </h1>
-          {!isLoadingAll && transactions.length > 0 && (
-            <SimplePageControl
-              pageNumber={pageNumber}
-              pageSize={TRANSACTIONS_PER_PAGE}
-              total={estimatedTotal}
-            />
-          )}
-        </div>
-
-        {isLoadingAll ? (
-          <div className="text-center py-8">
-            <div className="text-gray-500">Loading transactions...</div>
+        <div className="py-6 max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6 px-3 lg:px-9">
+            <h1 className="text-2xl font-bold flex items-center space-x-3">
+              <FontAwesomeIcon icon={faExchangeAlt} className="text-gray-500" />
+              <span>Recent Transactions</span>
+            </h1>
+            {!isLoadingAll && transactions.length > 0 && (
+              <SimplePageControl
+                pageNumber={pageNumber}
+                pageSize={TRANSACTIONS_PER_PAGE}
+                total={estimatedTotal}
+              />
+            )}
           </div>
-        ) : transactions.length > 0 ? (
-          <>
-            {/* Desktop Table */}
-            <div className="hidden sm:block">
-              <StandardSelectionBoundary>
-                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+
+          {isLoadingAll ? (
+            <div className="text-center py-8 px-3 lg:px-9">
+              <div className="text-gray-500">Loading transactions...</div>
+            </div>
+          ) : transactions.length > 0 ? (
+            <>
+              {/* Desktop Table */}
+              <div className="hidden sm:block mx-3 lg:mx-9">
+                <StandardSelectionBoundary>
+                  <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                   <div className="overflow-x-scroll">
                     <table className="w-full table-auto border-gray-200 px-2 py-2 text-left text-sm [&>*>tr]:items-baseline">
                       <thead>
@@ -151,7 +152,7 @@ const RecentTransactions: React.FC = () => {
             </div>
 
             {/* Mobile Cards */}
-            <div className="block sm:hidden space-y-3">
+            <div className="block sm:hidden space-y-3 px-3">
               {transactions.map((tx) => {
                 const timestamp = new Date(tx.timestamp * 1000);
                 const formattedTime = timestamp.toLocaleString('en-US', {
@@ -165,7 +166,7 @@ const RecentTransactions: React.FC = () => {
                 });
 
                 return (
-                  <div key={tx.hash} className="bg-white rounded-lg shadow-sm border p-4 space-y-3">
+                  <div key={tx.hash} className="bg-white rounded-lg shadow-sm border p-4 space-y-3 min-w-0">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-semibold text-gray-700">Transaction Hash</span>
                       <div className="flex items-center space-x-2">
@@ -224,7 +225,7 @@ const RecentTransactions: React.FC = () => {
               })}
             </div>
 
-            <div className="flex justify-center mt-6">
+            <div className="flex justify-center mt-6 px-3 lg:px-9">
               <SimplePageControl
                 pageNumber={pageNumber}
                 pageSize={TRANSACTIONS_PER_PAGE}
@@ -235,7 +236,7 @@ const RecentTransactions: React.FC = () => {
         ) : null}
 
         {/* SEO Content Section */}
-        <div className="mt-12 space-y-6">
+        <div className="mt-12 space-y-6 px-3 lg:px-9">
           <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
             <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Transactions</h1>
             <p>Ethereum transactions are recorded on a public ledger called the blockchain. Transactions are verified by network validators through the Proof of Stake consensus mechanism, and every recorded transaction is immutable. Ethereum users engage with block explorers to track their ETH transactions, token transfers, and smart contract interactions.</p>
@@ -254,8 +255,9 @@ const RecentTransactions: React.FC = () => {
             <p>Ethscan is an Ethereum transaction search engine that allows users to check specific ETH transactions and their history by inputting various criteria, such as transaction hash, block number, address, or ENS name. Users can view detailed information including gas usage, input data, logs, and internal transactions generated by smart contract execution.</p>
           </div>
         </div>
-      </div>
-    </StandardFrame>
+        </div>
+      </StandardFrame>
+    </div>
   );
 };
 

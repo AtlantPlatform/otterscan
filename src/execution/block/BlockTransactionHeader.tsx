@@ -19,9 +19,9 @@ const BlockTransactionHeader: React.FC<BlockTransactionHeaderProps> = ({
 
   return (
     <StandardSubtitle>
-      <h1 className="flex items-baseline space-x-1">
+      <h1 className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 space-y-1 sm:space-y-0">
         <span>Transactions</span>
-        <div className="flex space-x-1 text-sm text-gray-500">
+        <div className="flex items-center space-x-1 text-sm text-gray-500">
           <span>For Block</span>
           <BlockLink blockTag={blockTag} />
           <NavBlock

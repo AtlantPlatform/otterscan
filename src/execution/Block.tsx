@@ -38,26 +38,35 @@ const Block: React.FC = () => {
   // useBlockPageTitle(blockNumberOrHash);
 
   return (
-    <StandardFrame>
-      <Helmet>
-        <link rel="canonical" href={`https://ethscan.org/block/${blockNumberOrHash}`} />
+    <div className="min-h-screen overflow-x-hidden">
+      <StandardFrame>
+        <Helmet>
+          <link rel="canonical" href={`https://ethscan.org/block/${blockNumberOrHash}`} />
 
-      </Helmet>
-      <StandardSubtitle>
-        <h1 className="flex items-baseline space-x-1">
-          <span>Block</span>
-          <span className="text-base text-gray-500" data-test="block-number">
-            #{blockNumberOrHash}
-          </span>
-          <NavBlock
-            entityNum={blockNumber}
-            latestEntityNum={latestBlockNumber}
-            urlBuilder={blockURL}
-          />
-        </h1>
-      </StandardSubtitle>
-      <BlockDetails blockNumberOrHash={blockNumberOrHash} />
-    </StandardFrame>
+        </Helmet>
+
+        <div className="py-6 max-w-7xl mx-auto">
+          <div className="px-3 lg:px-9">
+            <StandardSubtitle>
+              <h1 className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 space-y-1 sm:space-y-0">
+                <div className="flex items-baseline space-x-1">
+                  <span>Block</span>
+                  <span className="text-base text-gray-500 break-all" data-test="block-number">
+                    #{blockNumberOrHash}
+                  </span>
+                </div>
+                <NavBlock
+                  entityNum={blockNumber}
+                  latestEntityNum={latestBlockNumber}
+                  urlBuilder={blockURL}
+                />
+              </h1>
+            </StandardSubtitle>
+          </div>
+          <BlockDetails blockNumberOrHash={blockNumberOrHash} />
+        </div>
+      </StandardFrame>
+    </div>
   );
 };
 

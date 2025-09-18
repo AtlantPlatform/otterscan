@@ -5,7 +5,6 @@ import StandardScrollableTable from "../../components/StandardScrollableTable";
 import StandardTBody from "../../components/StandardTBody";
 import { PAGE_SIZE } from "../../params";
 import ResultHeader from "../../search/ResultHeader";
-import SearchResultNavBar from "../../search/SearchResultNavBar";
 import TransactionItem from "../../search/TransactionItem";
 import { totalTransactionsFormatter } from "../../search/messages";
 import { useFeeToggler, FeeDisplay } from "../../search/useFeeToggler";
@@ -33,15 +32,11 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
   const [feeDisplay, feeDisplayToggler] = useFeeToggler();
 
   return (
-    <ContentFrame isLoading={isLoading}>
-      <SearchResultNavBar
-        pageNumber={pageNumber}
-        pageSize={PAGE_SIZE}
-        total={total}
-        totalFormatter={totalTransactionsFormatter}
-      />
-      {/* Desktop Table */}
-      <div className="hidden sm:block">
+    <>
+      <div className="px-3 lg:px-9">
+        <ContentFrame isLoading={isLoading}>
+          {/* Desktop Table */}
+          <div className="hidden sm:block">
         <StandardScrollableTable isAuto={true}>
           <ResultHeader
             feeDisplay={feeDisplay}
@@ -65,8 +60,11 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
         </StandardScrollableTable>
       </div>
       
+        </ContentFrame>
+      </div>
+
       {/* Mobile Cards */}
-      <div className="block sm:hidden space-y-3">
+      <div className="block sm:hidden space-y-3 px-3">
         {page ? (
           page.map((tx) => {
             const timestamp = new Date(tx.timestamp * 1000);
@@ -79,9 +77,9 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
               second: '2-digit',
               hour12: false
             });
-            
+
             return (
-              <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+              <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3 min-w-0">
                 <div className="flex justify-between items-start">
                   <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</span>
                   <div className="flex items-center space-x-2 max-w-[60%]">
@@ -137,15 +135,7 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
           <PendingPage rows={1} cols={1} />
         )}
       </div>
-      {page && (
-        <SearchResultNavBar
-          pageNumber={pageNumber}
-          pageSize={PAGE_SIZE}
-          total={total}
-          totalFormatter={totalTransactionsFormatter}
-        />
-      )}
-    </ContentFrame>
+    </>
   );
 };
 

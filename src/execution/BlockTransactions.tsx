@@ -103,24 +103,31 @@ const BlockTransactions: React.FC = () => {
   )
 
   return (
-    <StandardFrame>
-      <Helmet>
-        <meta name="description" content={description}/>
-        <link rel="canonical" href={`https://ethscan.org/block/${blockNumber}/txs`} />
+    <div className="min-h-screen overflow-x-hidden">
+      <StandardFrame>
+        <Helmet>
+          <meta name="description" content={description}/>
+          <link rel="canonical" href={`https://ethscan.org/block/${blockNumber}/txs`} />
 
 
-        <script type="application/ld+json">{payloadSchemaWebPage}</script>
-        <script type="application/ld+json">{payloadSchemaFaqPage}</script>
-      </Helmet>
-      <BlockTransactionHeader blockTag={blockNumber}/>
-      <BlockTransactionResults
-        page={txs}
-        total={totalTxs ?? 0}
-        pageNumber={pageNumber}
-        isLoading={isLoading}
-      />
-      {/* FAQ Section */}
-      <div className="px-9 py-6">
+          <script type="application/ld+json">{payloadSchemaWebPage}</script>
+          <script type="application/ld+json">{payloadSchemaFaqPage}</script>
+        </Helmet>
+
+        <div className="py-6 max-w-7xl mx-auto">
+          <div className="px-3 lg:px-9">
+            <BlockTransactionHeader blockTag={blockNumber}/>
+          </div>
+          <BlockTransactionResults
+            page={txs}
+            total={totalTxs ?? 0}
+            pageNumber={pageNumber}
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* FAQ Section */}
+        <div className="px-3 lg:px-9 py-6 max-w-7xl mx-auto">
         <div className="mt-12 space-y-6">
           <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
             <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h1>
@@ -135,8 +142,9 @@ const BlockTransactions: React.FC = () => {
             <p>Gas fees are the costs paid to execute a transaction on the Ethereum network. They compensate validators for the computing energy required to process and validate transactions.</p>
           </div>
         </div>
-      </div>
-    </StandardFrame>
+        </div>
+      </StandardFrame>
+    </div>
   );
 };
 
