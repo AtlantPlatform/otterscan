@@ -193,9 +193,13 @@ const StateDiff: React.FC<StateDiffProps> = ({ txData, txHash }) => {
       "@context": "https://schema.org",
       "@type": "WebPage",
       "url": `https://ethscan.org/tx/${txHash}/statediff`,
+      "name": `Transaction State Diff ${txHash.substring(0, 10)}...`,
+      "description": description,
       "mainEntity": {
-        "@type": "BlockchainTransaction",
-        "transactionHash": `${txHash}`,
+        "@type": "DigitalDocument",
+        "identifier": `${txHash}`,
+        "name": `Transaction State Diff ${txHash.substring(0, 10)}...`,
+        "description": "Account balance and storage changes caused by transaction execution"
       }
     }
   )

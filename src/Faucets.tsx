@@ -5,6 +5,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useMemo } from "react";
 import { useLocation } from "react-router";
+import { Helmet } from "react-helmet-async";
 import ContentFrame from "./components/ContentFrame";
 import ExternalLink from "./components/ExternalLink";
 import StandardFrame from "./components/StandardFrame";
@@ -37,6 +38,28 @@ const Faucets: React.FC = () => {
 
   return (
     <StandardFrame>
+      <Helmet>
+        <title>Ethereum Testnet Faucets | Ethscan</title>
+        <meta name="description" content="Find Ethereum testnet faucets to get free test ETH for development and testing purposes." />
+        <link rel="canonical" href="https://ethscan.org/faucets" />
+
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta property="og:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ethscan.org/faucets" />
+        <meta property="og:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta property="og:image:width" content="1280" />
+        <meta property="og:image:height" content="640" />
+        <meta property="og:site_name" content="Ethscan" />
+
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta name="twitter:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta name="twitter:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta name="twitter:site" content="@ethscan" />
+      </Helmet>
       <StandardSubtitle>Faucets</StandardSubtitle>
       <ContentFrame>
         <div className="space-y-3 py-4">

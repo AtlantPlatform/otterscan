@@ -52,7 +52,7 @@ const RecentBlocksSection: React.FC = () => {
               <th>Reward</th>
             </tr>
           </thead>
-          <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200 hover:[&>tr]:bg-skin-table-hover">
+          <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200">
             {recentBlocks.map((block) => {
               const gasUsedPercent = block.gasLimit ? (Number(block.gasUsed) * 100 / Number(block.gasLimit)).toFixed(2) : "0";
               const blockReward = block.blockReward + block.feeReward;
@@ -174,7 +174,7 @@ const RecentBlocksSection: React.FC = () => {
       <div className="flex justify-center mt-4">
         <NavLink
           to="/blocks/recent"
-          className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1 px-4 py-2 border border-blue-600 rounded hover:bg-blue-50"
+          className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1 px-4 py-2 border border-blue-600 rounded"
         >
           <span>View more blocks</span>
           <FontAwesomeIcon icon={faAngleRight} className="text-xs" />

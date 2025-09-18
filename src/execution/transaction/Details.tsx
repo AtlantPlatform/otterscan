@@ -135,14 +135,16 @@ const Details: FC<DetailsProps> = ({ txData }) => {
 
   const payloadSchemaWebPage = JSON.stringify({
       "@context": "https://schema.org",
-      "@type": "BlockchainTransaction",
+      "@type": "WebPage",
       "url": `https://ethscan.org/tx/${txData ? txData.transactionHash : ''}`,
-      "transactionHash": `${txData ? txData.transactionHash : ''}`,
-      "sender": `${txData.from}`,
-      "recipient": `${txData.to}`,
-      "value": `${formattedValue} ETH`,
-      "gasPrice": `${formattedGasPriceValue} ETH`,
-      "confirmations": `${txData.confirmedData?.confirmations || 0}`
+      "name": `Ethereum Transaction ${txData ? txData.transactionHash.substring(0, 10) : ''}...`,
+      "description": `Ethereum transaction details including sender, recipient, value of ${formattedValue} ETH and gas information`,
+      "mainEntity": {
+        "@type": "DigitalDocument",
+        "identifier": `${txData ? txData.transactionHash : ''}`,
+        "name": `Transaction ${txData ? txData.transactionHash.substring(0, 10) : ''}...`,
+        "description": `Transfer of ${formattedValue} ETH on Ethereum blockchain`
+      }
     }
   )
 
@@ -155,7 +157,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
           "name": "Why does this transaction include multiple internal calls and how are they decoded?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Internal calls result from smart contract executions that trigger additional calls or value transfers. EthScan uses trace_transaction data to visualize these operations, decoding input/output using verified contract ABIs when available. If the contract is unverified, decoding may be limited to function signatures and raw calldata."
+            "text": "Internal calls result from smart contract executions that trigger additional calls or value transfers. Ethscan uses trace_transaction data to visualize these operations, decoding input/output using verified contract ABIs when available. If the contract is unverified, decoding may be limited to function signatures and raw calldata."
           }
         },
         {
@@ -163,7 +165,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
           "name": "What factors influence the effective gas price shown, and how does it differ from the base fee?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The effective gas price reflects the total amount paid per unit of gas and includes both the base fee (as dictated by EIP-1559) and the priority fee (tip to miners). Variability in base fee depends on network congestion at the time of inclusion. EthScan displays all components: baseFeePerGas, maxFeePerGas, and maxPriorityFeePerGas."
+            "text": "The effective gas price reflects the total amount paid per unit of gas and includes both the base fee (as dictated by EIP-1559) and the priority fee (tip to miners). Variability in base fee depends on network congestion at the time of inclusion. Ethscan displays all components: baseFeePerGas, maxFeePerGas, and maxPriorityFeePerGas."
           }
         },
         {
@@ -171,7 +173,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
           "name": "How can I determine whether a transaction interacted with a proxy contract or an implementation contract?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "EthScan detects common proxy patterns (e.g., OpenZeppelin Transparent Proxy, EIP-1967) and flags transactions accordingly. Users can inspect the to and input fields alongside delegatecall traces to confirm if the call was routed through a proxy. When available, contract verification metadata is used to label implementation addresses."
+            "text": "Ethscan detects common proxy patterns (e.g., OpenZeppelin Transparent Proxy, EIP-1967) and flags transactions accordingly. Users can inspect the to and input fields alongside delegatecall traces to confirm if the call was routed through a proxy. When available, contract verification metadata is used to label implementation addresses."
           }
         }
       ]

@@ -63,12 +63,18 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
       "@context": "https://schema.org",
       "@type": "WebPage",
       "url": `https://ethscan.org/block/${blockNumberOrHash}`,
+      "name": `Ethereum Block ${blockNumberOrHash}`,
+      "description": description,
       "mainEntity": {
-        "@type": "BlockchainBlock",
-        "blockNumber": `${blockNumberOrHash}`,
-        "miner": `${block?.miner}`,
-        "timestamp": `${block?.timestamp ? (new Date(block.timestamp * 1000)).toISOString() : ''}`,
-        "transactionCount": `${block?.transactionCount}`
+        "@type": "DigitalDocument",
+        "identifier": `${blockNumberOrHash}`,
+        "name": `Ethereum Block ${blockNumberOrHash}`,
+        "description": `Ethereum blockchain block containing ${block?.transactionCount || 0} transactions`,
+        "dateCreated": `${block?.timestamp ? (new Date(block.timestamp * 1000)).toISOString() : ''}`,
+        "creator": {
+          "@type": "Organization",
+          "identifier": `${block?.miner}`
+        }
       }
     }
   )
@@ -89,7 +95,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
           "name": "How can I find details about a specific Ethereum block?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Enter the block number or hash in the EthScan search bar to view detailed information, including transactions and miner data."
+            "text": "Enter the block number or hash in the Ethscan search bar to view detailed information, including transactions and miner data."
           }
         },
         {

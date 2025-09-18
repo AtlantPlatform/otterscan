@@ -183,7 +183,7 @@ const AddressTransactionResults: FC = () => {
         "name": "How can I check the balance of an Ethereum address?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "You can view the balance of an Ethereum address on EthScan by searching for the address in the search bar."
+          "text": "You can view the balance of an Ethereum address on Ethscan by searching for the address in the search bar."
         }
       },
       {

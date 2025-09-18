@@ -24,19 +24,19 @@ const Trace: React.FC<TraceProps> = ({ txData, txHash }) => {
       "@context": "https://schema.org",
       "@type": "WebPage",
       "url": `https://ethscan.org/tx/${txData.transactionHash}/trace`,
+      "name": `Transaction Trace ${txData.transactionHash.substring(0, 10)}...`,
+      "description": description,
       "mainEntity": {
-        "@type": "BlockchainTransaction",
-        "transactionHash": `${txData.transactionHash}`,
+        "@type": "DigitalDocument",
+        "identifier": `${txData.transactionHash}`,
+        "name": `Transaction Trace ${txData.transactionHash.substring(0, 10)}...`,
+        "description": "Detailed execution trace including call stack and gas consumption"
       }
     }
   )
 
   return (
     <ContentFrame tabs>
-      <Helmet>
-        <meta name="description" content={description}/>
-        <script type="application/ld+json">{payloadSchemaWebPage}</script>
-      </Helmet>
       <Helmet>
         <meta name="description" content={description}/>
         <script type="application/ld+json">{payloadSchemaWebPage}</script>

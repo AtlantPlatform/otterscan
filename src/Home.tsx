@@ -39,8 +39,27 @@ const Home: FC = () => {
   return (
     <>
       <Helmet>
-        <meta name="description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, logs, and more with EthScan's user-friendly explorer" />
-        <title>Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | EthScan</title>
+        <meta name="description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, logs, and more with Ethscan's user-friendly explorer" />
+        <title>Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | Ethscan</title>
+        <link rel="canonical" href="https://ethscan.org/" />
+
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta property="og:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ethscan.org/" />
+        <meta property="og:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta property="og:image:width" content="1280" />
+        <meta property="og:image:height" content="640" />
+        <meta property="og:site_name" content="Ethscan" />
+
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta name="twitter:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta name="twitter:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta name="twitter:site" content="@ethscan" />
+
         <script type="application/ld+json">{structuredJSON}</script>
       </Helmet>
       {/* Responsive header with conditional element display */}
@@ -195,7 +214,7 @@ const Home: FC = () => {
             <p>Ethereum is a decentralized blockchain platform that enables smart contracts and decentralized applications (DApps) to be built and operated without downtime, fraud, control, or interference from a third party.</p>
 
             <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is a blockchain explorer?</h2>
-            <p>A blockchain explorer is a web application that allows users to search and navigate blockchain data, including transactions, blocks, addresses, and smart contracts. EthScan provides real-time access to Ethereum blockchain data.</p>
+            <p>A blockchain explorer is a web application that allows users to search and navigate blockchain data, including transactions, blocks, addresses, and smart contracts. Ethscan provides real-time access to Ethereum blockchain data.</p>
 
             <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How do I search for a transaction?</h2>
             <p>Enter the transaction hash (a 66-character string starting with '0x') in the search bar above. You can also search by block number, address, or ENS name to find related transactions.</p>

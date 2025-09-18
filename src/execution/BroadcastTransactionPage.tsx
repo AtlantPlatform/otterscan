@@ -37,7 +37,7 @@ const BroadcastTransactionPage: React.FC = () => {
   }
 
   usePageTitle(`Broadcast Ethereum Transactions`);
-  const description = `Broadcast raw Ethereum transactions to the network easily with EthScan's secure broadcasting tool.`
+  const description = `Broadcast raw Ethereum transactions to the network easily with Ethscan's secure broadcasting tool.`
 
   const payloadSchemaFaqPageBaseInfo = JSON.stringify({
       "@context": "https://schema.org",
@@ -45,7 +45,7 @@ const BroadcastTransactionPage: React.FC = () => {
       "url": "https://ethscan.org/broadcast",
       "mainEntity": {
         "@type": "SoftwareApplication",
-        "name": "EthScan Broadcast Tool",
+        "name": "Ethscan Broadcast Tool",
         "operatingSystem": "All",
         "applicationCategory": "Blockchain"
       }
@@ -58,7 +58,7 @@ const BroadcastTransactionPage: React.FC = () => {
       "@type": "HowTo",
       "url": "https://ethscan.org/broadcast",
       "name": "How to Broadcast Ethereum Transactions",
-      "description": "Follow these steps to broadcast raw Ethereum transactions to the network using EthScan.",
+      "description": "Follow these steps to broadcast raw Ethereum transactions to the network using Ethscan.",
       "steps": [
         {
           "@type": "HowToStep",
@@ -83,7 +83,7 @@ const BroadcastTransactionPage: React.FC = () => {
         {
           "@type": "HowToStep",
           "name": "Confirm Submission",
-          "text": "Once the transaction is successfully broadcasted, you’ll receive a confirmation with the transaction hash. Use the transaction hash to track the status on EthScan."
+          "text": "Once the transaction is successfully broadcasted, you’ll receive a confirmation with the transaction hash. Use the transaction hash to track the status on Ethscan."
         }
       ]
     }
@@ -95,7 +95,7 @@ const BroadcastTransactionPage: React.FC = () => {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "What are the security benefits of using EthScan to broadcast transactions?",
+          "name": "What are the security benefits of using Ethscan to broadcast transactions?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "The tool processes raw transaction data securely, minimizing exposure to third parties. No private keys are required, ensuring your wallet's safety."
@@ -103,7 +103,7 @@ const BroadcastTransactionPage: React.FC = () => {
         },
         {
           "@type": "Question",
-          "name": "How fast are Ethereum transactions broadcasted on EthScan?",
+          "name": "How fast are Ethereum transactions broadcasted on Ethscan?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Transactions are directly sent to the Ethereum network, ensuring fast propagation. Ideal for time-sensitive transactions."
@@ -111,7 +111,7 @@ const BroadcastTransactionPage: React.FC = () => {
         },
         {
           "@type": "Question",
-          "name": "Is EthScan's broadcasting tool easy to use?",
+          "name": "Is Ethscan's broadcasting tool easy to use?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "The tool is designed to be simple and user-friendly, ensuring that both beginners and experienced users can broadcast transactions with ease."
@@ -122,7 +122,7 @@ const BroadcastTransactionPage: React.FC = () => {
           "name": "How can I verify my broadcasted transaction?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "After submitting the transaction, you will receive a confirmation with the transaction hash, which you can use to track the status on EthScan."
+            "text": "After submitting the transaction, you will receive a confirmation with the transaction hash, which you can use to track the status on Ethscan."
           }
         }
       ]
@@ -133,6 +133,25 @@ const BroadcastTransactionPage: React.FC = () => {
     <StandardFrame>
       <Helmet>
         <meta name="description" content={description}/>
+        <link rel="canonical" href="https://ethscan.org/broadcastTx" />
+
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta property="og:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ethscan.org/broadcastTx" />
+        <meta property="og:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta property="og:image:width" content="1280" />
+        <meta property="og:image:height" content="640" />
+        <meta property="og:site_name" content="Ethscan" />
+
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta name="twitter:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta name="twitter:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta name="twitter:site" content="@ethscan" />
+
         <script type="application/ld+json">{payloadSchemaFaqPageBaseInfo}</script>
         <script type="application/ld+json">{payloadSchemaFaqPageAdditionalInfo}</script>
         <script type="application/ld+json">{payloadSchemaFaqPage}</script>
@@ -160,7 +179,7 @@ const BroadcastTransactionPage: React.FC = () => {
               "Press the Broadcast button to submit the transaction to the Ethereum network.\n\n" +
               "Confirm Submission:\n" +
               "Once the transaction is successfully broadcasted, you’ll receive a confirmation with the transaction hash.\n" +
-              "Use the transaction hash to track the status on EthScan.\n"}
+              "Use the transaction hash to track the status on Ethscan.\n"}
           ></StandardTextarea>
           <div>
             <button
@@ -195,31 +214,32 @@ const BroadcastTransactionPage: React.FC = () => {
           )}
         </div>
       </ContentFrame>
-      <div className="faq-section">
-        <p><b>What are the security benefits of using the EthScan broadcasting tool?</b></p>
-        <p>The tool processes raw transaction data securely, minimizing exposure to third parties.
-          No private keys are required, ensuring your wallet's safety.
-        </p>
 
-        <br/>
+      {/* FAQ Section */}
+      <div className="px-9 py-6">
+        <div className="mt-12 space-y-6">
+          <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
+            <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h1>
 
-        <p><b>How fast are Ethereum transactions broadcasted on EthScan?</b></p>
-        <p>Transactions are directly sent to the Ethereum network, ensuring fast propagation.
-          Ideal for time-sensitive transactions.
-        </p>
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What are the security benefits of using the Ethscan broadcasting tool?</h2>
+            <p>The tool processes raw transaction data securely, minimizing exposure to third parties. No private keys are required, ensuring your wallet's safety.</p>
 
-        <br/>
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How fast are Ethereum transactions broadcasted on Ethscan?</h2>
+            <p>Transactions are directly sent to the Ethereum network, ensuring fast propagation. Ideal for time-sensitive transactions.</p>
 
-        <p><b>Is EthScan's broadcasting tool easy to use?</b></p>
-        <p>The tool is designed to be simple and user-friendly, ensuring that both beginners and experienced users can
-          broadcast transactions with ease.</p>
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Is Ethscan's broadcasting tool easy to use?</h2>
+            <p>The tool is designed to be simple and user-friendly, ensuring that both beginners and experienced users can broadcast transactions with ease.</p>
 
-        <br/>
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I verify my broadcasted transaction?</h2>
+            <p>After submitting the transaction, you will receive a confirmation with the transaction hash, which you can use to track the status on Ethscan.</p>
 
-        <p><b>How can I verify my broadcasted transaction?</b></p>
-        <p>After submitting the transaction, you will receive a confirmation with the transaction hash, which you can
-          use to track the status on EthScan</p>
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What format should the raw transaction be in?</h2>
+            <p>The raw transaction must be in hexadecimal format (starting with '0x'). This is the standard format used by Ethereum wallets and development tools when signing transactions offline.</p>
 
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Can I broadcast multiple transactions at once?</h2>
+            <p>No, each transaction must be broadcast individually. This ensures proper nonce sequencing and allows you to verify each transaction's status separately.</p>
+          </div>
+        </div>
       </div>
     </StandardFrame>
   );

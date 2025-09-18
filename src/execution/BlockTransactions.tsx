@@ -51,15 +51,15 @@ const BlockTransactions: React.FC = () => {
     nativeCurrency: { symbol, decimals },
   } = useChainInfo();
 
-  const schemaWebPageItems = txs?.map((item) => {
+  const schemaWebPageItems = txs?.map((item, index) => {
     return {
       "@type": "ListItem",
-      "position": 1,
+      "position": index + 1,
       "item": {
-        "@type": "BlockchainTransaction",
-        "transactionHash": item.hash,
-        "value": `${formatValue(item.value || 0, decimals)} ETH`,
-        "gasFee": `${formatValue(item.fee, 18)} ETH`
+        "@type": "DigitalDocument",
+        "identifier": item.hash,
+        "name": `Transaction ${item.hash.substring(0, 10)}...`,
+        "description": `Ethereum transaction with value ${formatValue(item.value || 0, decimals)} ETH`
       }
     }
   }) || []
@@ -84,10 +84,10 @@ const BlockTransactions: React.FC = () => {
         },
         {
           "@type": "Question",
-          "name": "How can I check the details of a transaction on EthScan?",
+          "name": "How can I check the details of a transaction on Ethscan?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Enter the transaction hash in the EthScan search bar to view details like sender, recipient, and gas fees."
+            "text": "Enter the transaction hash in the Ethscan search bar to view details like sender, recipient, and gas fees."
           }
         },
         {
@@ -106,6 +106,25 @@ const BlockTransactions: React.FC = () => {
     <StandardFrame>
       <Helmet>
         <meta name="description" content={description}/>
+        <link rel="canonical" href={`https://ethscan.org/block/${blockNumber}/txs`} />
+
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta property="og:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`https://ethscan.org/block/${blockNumber}/txs`} />
+        <meta property="og:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta property="og:image:width" content="1280" />
+        <meta property="og:image:height" content="640" />
+        <meta property="og:site_name" content="Ethscan" />
+
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta name="twitter:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta name="twitter:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta name="twitter:site" content="@ethscan" />
+
         <script type="application/ld+json">{payloadSchemaWebPage}</script>
         <script type="application/ld+json">{payloadSchemaFaqPage}</script>
       </Helmet>
@@ -116,18 +135,22 @@ const BlockTransactions: React.FC = () => {
         pageNumber={pageNumber}
         isLoading={isLoading}
       />
-      <div className="faq-section">
-        <p>1. What is an Ethereum transaction?<br/>
-          An Ethereum transaction is a transfer of data or value between addresses on the Ethereum blockchain, often
-          including smart contract interactions.
-        </p>
-        <br/>
-        <p>2. How can I check the details of a transaction on EthScan?<br/>
-          Enter the transaction hash in the EthScan search bar to view details like sender, recipient, and gas fees.</p>
-        <br/>
-        <p>3. What do gas fees in a transaction mean?
-          Gas fees are the costs paid to execute a transaction on the Ethereum network. They compensate miners for their
-          work and secure the network.</p>
+      {/* FAQ Section */}
+      <div className="px-9 py-6">
+        <div className="mt-12 space-y-6">
+          <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
+            <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h1>
+
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is an Ethereum transaction?</h2>
+            <p>An Ethereum transaction is a transfer of data or value between addresses on the Ethereum blockchain, often including smart contract interactions.</p>
+
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I check the details of a transaction on Ethscan?</h2>
+            <p>Enter the transaction hash in the Ethscan search bar to view details like sender, recipient, and gas fees.</p>
+
+            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What do gas fees in a transaction mean?</h2>
+            <p>Gas fees are the costs paid to execute a transaction on the Ethereum network. They compensate validators for the computing energy required to process and validate transactions.</p>
+          </div>
+        </div>
       </div>
     </StandardFrame>
   );

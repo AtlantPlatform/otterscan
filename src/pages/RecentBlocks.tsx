@@ -144,6 +144,24 @@ const RecentBlocks: React.FC = () => {
       <Helmet>
         <title>Recent Blocks | Ethscan</title>
         <meta name="description" content="Browse the latest Ethereum blocks with detailed information about gas usage, fees, and rewards." />
+        <link rel="canonical" href="https://ethscan.org/blocks/recent" />
+
+        {/* Open Graph meta tags */}
+        <meta property="og:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta property="og:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ethscan.org/blocks/recent" />
+        <meta property="og:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta property="og:image:width" content="1280" />
+        <meta property="og:image:height" content="640" />
+        <meta property="og:site_name" content="Ethscan" />
+
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+        <meta name="twitter:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+        <meta name="twitter:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+        <meta name="twitter:site" content="@ethscan" />
       </Helmet>
       
       <div className="px-9 py-6">
@@ -181,7 +199,7 @@ const RecentBlocks: React.FC = () => {
                       <th className="text-right">Date/Time</th>
                     </tr>
                   </thead>
-                  <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200 hover:[&>tr]:bg-skin-table-hover">
+                  <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200">
                     {blocks.map((block) => (
                       <BlockRow key={block.hash} block={block} />
                     ))}
@@ -285,7 +303,7 @@ const RecentBlocks: React.FC = () => {
             <p>Since the implementation of EIP-1559 in August 2021, Ethereum uses a dynamic fee market with base fees that are burned, reducing the overall supply of ETH. Validators receive priority fees (tips) and block rewards for proposing and attesting to blocks. New blocks are produced approximately every 12 seconds, a significant improvement from the previous ~13-second block time under Proof of Work.</p>
             
             <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Ethereum Last Block</h2>
-            <p>Ethereum block explorers can be used to view information about the most recent block produced on the Ethereum network. This block is also known as the "last block" or "latest block" and represents the current head of the blockchain. To view information about the last block, simply navigate to the blocks section on EthScan, where you can see real-time updates of newly produced blocks including their validators, gas usage, and transaction counts.</p>
+            <p>Ethereum block explorers can be used to view information about the most recent block produced on the Ethereum network. This block is also known as the "last block" or "latest block" and represents the current head of the blockchain. To view information about the last block, simply navigate to the blocks section on Ethscan, where you can see real-time updates of newly produced blocks including their validators, gas usage, and transaction counts.</p>
             
             <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">The ETH Explorer</h2>
             <p>Details about blocks including Block Height, Validator, Gas Used, Base Fee, and Burnt Fees can be viewed publicly on the ETH blockchain explorer. An explorer is a tool that allows you to search and browse the Ethereum blockchain for transactions, addresses, blocks, and smart contracts. It contains a search bar where you can input the information you're looking for, and it returns the results in real-time, providing transparency into all network activities including DeFi transactions, NFT transfers, and smart contract interactions.</p>
