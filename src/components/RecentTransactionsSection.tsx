@@ -43,7 +43,7 @@ const RecentTransactionsSection: React.FC = () => {
         <table className="w-full table-auto border-gray-200 px-2 py-2 text-left text-sm [&>*>tr]:items-baseline">
           <thead>
             <tr className="bg-gray-100 text-gray-500 [&>th]:truncate [&>th:first-child]:pl-2 [&>th:last-child]:pr-2 [&>th]:px-1 [&>th]:py-2">
-              <th>Transaction Hash</th>
+              <th>Transaction</th>
               <th>Method</th>
               <th className="w-36">Age</th>
               <th>Value</th>
@@ -126,22 +126,22 @@ const RecentTransactionsSection: React.FC = () => {
           return (
             <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3 min-w-0">
               <div className="flex justify-between items-start">
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</span>
-                <div className="flex items-center space-x-2 max-w-[60%]">
-                  <span className={`text-xs px-1 py-0.5 rounded flex-shrink-0 ${
-                    tx.status === 0 
-                      ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' 
+                <div className="flex flex-col space-y-2">
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</span>
+                  <span className={`text-xs px-1 py-0.5 rounded self-start ${
+                    tx.status === 0
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
                       : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
                   }`}>
                     {tx.status === 0 ? 'Failed' : 'Success'}
                   </span>
-                  <NavLink 
-                    to={`/tx/${tx.hash}`}
-                    className="text-sm text-blue-600 dark:text-blue-400 font-mono hover:text-blue-800 dark:hover:text-blue-300"
-                  >
-                    {tx.hash.substring(0, 10)}...
-                  </NavLink>
                 </div>
+                <NavLink
+                  to={`/tx/${tx.hash}`}
+                  className="text-sm text-blue-600 dark:text-blue-400 font-mono hover:text-blue-800 dark:hover:text-blue-300 break-all max-w-[60%]"
+                >
+                  {tx.hash}
+                </NavLink>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Method</span>

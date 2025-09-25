@@ -1,5 +1,4 @@
 {
   "erigonURL": "http://localhost:5174/api",
-  "assetsURLPrefix": "http://localhost:5175",
   "experimentalFixedChainId": 1
 }

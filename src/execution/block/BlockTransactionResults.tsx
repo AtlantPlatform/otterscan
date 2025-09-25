@@ -81,22 +81,22 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
             return (
               <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3 min-w-0">
                 <div className="flex justify-between items-start">
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</span>
-                  <div className="flex items-center space-x-2 max-w-[60%]">
-                    <span className={`text-xs px-1 py-0.5 rounded flex-shrink-0 ${
-                      tx.status === 0 
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' 
+                  <div className="flex flex-col space-y-2">
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</span>
+                    <span className={`text-xs px-1 py-0.5 rounded self-start ${
+                      tx.status === 0
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
                         : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
                     }`}>
                       {tx.status === 0 ? 'Failed' : 'Success'}
                     </span>
-                    <NavLink 
-                      to={`/tx/${tx.hash}`}
-                      className="text-sm text-blue-600 dark:text-blue-400 font-mono hover:text-blue-800 dark:hover:text-blue-300 truncate"
-                    >
-                      {tx.hash.substring(0, 10)}...
-                    </NavLink>
                   </div>
+                  <NavLink
+                    to={`/tx/${tx.hash}`}
+                    className="text-sm text-blue-600 dark:text-blue-400 font-mono hover:text-blue-800 dark:hover:text-blue-300 break-all max-w-[60%]"
+                  >
+                    {tx.hash}
+                  </NavLink>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Method</span>

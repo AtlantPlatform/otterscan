@@ -102,6 +102,17 @@ const AddressMainPage: React.FC = () => {
           <meta name="description" content={`View Ethereum address ${addressOrName} details including current balance${balance ? ` (${formatEther(balance)} ETH)` : ''}, transaction history, and contract information.`} />
           <link rel="canonical" href={`https://ethscan.org/address/${addressOrName}`} />
 
+          {/* Open Graph tags */}
+          <meta property="og:title" content="Ethereum Address Details | Ethscan" />
+          <meta property="og:description" content="View Ethereum address details including current balance, transaction history, and contract information." />
+          <meta property="og:url" content={`https://ethscan.org/address/${addressOrName}`} />
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content="Ethscan" />
+
+          {/* Twitter tags */}
+          <meta name="twitter:card" content="summary" />
+          <meta name="twitter:title" content="Ethereum Address Details | Ethscan" />
+          <meta name="twitter:description" content="View Ethereum address details including current balance, transaction history, and contract information." />
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">

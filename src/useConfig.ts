@@ -217,9 +217,6 @@ export const DEFAULT_CONFIG_FILE = "/config.json";
 export const loadOtterscanConfig = async (): Promise<OtterscanConfig> => {
   // vite config override has precedence over everything
   if (import.meta.env.VITE_CONFIG_JSON !== undefined) {
-    console.log("Using hardcoded config: ");
-    console.log(import.meta.env.VITE_CONFIG_JSON);
-
     // We trust the contents of VITE_CONFIG_JSON to be a valid
     // Otterscan JSON configuration
     try {

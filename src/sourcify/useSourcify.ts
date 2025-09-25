@@ -236,21 +236,7 @@ export const useSourcifyMetadata = (
   address: ChecksummedAddress | undefined,
   chainId: bigint | undefined,
 ): Match | null | undefined => {
-  const { sourcifySource } = useAppConfigContext();
-  const { sources: sourcifySources } = useSourcifySources();
-  const metadataURL = () =>
-    address === undefined || chainId === undefined
-      ? null
-      : ["sourcify", address, chainId, sourcifySource];
-  const fetcher = sourcifyFetcher(sourcifySources);
-  const { data, error } = useSWRImmutable<Match | null | undefined>(
-    metadataURL,
-    fetcher,
-  );
-  if (error) {
-    return null;
-  }
-  return data;
+  return null;
 };
 
 const contractFetcher: Fetcher<string | null, string> = async (url) => {

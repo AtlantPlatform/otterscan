@@ -115,6 +115,20 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
       <Helmet>
         <title>Ethereum Block {blockNumberOrHash} - Transactions, Gas Used, and Miner Details</title>
         <meta name="description" content={description}/>
+        <link rel="canonical" href={`https://ethscan.org/block/${blockNumberOrHash}`} />
+
+        {/* Open Graph tags */}
+        <meta property="og:title" content="Ethereum Block Details | Ethscan" />
+        <meta property="og:description" content="View detailed information about Ethereum blocks including transactions, gas usage, fees, and miner details." />
+        <meta property="og:url" content={`https://ethscan.org/block/${blockNumberOrHash}`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Ethscan" />
+
+        {/* Twitter tags */}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Ethereum Block Details | Ethscan" />
+        <meta name="twitter:description" content="View detailed information about Ethereum blocks including transactions, gas usage, fees, and miner details." />
+
         <script type="application/ld+json">{payloadSchemaWebPage}</script>
         <script type="application/ld+json">{payloadSchemaFaqPage}</script>
       </Helmet>

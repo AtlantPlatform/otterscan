@@ -135,13 +135,27 @@ const BroadcastTransactionPage: React.FC = () => {
         <meta name="description" content={description}/>
         <link rel="canonical" href="https://ethscan.org/broadcastTx" />
 
+        {/* Open Graph tags */}
+        <meta property="og:title" content="Broadcast Ethereum Transactions | Ethscan" />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content="https://ethscan.org/broadcastTx" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Ethscan" />
+
+        {/* Twitter tags */}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Broadcast Ethereum Transactions | Ethscan" />
+        <meta name="twitter:description" content={description} />
 
         <script type="application/ld+json">{payloadSchemaFaqPageBaseInfo}</script>
         <script type="application/ld+json">{payloadSchemaFaqPageAdditionalInfo}</script>
         <script type="application/ld+json">{payloadSchemaFaqPage}</script>
       </Helmet>
-      <h1 className="pb-2 text-xl text-gray-700">Broadcast Transaction</h1>
-      <ContentFrame>
+
+      <div className="py-6 max-w-7xl mx-auto">
+        <div className="px-3 lg:px-9">
+          <h1 className="text-2xl font-bold mb-6">Broadcast Transaction</h1>
+          <ContentFrame marginSize="none">
         <div className="space-y-3 py-4">
           <div>
           This page lets you broadcast a raw signed transaction to the
@@ -197,31 +211,32 @@ const BroadcastTransactionPage: React.FC = () => {
             </div>
           )}
         </div>
-      </ContentFrame>
+          </ContentFrame>
 
-      {/* FAQ Section */}
-      <div className="px-9 py-6">
-        <div className="mt-12 space-y-6">
-          <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-            <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h1>
+          {/* FAQ Section */}
+          <div className="mt-12">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+            <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
+              <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+                <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">What are the security benefits of using the Ethscan broadcasting tool?</h3>
+                <p>The tool processes raw transaction data securely, minimizing exposure to third parties. No private keys are required, ensuring your wallet's safety.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What are the security benefits of using the Ethscan broadcasting tool?</h2>
-            <p>The tool processes raw transaction data securely, minimizing exposure to third parties. No private keys are required, ensuring your wallet's safety.</p>
+                <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How fast are Ethereum transactions broadcasted on Ethscan?</h3>
+                <p>Transactions are directly sent to the Ethereum network, ensuring fast propagation. Ideal for time-sensitive transactions.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How fast are Ethereum transactions broadcasted on Ethscan?</h2>
-            <p>Transactions are directly sent to the Ethereum network, ensuring fast propagation. Ideal for time-sensitive transactions.</p>
+                <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Is Ethscan's broadcasting tool easy to use?</h3>
+                <p>The tool is designed to be simple and user-friendly, ensuring that both beginners and experienced users can broadcast transactions with ease.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Is Ethscan's broadcasting tool easy to use?</h2>
-            <p>The tool is designed to be simple and user-friendly, ensuring that both beginners and experienced users can broadcast transactions with ease.</p>
+                <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I verify my broadcasted transaction?</h3>
+                <p>After submitting the transaction, you will receive a confirmation with the transaction hash, which you can use to track the status on Ethscan.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I verify my broadcasted transaction?</h2>
-            <p>After submitting the transaction, you will receive a confirmation with the transaction hash, which you can use to track the status on Ethscan.</p>
+                <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What format should the raw transaction be in?</h3>
+                <p>The raw transaction must be in hexadecimal format (starting with '0x'). This is the standard format used by Ethereum wallets and development tools when signing transactions offline.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What format should the raw transaction be in?</h2>
-            <p>The raw transaction must be in hexadecimal format (starting with '0x'). This is the standard format used by Ethereum wallets and development tools when signing transactions offline.</p>
-
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Can I broadcast multiple transactions at once?</h2>
-            <p>No, each transaction must be broadcast individually. This ensures proper nonce sequencing and allows you to verify each transaction's status separately.</p>
+                <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Can I broadcast multiple transactions at once?</h3>
+                <p>No, each transaction must be broadcast individually. This ensures proper nonce sequencing and allows you to verify each transaction's status separately.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

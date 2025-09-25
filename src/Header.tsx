@@ -183,33 +183,33 @@ const Header: FC = () => {
             <a className="flex items-center" href="https://btcscan.org/" rel="external" target="_blank">
               <img
                 src={BTCIcon}
-                className="w-[32px] h-[32px]"
-                alt="btcscan icon"
-                title="btcscan icon"
+                className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                alt="BTC Explorer"
+                title="BTC Explorer"
               />
             </a>
             <a className="flex items-center" href="https://ethscan.org/" rel="external" target="_blank">
               <img
                 src={ETHIcon}
-                className="w-[32px] h-[32px]"
-                alt="ethscan icon"
-                title="ethscan icon"
+                className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                alt="ETH Explorer"
+                title="ETH Explorer"
               />
             </a>
             <a className="flex items-center" href="https://xmrscan.org/" rel="external" target="_blank">
               <img
                 src={XMRIcon}
-                className="w-[32px] h-[32px]"
-                alt="xmrscan icon"
-                title="xmrscan icon"
+                className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                alt="XMR Explorer"
+                title="XMR Explorer"
               />
             </a>
             <a className="flex items-center" href="https://btcmempool.org/" rel="external" target="_blank">
               <img
                 src={MempoolIcon}
-                className="w-[32px] h-[32px]"
-                alt="btcmempool icon"
-                title="btcmempool icon"
+                className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                alt="BTC Mempool"
+                title="BTC Mempool"
               />
             </a>
           </div>

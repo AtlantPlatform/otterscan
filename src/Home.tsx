@@ -43,6 +43,17 @@ const Home: FC = () => {
         <title>Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | Ethscan</title>
         <link rel="canonical" href="https://ethscan.org/" />
 
+        {/* Open Graph tags */}
+        <meta property="og:title" content="Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | Ethscan" />
+        <meta property="og:description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, logs, and more with Ethscan's user-friendly explorer" />
+        <meta property="og:url" content="https://ethscan.org/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Ethscan" />
+
+        {/* Twitter tags */}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | Ethscan" />
+        <meta name="twitter:description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, logs, and more with Ethscan's user-friendly explorer" />
 
         <script type="application/ld+json">{structuredJSON}</script>
       </Helmet>
@@ -201,33 +212,33 @@ const Home: FC = () => {
             <a className="flex items-center" href="https://btcscan.org/" rel="external" target="_blank">
               <img
                 src={BTCIcon}
-                className="w-[32px] h-[32px]"
-                alt="btcscan icon"
-                title="btcscan icon"
+                className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                alt="BTC Explorer"
+                title="BTC Explorer"
               />
             </a>
             <a className="flex items-center" href="https://ethscan.org/" rel="external" target="_blank">
               <img
                 src={ETHIcon}
-                className="w-[32px] h-[32px]"
-                alt="ethscan icon"
-                title="ethscan icon"
+                className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                alt="ETH Explorer"
+                title="ETH Explorer"
               />
             </a>
             <a className="flex items-center" href="https://xmrscan.org/" rel="external" target="_blank">
               <img
                 src={XMRIcon}
-                className="w-[32px] h-[32px]"
-                alt="xmrscan icon"
-                title="xmrscan icon"
+                className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                alt="XMR Explorer"
+                title="XMR Explorer"
               />
             </a>
             <a className="flex items-center" href="https://btcmempool.org/" rel="external" target="_blank">
               <img
                 src={MempoolIcon}
-                className="w-[32px] h-[32px]"
-                alt="btcmempool icon"
-                title="btcmempool icon"
+                className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                alt="BTC Mempool"
+                title="BTC Mempool"
               />
             </a>
           </div>
@@ -260,34 +271,37 @@ const Home: FC = () => {
           <RecentTransactionsSection />
         </div>
 
-        {/* FAQ Section */}
-        <div className="mt-12 space-y-6 px-3 lg:px-9">
-          <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-            <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h1>
+        {/* Main Content Section */}
+        <div className="mt-12 px-3 lg:px-9">
+          <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Blockchain Explorer</h1>
+          <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 mb-8">
+            <p>Ethscan is a powerful blockchain explorer that provides real-time access to Ethereum blockchain data. Search and navigate through transactions, blocks, addresses, and smart contracts with ease. Our explorer allows you to track ETH transactions, monitor DeFi positions, verify smart contracts, and investigate any address on the Ethereum network. Whether you're a developer, trader, or blockchain enthusiast, Ethscan offers comprehensive tools to explore and understand the Ethereum ecosystem.</p>
+          </div>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is Ethereum?</h2>
-            <p>Ethereum is a decentralized blockchain platform that enables smart contracts and decentralized applications (DApps) to be built and operated without downtime, fraud, control, or interference from a third party.</p>
+          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+          <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
+            <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+              <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">What is Ethereum?</h3>
+              <p>Ethereum is a decentralized blockchain platform that enables smart contracts and decentralized applications (DApps) to be built and operated without downtime, fraud, control, or interference from a third party.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is a blockchain explorer?</h2>
-            <p>A blockchain explorer is a web application that allows users to search and navigate blockchain data, including transactions, blocks, addresses, and smart contracts. Ethscan provides real-time access to Ethereum blockchain data.</p>
+              <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How do I search for a transaction?</h3>
+              <p>Enter the transaction hash (a 66-character string starting with '0x') in the search bar above. You can also search by block number, address, or ENS name to find related transactions.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How do I search for a transaction?</h2>
-            <p>Enter the transaction hash (a 66-character string starting with '0x') in the search bar above. You can also search by block number, address, or ENS name to find related transactions.</p>
+              <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is a transaction hash?</h3>
+              <p>A transaction hash is a unique identifier for each transaction on the blockchain. It's a 66-character hexadecimal string that starts with '0x' and serves as a digital fingerprint for the transaction.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is a transaction hash?</h2>
-            <p>A transaction hash is a unique identifier for each transaction on the blockchain. It's a 66-character hexadecimal string that starts with '0x' and serves as a digital fingerprint for the transaction.</p>
+              <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is gas in Ethereum?</h3>
+              <p>Gas is the unit that measures the computational effort required to execute operations on Ethereum. Users pay gas fees to compensate validators for the computing energy required to process and validate transactions.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is gas in Ethereum?</h2>
-            <p>Gas is the unit that measures the computational effort required to execute operations on Ethereum. Users pay gas fees to compensate validators for the computing energy required to process and validate transactions.</p>
+              <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What's the difference between an EOA and a smart contract?</h3>
+              <p>An Externally Owned Account (EOA) is controlled by a private key and can initiate transactions. A smart contract is a program deployed on the blockchain that executes automatically when certain conditions are met.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What's the difference between an EOA and a smart contract?</h2>
-            <p>An Externally Owned Account (EOA) is controlled by a private key and can initiate transactions. A smart contract is a program deployed on the blockchain that executes automatically when certain conditions are met.</p>
+              <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I verify a smart contract?</h3>
+              <p>Smart contract verification involves submitting the source code to match the deployed bytecode on the blockchain. This allows users to read and verify the contract's functionality. Use the contract page to access verification options.</p>
 
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I verify a smart contract?</h2>
-            <p>Smart contract verification involves submitting the source code to match the deployed bytecode on the blockchain. This allows users to read and verify the contract's functionality. Use the contract page to access verification options.</p>
-
-            <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What are internal transactions?</h2>
-            <p>Internal transactions are value transfers or contract calls that occur within the execution of a smart contract. They are not recorded directly on the blockchain but can be traced through transaction execution.</p>
+              <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What are internal transactions?</h3>
+              <p>Internal transactions are value transfers or contract calls that occur within the execution of a smart contract. They are not recorded directly on the blockchain but can be traced through transaction execution.</p>
+            </div>
           </div>
         </div>
       </div>

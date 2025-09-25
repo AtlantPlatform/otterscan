@@ -52,26 +52,26 @@ const SourcifyMenu: React.FC = () => {
             <div className="my-1 border-b border-gray-300" />
           </div>
           
-          {/* External Sites - mobile only */}
+          {/* Explorers - mobile only */}
           <div className="block lg:hidden">
-            <SourcifyMenuTitle>External Sites</SourcifyMenuTitle>
+            <SourcifyMenuTitle>Explorers</SourcifyMenuTitle>
             <ExternalMenuItem
               icon={BTCIcon}
               url="https://btcscan.org/"
             >
-              BTC Scan
+              BTC Explorer
             </ExternalMenuItem>
             <ExternalMenuItem
               icon={ETHIcon}
               url="https://ethscan.org/"
             >
-              ETH Scan
+              ETH Explorer
             </ExternalMenuItem>
             <ExternalMenuItem
               icon={XMRIcon}
               url="https://xmrscan.org/"
             >
-              XMR Scan
+              XMR Explorer
             </ExternalMenuItem>
             <ExternalMenuItem
               icon={MempoolIcon}

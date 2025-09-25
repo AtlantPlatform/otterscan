@@ -145,6 +145,18 @@ const RecentBlocks: React.FC = () => {
           <title>Recent Blocks | Ethscan</title>
           <meta name="description" content="Browse the latest Ethereum blocks with detailed information about gas usage, fees, and rewards." />
           <link rel="canonical" href="https://ethscan.org/blocks/recent" />
+
+          {/* Open Graph tags */}
+          <meta property="og:title" content="Recent Blocks | Ethscan" />
+          <meta property="og:description" content="Browse the latest Ethereum blocks with detailed information about gas usage, fees, and rewards." />
+          <meta property="og:url" content="https://ethscan.org/blocks/recent" />
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content="Ethscan" />
+
+          {/* Twitter tags */}
+          <meta name="twitter:card" content="summary" />
+          <meta name="twitter:title" content="Recent Blocks | Ethscan" />
+          <meta name="twitter:description" content="Browse the latest Ethereum blocks with detailed information about gas usage, fees, and rewards." />
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">
@@ -270,26 +282,28 @@ const RecentBlocks: React.FC = () => {
           )}
 
           {/* SEO Content Section */}
-          <div className="mt-12 space-y-6 px-3 lg:px-9">
-            <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-              <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Blocks</h1>
-              <p>The history of Ethereum starts with its creator, Vitalik Buterin. He proposed Ethereum in 2013 and launched it in 2015 as an open-source blockchain platform that extends beyond simple transactions to enable smart contracts and decentralized applications without any central authority or intermediary involvement.</p>
+          <div className="mt-12 px-3 lg:px-9">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Blocks</h2>
+            <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
+              <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-4">
+                <p>The history of Ethereum starts with its creator, Vitalik Buterin. He proposed Ethereum in 2013 and launched it in 2015 as an open-source blockchain platform that extends beyond simple transactions to enable smart contracts and decentralized applications without any central authority or intermediary involvement.</p>
 
-              <p>The Ethereum blockchain is a digital ledger of all transactions and smart contract executions that have ever been processed on the network. It is constantly growing as "completed" blocks are added to it with a new set of recordings. Each block contains a cryptographic hash of the previous block, a timestamp, transaction data, and state changes resulting from smart contract execution.</p>
+                <p>The Ethereum blockchain is a digital ledger of all transactions and smart contract executions that have ever been processed on the network. It is constantly growing as "completed" blocks are added to it with a new set of recordings. Each block contains a cryptographic hash of the previous block, a timestamp, transaction data, and state changes resulting from smart contract execution.</p>
 
-              <p>Ethereum users utilize blockchain explorers to track ETH transactions and smart contract interactions when they send or receive funds. Following Ethereum's transition to Proof of Stake (The Merge) in September 2022, the network became more energy-efficient while maintaining its position as the leading smart contract platform.</p>
+                <p>Ethereum users utilize blockchain explorers to track ETH transactions and smart contract interactions when they send or receive funds. Following Ethereum's transition to Proof of Stake (The Merge) in September 2022, the network became more energy-efficient while maintaining its position as the leading smart contract platform.</p>
 
-              <p>The ETH blockchain is maintained by a network of validators who stake their ETH to participate in block production and validation. These validators are distributed globally, ensuring the network remains decentralized and secure. Unlike Bitcoin's fixed supply, Ethereum's supply is dynamic, with new ETH issued as rewards and ETH burned through the EIP-1559 fee mechanism.</p>
+                <p>The ETH blockchain is maintained by a network of validators who stake their ETH to participate in block production and validation. These validators are distributed globally, ensuring the network remains decentralized and secure. Unlike Bitcoin's fixed supply, Ethereum's supply is dynamic, with new ETH issued as rewards and ETH burned through the EIP-1559 fee mechanism.</p>
 
-              <p>The Ethereum blockchain is considered highly secure because of its decentralized nature and cryptographic foundations. Transactions and smart contract executions are validated by the network's consensus mechanism, and once confirmed, they become an immutable part of the blockchain. This makes it virtually impossible to tamper with the Ethereum blockchain without detection.</p>
+                <p>The Ethereum blockchain is considered highly secure because of its decentralized nature and cryptographic foundations. Transactions and smart contract executions are validated by the network's consensus mechanism, and once confirmed, they become an immutable part of the blockchain. This makes it virtually impossible to tamper with the Ethereum blockchain without detection.</p>
 
-              <p>Since the implementation of EIP-1559 in August 2021, Ethereum uses a dynamic fee market with base fees that are burned, reducing the overall supply of ETH. Validators receive priority fees (tips) and block rewards for proposing and attesting to blocks. New blocks are produced approximately every 12 seconds, a significant improvement from the previous ~13-second block time under Proof of Work.</p>
+                <p>Since the implementation of EIP-1559 in August 2021, Ethereum uses a dynamic fee market with base fees that are burned, reducing the overall supply of ETH. Validators receive priority fees (tips) and block rewards for proposing and attesting to blocks. New blocks are produced approximately every 12 seconds, a significant improvement from the previous ~13-second block time under Proof of Work.</p>
 
-              <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Ethereum Last Block</h2>
-              <p>Ethereum block explorers can be used to view information about the most recent block produced on the Ethereum network. This block is also known as the "last block" or "latest block" and represents the current head of the blockchain. To view information about the last block, simply navigate to the blocks section on Ethscan, where you can see real-time updates of newly produced blocks including their validators, gas usage, and transaction counts.</p>
+                <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Ethereum Last Block</h3>
+                <p>Ethereum block explorers can be used to view information about the most recent block produced on the Ethereum network. This block is also known as the "last block" or "latest block" and represents the current head of the blockchain. To view information about the last block, simply navigate to the blocks section on Ethscan, where you can see real-time updates of newly produced blocks including their validators, gas usage, and transaction counts.</p>
 
-              <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">The ETH Explorer</h2>
-              <p>Details about blocks including Block Height, Validator, Gas Used, Base Fee, and Burnt Fees can be viewed publicly on the ETH blockchain explorer. An explorer is a tool that allows you to search and browse the Ethereum blockchain for transactions, addresses, blocks, and smart contracts. It contains a search bar where you can input the information you're looking for, and it returns the results in real-time, providing transparency into all network activities including DeFi transactions, NFT transfers, and smart contract interactions.</p>
+                <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">The ETH Explorer</h3>
+                <p>Details about blocks including Block Height, Validator, Gas Used, Base Fee, and Burnt Fees can be viewed publicly on the ETH blockchain explorer. An explorer is a tool that allows you to search and browse the Ethereum blockchain for transactions, addresses, blocks, and smart contracts. It contains a search bar where you can input the information you're looking for, and it returns the results in real-time, providing transparency into all network activities including DeFi transactions, NFT transfers, and smart contract interactions.</p>
+              </div>
             </div>
           </div>
         </div>
