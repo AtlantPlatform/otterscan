@@ -3,14 +3,12 @@ import {
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { formatUnits } from "ethers";
 import React, { FC, memo, useContext, useState } from "react";
 import BlockConfirmations from "../../components/BlockConfirmations";
 import BlockLink from "../../components/BlockLink";
 import ContentFrame from "../../components/ContentFrame";
 import Copy from "../../components/Copy";
-import ExpanderSwitch from "../../components/ExpanderSwitch";
 import ExternalLink from "../../components/ExternalLink";
 import { feePreset } from "../../components/FiatValue";
 import FormattedBalance from "../../components/FormattedBalance";
@@ -18,7 +16,6 @@ import HelpButton from "../../components/HelpButton";
 import InfoRow from "../../components/InfoRow";
 import InternalTransactionOperation from "../../components/InternalTransactionOperation";
 import MethodName from "../../components/MethodName";
-import ModeTab from "../../components/ModeTab";
 import NativeTokenAmountAndFiat from "../../components/NativeTokenAmountAndFiat";
 import NativeTokenPrice from "../../components/NativeTokenPrice";
 import NavBlock from "../../components/NavBlock";
@@ -26,12 +23,9 @@ import Nonce from "../../components/Nonce";
 import PercentageBar from "../../components/PercentageBar";
 import PercentagePosition from "../../components/PercentagePosition";
 import RelativePosition from "../../components/RelativePosition";
-import StandardTextarea from "../../components/StandardTextarea";
 import Timestamp from "../../components/Timestamp";
 import TransactionType from "../../components/TransactionType";
-import SolidityLogo from "../../sourcify/SolidityLogo";
 import {
-  useError,
   useSourcifyMetadata,
   useTransactionDescription as useSourcifyTransactionDescription,
 } from "../../sourcify/useSourcify";
@@ -53,11 +47,9 @@ import { RuntimeContext } from "../../useRuntime";
 import { commify } from "../../utils/utils";
 import TransactionAddressWithCopy from "../components/TransactionAddressWithCopy";
 import { calculateFee } from "../feeCalc";
-import { isOptimisticChain } from "../op-tx-calculation";
 import NavNonce from "./NavNonce";
 import RewardSplit from "./RewardSplit";
 import TokenTransferItem from "./TokenTransferItem";
-import DecodedParamsTable from "./decoder/DecodedParamsTable";
 import InputDecoder from "./decoder/InputDecoder";
 import {Helmet} from 'react-helmet-async';
 import {formatValue} from '../../components/formatter';
@@ -108,19 +100,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
     provider,
     txData.transactionHash,
   );
-  const errorDescription = useError(
-    metadata,
-    errorType === "custom" ? outputData : undefined,
-  );
-  const userError = errorDescription
-    ? userDoc?.errors?.[errorDescription.signature]?.[0]
-    : undefined;
-  const devError = errorDescription
-    ? devDoc?.errors?.[errorDescription.signature]?.[0]
-    : undefined;
-  const [expanded, setExpanded] = useState<boolean>(false);
   const [showFunctionHelp, setShowFunctionHelp] = useState<boolean>(false);
-  const isOptimistic = isOptimisticChain(provider._network.chainId);
 
   const { totalFees } = calculateFee(txData, block);
 
@@ -220,72 +200,9 @@ const Details: FC<DetailsProps> = ({ txData }) => {
                     icon={faTimesCircle}
                     size="1x"
                   />
-                  <span>
-                  {errorType === "string" && errorMsg && (
-                    <>
-                      Fail with revert message: '
-                      <span className="font-bold underline">{errorMsg}</span>'
-                    </>
-                  )}
-                    {errorType === "custom" && (
-                      <>
-                        Fail with custom error
-                        {errorDescription && (
-                          <>
-                            {" '"}
-                            <span className="font-code font-bold underline">
-                            {errorDescription.name}
-                          </span>
-                            {"'"}
-                          </>
-                        )}
-                      </>
-                    )}
-                    {errorType === "panic" && (
-                      <>
-                        <SolidityLogo/> Panic {errorMsg}{" "}
-                        <ExternalLink
-                          href="https://docs.soliditylang.org/en/latest/control-structures.html#panic-via-assert-and-error-via-require">
-                          (docs)
-                        </ExternalLink>
-                      </>
-                    )}
-                </span>
+                  <span>Failed</span>
                 </div>
-                {errorType === "custom" && (
-                  <ExpanderSwitch expanded={expanded} setExpanded={setExpanded}/>
-                )}
               </div>
-              {expanded && (
-                <TabGroup>
-                  <TabList className="mb-1 mt-2 flex space-x-1">
-                    <ModeTab disabled={!errorDescription}>Decoded</ModeTab>
-                    <ModeTab>Raw</ModeTab>
-                  </TabList>
-                  <TabPanels>
-                    <TabPanel>
-                      {errorDescription === undefined ? (
-                        <>Waiting for data...</>
-                      ) : errorDescription === null ? (
-                        <>Can't decode data</>
-                      ) : errorDescription.args.length === 0 ? (
-                        <>No parameters</>
-                      ) : (
-                        <DecodedParamsTable
-                          args={errorDescription.args}
-                          paramTypes={errorDescription.fragment.inputs}
-                          hasParamNames
-                          userMethod={userError}
-                          devMethod={devError}
-                        />
-                      )}
-                    </TabPanel>
-                    <TabPanel>
-                      <StandardTextarea value={outputData}/>
-                    </TabPanel>
-                  </TabPanels>
-                </TabGroup>
-              )}
             </>
           )}
         </InfoRow>
@@ -590,7 +507,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
                     {...feePreset}
                   />
                 </div>
-                {hasEIP1559 && (!isOptimistic || txData.type !== 126) && (
+                {hasEIP1559 && (
                   <RewardSplit txData={txData}/>
                 )}
               </div>
