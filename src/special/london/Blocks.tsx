@@ -1,6 +1,5 @@
 import {
   faBurn,
-  faCoins,
   faCube,
   faGasPump,
   faHistory,
@@ -131,7 +130,7 @@ const Blocks: React.FC<BlocksProps> = ({ latestBlock }) => {
         <div>
           <Line data={data} height={100} options={chartOptions} />
         </div>
-        <div className="mt-5 grid grid-cols-9 gap-x-2 px-3 py-2">
+        <div className="mt-5 grid grid-cols-7 gap-x-2 px-3 py-2">
           <div className="flex items-baseline space-x-1">
             <span className="text-gray-500">
               <FontAwesomeIcon icon={faCube} />
@@ -145,12 +144,6 @@ const Blocks: React.FC<BlocksProps> = ({ latestBlock }) => {
             <span>Gas used</span>
           </div>
           <div className="text-right">Base fee</div>
-          <div className="col-span-2 flex items-baseline justify-end space-x-1 text-right">
-            <span className="text-amber-400">
-              <FontAwesomeIcon icon={faCoins} />
-            </span>
-            <span>Rewards</span>
-          </div>
           <div className="col-span-2 flex items-baseline justify-end space-x-1 text-right">
             <span className="text-orange-500">
               <FontAwesomeIcon icon={faBurn} />

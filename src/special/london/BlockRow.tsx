@@ -20,11 +20,9 @@ const BlockRow: React.FC<BlockRowProps> = ({ block, baseFeeDelta }) => {
   } = useChainInfo();
   const gasTarget = block.gasLimit / ELASTICITY_MULTIPLIER;
   const burntFees = block?.baseFeePerGas && block.baseFeePerGas * block.gasUsed;
-  const netFeeReward = block && block.feeReward - (burntFees ?? 0n);
-  const totalReward = block.blockReward + (netFeeReward ?? 0n);
 
   return (
-    <div className="grid grid-cols-9 gap-x-2 px-3 py-2 hover:bg-skin-table-hover">
+    <div className="grid grid-cols-7 gap-x-2 px-3 py-2 hover:bg-skin-table-hover">
       <div>
         <BlockLink blockTag={block.number} />
       </div>
@@ -58,9 +56,6 @@ const BlockRow: React.FC<BlockRowProps> = ({ block, baseFeeDelta }) => {
           </span>
           <Blip value={baseFeeDelta} />
         </div>
-      </div>
-      <div className="col-span-2 text-right">
-        {commify(formatEther(totalReward))} {symbol}
       </div>
       <div className="col-span-2 text-right text-orange-500 line-through">
         {commify(formatEther(block.gasUsed * block.baseFeePerGas!))} {symbol}

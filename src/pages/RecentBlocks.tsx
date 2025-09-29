@@ -1,13 +1,12 @@
 import { faCube } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FixedNumber, formatEther } from "ethers";
+import { FixedNumber } from "ethers";
 import React, { useContext, useMemo } from "react";
 import { useSearchParams } from "react-router";
 import { Helmet } from "react-helmet-async";
 import BlockLink from "../components/BlockLink";
 import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
-import { useChainInfo } from "../useChainInfo";
 import { ExtendedBlock, readBlock } from "../useErigonHooks";
 import { useLatestBlockHeader } from "../useLatestBlock";
 import { RuntimeContext } from "../useRuntime";
@@ -18,9 +17,6 @@ const BLOCKS_PER_PAGE = 30;
 
 const RecentBlocks: React.FC = () => {
   const { provider } = useContext(RuntimeContext);
-  const {
-    nativeCurrency: { symbol },
-  } = useChainInfo();
 
   const [searchParams] = useSearchParams();
   let pageNumber = 1;
@@ -80,9 +76,6 @@ const RecentBlocks: React.FC = () => {
 
   const BlockRow: React.FC<{ block: ExtendedBlock }> = ({ block }) => {
     const gasTarget = block.gasLimit / ELASTICITY_MULTIPLIER;
-    const burntFees = block?.baseFeePerGas && block.baseFeePerGas * block.gasUsed;
-    const netFeeReward = block && block.feeReward - (burntFees ?? 0n);
-    const totalReward = block.blockReward + (netFeeReward ?? 0n);
 
     return (
       <tr>
@@ -117,12 +110,6 @@ const RecentBlocks: React.FC = () => {
             Gwei
           </span>
         </td>
-        <td className="col-span-2 text-right">
-          {commify(formatEther(totalReward))} {symbol}
-        </td>
-        <td className="col-span-2 text-right text-orange-500 line-through">
-          {commify(formatEther(block.gasUsed * block.baseFeePerGas!))} {symbol}
-        </td>
         <td className="text-right text-gray-400" title={new Date(block.timestamp * 1000).toLocaleString()}>
           {new Date(block.timestamp * 1000).toLocaleString('en-US', {
             month: 'short',
@@ -143,12 +130,12 @@ const RecentBlocks: React.FC = () => {
       <StandardFrame>
         <Helmet>
           <title>Recent Blocks | Ethscan</title>
-          <meta name="description" content="Browse the latest Ethereum blocks with detailed information about gas usage, fees, and rewards." />
+          <meta name="description" content="Browse the latest Ethereum blocks with detailed information about gas usage and fees." />
           <link rel="canonical" href="https://ethscan.org/blocks/recent" />
 
           {/* Open Graph tags */}
           <meta property="og:title" content="Recent Blocks | Ethscan" />
-          <meta property="og:description" content="Browse the latest Ethereum blocks with detailed information about gas usage, fees, and rewards." />
+          <meta property="og:description" content="Browse the latest Ethereum blocks with detailed information about gas usage and fees." />
           <meta property="og:url" content="https://ethscan.org/blocks/recent" />
           <meta property="og:type" content="website" />
           <meta property="og:site_name" content="Ethscan" />
@@ -156,7 +143,7 @@ const RecentBlocks: React.FC = () => {
           {/* Twitter tags */}
           <meta name="twitter:card" content="summary" />
           <meta name="twitter:title" content="Recent Blocks | Ethscan" />
-          <meta name="twitter:description" content="Browse the latest Ethereum blocks with detailed information about gas usage, fees, and rewards." />
+          <meta name="twitter:description" content="Browse the latest Ethereum blocks with detailed information about gas usage and fees." />
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">
@@ -189,8 +176,6 @@ const RecentBlocks: React.FC = () => {
                         <th>Block</th>
                         <th className="text-right">Gas used</th>
                         <th className="text-right">Base fee</th>
-                        <th className="text-right">Rewards</th>
-                        <th className="text-right">Burnt fees</th>
                         <th className="text-right">Date/Time</th>
                       </tr>
                     </thead>
@@ -207,9 +192,6 @@ const RecentBlocks: React.FC = () => {
               <div className="block sm:hidden space-y-3 px-3">
                 {blocks.map((block) => {
                   const gasTarget = block.gasLimit / ELASTICITY_MULTIPLIER;
-                  const burntFees = block?.baseFeePerGas && block.baseFeePerGas * block.gasUsed;
-                  const netFeeReward = block && block.feeReward - (burntFees ?? 0n);
-                  const totalReward = block.blockReward + (netFeeReward ?? 0n);
                   const gasUsedPercent = block.gasLimit ? (Number(block.gasUsed) * 100 / Number(block.gasLimit)).toFixed(2) : "0";
 
                   return (
@@ -250,18 +232,6 @@ const RecentBlocks: React.FC = () => {
                         <span className="text-sm text-gray-600">Base Fee</span>
                         <span className="text-sm text-gray-800">
                           {(Number(block.baseFeePerGas ?? 0n) / 1_000_000_000).toFixed(2)} Gwei
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Rewards</span>
-                        <span className="text-sm text-gray-800">
-                          {commify(formatEther(totalReward))} {symbol}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Burnt Fees</span>
-                        <span className="text-sm text-orange-500 line-through">
-                          {commify(formatEther(block.gasUsed * block.baseFeePerGas!))} {symbol}
                         </span>
                       </div>
                     </div>

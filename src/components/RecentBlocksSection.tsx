@@ -1,9 +1,7 @@
-import { faAngleRight, faCube, faGasPump } from "@fortawesome/free-solid-svg-icons";
+import { faAngleRight, faCube } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { formatEther } from "ethers";
 import React, { useContext } from "react";
 import { NavLink } from "react-router";
-import { useChainInfo } from "../useChainInfo";
 import { useRecentBlocksStatic } from "../useRecentData";
 import { RuntimeContext } from "../useRuntime";
 import { commify } from "../utils/utils";
@@ -13,9 +11,6 @@ import BlockLink from "./BlockLink";
 const RecentBlocksSection: React.FC = () => {
   const { provider } = useContext(RuntimeContext);
   const recentBlocks = useRecentBlocksStatic(provider, 5);
-  const {
-    nativeCurrency: { symbol },
-  } = useChainInfo();
 
   if (recentBlocks.length === 0) {
     return (
@@ -49,13 +44,11 @@ const RecentBlocksSection: React.FC = () => {
               <th>Miner</th>
               <th>Gas Used</th>
               <th>Gas Limit</th>
-              <th>Reward</th>
             </tr>
           </thead>
           <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200">
             {recentBlocks.map((block) => {
               const gasUsedPercent = block.gasLimit ? (Number(block.gasUsed) * 100 / Number(block.gasLimit)).toFixed(2) : "0";
-              const blockReward = block.blockReward + block.feeReward;
               const timestamp = new Date(block.timestamp * 1000);
               const formattedTime = timestamp.toLocaleString('en-US', {
                 month: 'short',
@@ -95,9 +88,6 @@ const RecentBlocksSection: React.FC = () => {
                   <td className="py-3 text-gray-600">
                     {commify(block.gasLimit.toString())}
                   </td>
-                  <td>
-                    {formatEther(blockReward).substring(0, 8)} {symbol}
-                  </td>
                 </tr>
               );
             })}
@@ -109,7 +99,6 @@ const RecentBlocksSection: React.FC = () => {
       <div className="block sm:hidden space-y-3 px-3">
         {recentBlocks.map((block) => {
           const gasUsedPercent = block.gasLimit ? (Number(block.gasUsed) * 100 / Number(block.gasLimit)).toFixed(2) : "0";
-          const blockReward = block.blockReward + block.feeReward;
           const gasTarget = block.gasLimit / 2n; // ELASTICITY_MULTIPLIER = 2
           const timestamp = new Date(block.timestamp * 1000);
           const formattedTime = timestamp.toLocaleString('en-US', {
@@ -160,10 +149,6 @@ const RecentBlocksSection: React.FC = () => {
                 <span className="text-sm text-gray-800 dark:text-gray-200 break-words min-w-0">
                   {block.baseFeePerGas ? (Number(block.baseFeePerGas) / 1_000_000_000).toFixed(2) : '0'} Gwei
                 </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Rewards</span>
-                <span className="text-sm text-gray-800 dark:text-gray-200 break-words min-w-0">{formatEther(blockReward).substring(0, 8)} {symbol}</span>
               </div>
             </div>
           );

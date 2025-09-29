@@ -37,16 +37,11 @@ const TRANSFER_TOPIC =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 export interface ExtendedBlock extends BlockParams {
-  blockReward: bigint;
-  unclesReward: bigint;
-  feeReward: bigint;
   size: number;
   sha3Uncles: string;
   stateRoot: string;
   totalDifficulty?: bigint;
   transactionCount: number;
-  // Optimism-specific
-  gasUsedDepositTx?: bigint;
 }
 
 export const readBlock = async (
@@ -55,37 +50,35 @@ export const readBlock = async (
 ): Promise<ExtendedBlock | null> => {
   let blockPromise: Promise<any>;
   if (isHexString(blockNumberOrHash, 32)) {
-    blockPromise = provider.send("ots_getBlockDetailsByHash", [
+    blockPromise = provider.send("eth_getBlockByHash", [
       blockNumberOrHash,
+      false, // Don't include full transaction objects
     ]);
   } else {
     const blockNumber = parseInt(blockNumberOrHash);
     if (isNaN(blockNumber) || blockNumber < 0) {
       return null;
     }
-    blockPromise = provider.send("ots_getBlockDetails", [blockNumber]);
+    blockPromise = provider.send("eth_getBlockByNumber", [
+      "0x" + blockNumber.toString(16), // Convert to hex
+      false, // Don't include full transaction objects
+    ]);
   }
 
   const _rawBlock = await blockPromise;
   if (_rawBlock === null) {
     return null;
   }
-  const _block: BlockParams = formatter.blockParams(_rawBlock.block);
-  const _rawIssuance = _rawBlock.issuance;
+  const _block: BlockParams = formatter.blockParams(_rawBlock);
 
   const extBlock: ExtendedBlock = {
-    blockReward: formatter.bigInt(_rawIssuance.blockReward ?? 0),
-    unclesReward: formatter.bigInt(_rawIssuance.uncleReward ?? 0),
-    feeReward: formatter.bigInt(_rawBlock.totalFees),
-    size: formatter.number(_rawBlock.block.size),
-    sha3Uncles: _rawBlock.block.sha3Uncles,
-    stateRoot: _rawBlock.block.stateRoot,
+    size: formatter.number(_rawBlock.size),
+    sha3Uncles: _rawBlock.sha3Uncles,
+    stateRoot: _rawBlock.stateRoot,
     totalDifficulty:
-      _rawBlock.block.totalDifficulty &&
-      formatter.bigInt(_rawBlock.block.totalDifficulty),
-    transactionCount: formatter.number(_rawBlock.block.transactionCount),
-    // Optimism-specific; gas used by the deposit transaction
-    gasUsedDepositTx: formatter.bigInt(_rawBlock.gasUsedDepositTx ?? 0n),
+      _rawBlock.totalDifficulty &&
+      formatter.bigInt(_rawBlock.totalDifficulty),
+    transactionCount: _rawBlock.transactions ? _rawBlock.transactions.length : 0,
     ..._block,
   };
   return extBlock;

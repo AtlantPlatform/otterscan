@@ -10,7 +10,6 @@ import ExternalBlockLink from "../components/ExternalBlockLink";
 import FormattedBalance from "../components/FormattedBalance";
 import HexValue from "../components/HexValue";
 import InfoRow from "../components/InfoRow";
-import NativeTokenAmount from "../components/NativeTokenAmount";
 import NativeTokenPrice from "../components/NativeTokenPrice";
 import PercentageBar from "../components/PercentageBar";
 import RelativePosition from "../components/RelativePosition";
@@ -21,7 +20,6 @@ import { useChainInfo } from "../useChainInfo";
 import { useBlockData, useL1Epoch } from "../useErigonHooks";
 import { RuntimeContext } from "../useRuntime";
 import { commify } from "../utils/utils";
-import BlockReward from "./components/BlockReward";
 import DecoratedAddressLink from "./components/DecoratedAddressLink";
 import {Helmet} from 'react-helmet-async';
 
@@ -45,13 +43,8 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   const extraStr = useMemo(() => {
     return block && toUtf8String(block.extraData, Utf8ErrorFuncs.replace);
   }, [block]);
-  // gasUsedDepositTx: Optimism-specific; "gas used" by the deposit transaction which does
-  // not pay the basefee
-  const gasUsedWithoutDepositTx = block
-    ? block.gasUsed - (block.gasUsedDepositTx ?? 0n)
-    : 0n;
   const burntFees =
-    block?.baseFeePerGas && block.baseFeePerGas * gasUsedWithoutDepositTx;
+    block?.baseFeePerGas && block.baseFeePerGas * block.gasUsed;
   const gasUsedPerc =
     block && Number((block.gasUsed * 10000n) / block.gasLimit) / 100;
 
@@ -163,12 +156,6 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
           </InfoRow>
           <InfoRow title="Mined by">
             <DecoratedAddressLink address={block.miner} miner/>
-          </InfoRow>
-          <InfoRow title="Block Reward">
-            <BlockReward block={block}/>
-          </InfoRow>
-          <InfoRow title="Uncles Reward">
-            <NativeTokenAmount value={block.unclesReward}/>
           </InfoRow>
           <InfoRow title="Size">{commify(block.size)} bytes</InfoRow>
           {block.baseFeePerGas !== null &&
@@ -289,7 +276,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
             <p className="text-sm text-gray-700 dark:text-gray-300">
               Ethereum block #{commify(block.number)} was mined on {new Date(block.timestamp * 1000).toLocaleString()} by {block.miner}.
               This block contains {block.transactionCount} transaction{block.transactionCount !== 1 ? 's' : ''} with a total gas usage of {commify(formatUnits(block.gasUsed, 0))} out of {commify(formatUnits(block.gasLimit, 0))} gas limit.
-              The block reward was {formatEther(block.blockReward + block.feeReward)} {symbol}, with a base fee of {block.baseFeePerGas ? formatUnits(block.baseFeePerGas, 9) : '0'} Gwei.
+              The base fee was {block.baseFeePerGas ? formatUnits(block.baseFeePerGas, 9) : '0'} Gwei.
               The block hash is {block.hash} and the parent block is #{block.number - 1}.
             </p>
           </div>
