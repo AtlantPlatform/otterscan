@@ -186,28 +186,35 @@ const StateDiff: React.FC<StateDiffProps> = ({ txData, txHash }) => {
   const { provider } = useContext(RuntimeContext);
   const traces = useStateDiffTrace(provider, txData.transactionHash);
 
-  usePageTitle(`Ethereum Transaction State Diff - ${txHash}`);
+  usePageTitle(`State Diff - Transaction ${txHash}`);
 
   const description = `State diff for Ethereum transaction ${txHash}, showing account balance and storage changes.`
-  const payloadSchemaWebPage = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "url": `https://ethscan.org/tx/${txHash}/statediff`,
-      "name": `Transaction State Diff ${txHash.substring(0, 10)}...`,
-      "description": description,
-      "mainEntity": {
-        "@type": "DigitalDocument",
-        "identifier": `${txHash}`,
-        "name": `Transaction State Diff ${txHash.substring(0, 10)}...`,
-        "description": "Account balance and storage changes caused by transaction execution"
-      }
-    }
-  )
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "url": `https://ethscan.org/tx/${txHash}/statediff`,
+    "name": `Transaction State Diff ${txHash}`,
+    "description": description,
+  };
+
+  // Only include mainEntity for transactions with value > 0 ETH
+  if (txData && txData.value && txData.value > 0n) {
+    schemaData.mainEntity = {
+      "@type": "DigitalDocument",
+      "identifier": `${txHash}`,
+      "name": `Transaction State Diff ${txHash}`,
+      "description": "Account balance and storage changes caused by transaction execution"
+    };
+  }
+
+  const payloadSchemaWebPage = JSON.stringify(schemaData);
 
   return (
     <ContentFrame tabs>
       <Helmet>
         <meta name="description" content={description}/>
+        <link rel="canonical" href={`https://ethscan.org/tx/${txHash}/statediff`} />
         <script type="application/ld+json">{payloadSchemaWebPage}</script>
       </Helmet>
       <div className="mb-5 mt-4 flex flex-col items-start space-y-3 overflow-x-auto text-sm">

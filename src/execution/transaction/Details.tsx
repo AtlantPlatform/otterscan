@@ -53,6 +53,7 @@ import TokenTransferItem from "./TokenTransferItem";
 import InputDecoder from "./decoder/InputDecoder";
 import {Helmet} from 'react-helmet-async';
 import {formatValue} from '../../components/formatter';
+import {usePageTitle} from '../../useTitle';
 
 type DetailsProps = {
   txData: TransactionData;
@@ -61,6 +62,8 @@ type DetailsProps = {
 const Details: FC<DetailsProps> = ({ txData }) => {
   const { provider } = useContext(RuntimeContext);
   const block = useBlockDataFromTransaction(provider, txData);
+
+  usePageTitle(`Transaction ${txData.transactionHash}`);
 
   const hasEIP1559 =
     block?.baseFeePerGas !== undefined && block?.baseFeePerGas !== null;
@@ -113,20 +116,25 @@ const Details: FC<DetailsProps> = ({ txData }) => {
   const formattedValue = formatValue(txData.value || 0, decimals);
   const formattedGasPriceValue = formatValue(txData.gasPrice || 0, 18);
 
-  const payloadSchemaWebPage = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "url": `https://ethscan.org/tx/${txData ? txData.transactionHash : ''}`,
-      "name": `Ethereum Transaction ${txData ? txData.transactionHash.substring(0, 10) : ''}...`,
-      "description": `Ethereum transaction details including sender, recipient, value of ${formattedValue} ETH and gas information`,
-      "mainEntity": {
-        "@type": "DigitalDocument",
-        "identifier": `${txData ? txData.transactionHash : ''}`,
-        "name": `Transaction ${txData ? txData.transactionHash.substring(0, 10) : ''}...`,
-        "description": `Transfer of ${formattedValue} ETH on Ethereum blockchain`
-      }
-    }
-  )
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "url": `https://ethscan.org/tx/${txData ? txData.transactionHash : ''}`,
+    "name": `Ethereum Transaction ${txData ? txData.transactionHash : ''}`,
+    "description": `Ethereum transaction details including sender, recipient, value of ${formattedValue} ETH and gas information`,
+  };
+
+  // Only include mainEntity for transactions with value > 0 ETH
+  if (txData && txData.value && txData.value > 0n) {
+    schemaData.mainEntity = {
+      "@type": "DigitalDocument",
+      "identifier": `${txData.transactionHash}`,
+      "name": `Transaction ${txData.transactionHash}`,
+      "description": `Transfer of ${formattedValue} ETH on Ethereum blockchain`
+    };
+  }
+
+  const payloadSchemaWebPage = JSON.stringify(schemaData);
 
   const payloadSchemaFaqPage = JSON.stringify({
       "@context": "https://schema.org",
@@ -533,12 +541,21 @@ const Details: FC<DetailsProps> = ({ txData }) => {
         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Transaction Summary</h2>
           <p className="text-sm text-gray-700 dark:text-gray-300">
-            Ethereum transaction {txData.transactionHash} {txData.confirmedData ?
-              `was confirmed in block #${txData.confirmedData.blockNumber} with status ${txData.confirmedData.status ? 'success' : 'failed'}.
-              The transaction was sent from ${txData.from} to ${txData.to || 'contract creation'} with a value of ${txData.value} wei.
-              Gas used was ${txData.confirmedData.gasUsed} out of ${txData.gasLimit} gas limit, with a gas price of ${txData.gasPrice} wei.
-              The transaction includes ${txData.confirmedData.logs?.length || 0} log events.` :
-              'is pending confirmation.'}
+            Ethereum transaction <span className="font-mono break-all">{txData.transactionHash}</span> {txData.confirmedData ? (
+              <>
+                was confirmed in block #{txData.confirmedData.blockNumber} with status {txData.confirmedData.status ? 'success' : 'failed'}.
+                The transaction was sent from <span className="font-mono break-all">{txData.from}</span> to <span className="font-mono break-all">{txData.to || 'contract creation'}</span>
+                {txData.value && txData.value > 0n && (
+                  <> with a value of {txData.value.toString()} wei</>
+                )}.
+                Gas used was {txData.confirmedData.gasUsed.toString()} out of {txData.gasLimit.toString()} gas limit, with a gas price of {txData.gasPrice.toString()} wei.
+                {txData.confirmedData.logs && txData.confirmedData.logs.length > 0 && (
+                  <> The transaction includes {txData.confirmedData.logs.length} log events.</>
+                )}
+              </>
+            ) : (
+              'is pending confirmation.'
+            )}
           </p>
         </div>
       </div>

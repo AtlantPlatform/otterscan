@@ -31,7 +31,6 @@ const Transaction: FC = () => {
       <BlockNumberContext.Provider value={txData?.confirmedData?.blockNumber}>
         <div className="min-h-screen overflow-x-hidden">
           <Helmet>
-            <title>Transaction {txHash} | Ethscan</title>
             <meta name="description" content={`View details for Ethereum transaction ${txHash} including gas fees, input data, logs, and trace information.`} />
             <link rel="canonical" href={`https://ethscan.org/tx/${txHash}`} />
 
