@@ -116,7 +116,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
   const formattedValue = formatValue(txData.value || 0, decimals);
   const formattedGasPriceValue = formatValue(txData.gasPrice || 0, 18);
 
-  const schemaData = {
+  const schemaData: any = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "url": `https://ethscan.org/tx/${txData ? txData.transactionHash : ''}`,
@@ -548,7 +548,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
                 {txData.value && txData.value > 0n && (
                   <> with a value of {txData.value.toString()} wei</>
                 )}.
-                Gas used was {txData.confirmedData.gasUsed.toString()} out of {txData.gasLimit.toString()} gas limit, with a gas price of {txData.gasPrice.toString()} wei.
+                Gas used was {txData.confirmedData.gasUsed.toString()} out of {txData.gasLimit.toString()} gas limit, with a gas price of {txData.gasPrice?.toString() || '0'} wei.
                 {txData.confirmedData.logs && txData.confirmedData.logs.length > 0 && (
                   <> The transaction includes {txData.confirmedData.logs.length} log events.</>
                 )}

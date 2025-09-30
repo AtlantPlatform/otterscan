@@ -34,7 +34,7 @@ const Logs: FC<LogsProps> = ({ logs, txHash }) => {
 
   const description = `View logs for Ethereum transaction ${txHash}, including emitted events and contract interactions.`
 
-  const schemaData = {
+  const schemaData: any = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "url": `https://ethscan.org/tx/${txHash}/logs`,

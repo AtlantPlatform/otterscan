@@ -21,7 +21,7 @@ const Trace: React.FC<TraceProps> = ({ txData, txHash }) => {
 
   const description = `Detailed execution trace for Ethereum transaction ${txHash}, including call stack and gas consumption.`
 
-  const schemaData = {
+  const schemaData: any = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "url": `https://ethscan.org/tx/${txData.transactionHash}/trace`,

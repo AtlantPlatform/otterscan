@@ -190,7 +190,7 @@ const StateDiff: React.FC<StateDiffProps> = ({ txData, txHash }) => {
 
   const description = `State diff for Ethereum transaction ${txHash}, showing account balance and storage changes.`
 
-  const schemaData = {
+  const schemaData: any = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "url": `https://ethscan.org/tx/${txHash}/statediff`,
