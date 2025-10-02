@@ -54,6 +54,7 @@ import InputDecoder from "./decoder/InputDecoder";
 import {Helmet} from 'react-helmet-async';
 import {formatValue} from '../../components/formatter';
 import {usePageTitle} from '../../useTitle';
+import {useFiatValue, formatFiatValue} from '../../usePriceOracle';
 
 type DetailsProps = {
   txData: TransactionData;
@@ -114,7 +115,10 @@ const Details: FC<DetailsProps> = ({ txData }) => {
     nativeCurrency: { decimals },
   } = useChainInfo();
   const formattedValue = formatValue(txData.value || 0, decimals);
-  const formattedGasPriceValue = formatValue(txData.gasPrice || 0, 18);
+
+  // Get ETH/USD price
+  const ethPriceUSD = useFiatValue(10n ** BigInt(decimals), txData.confirmedData?.blockNumber);
+  const totalFeesUSD = useFiatValue(totalFees, txData.confirmedData?.blockNumber);
 
   const schemaData: any = {
     "@context": "https://schema.org",
@@ -131,6 +135,27 @@ const Details: FC<DetailsProps> = ({ txData }) => {
       "identifier": `${txData.transactionHash}`,
       "name": `Transaction ${txData.transactionHash}`,
       "description": `Transfer of ${formattedValue} ETH on Ethereum blockchain`
+    };
+  }
+
+  // Add transaction-specific fields to schema
+  if (txData.confirmedData && block) {
+    schemaData.potentialAction = {
+      "@type": "ViewAction",
+      "target": `https://ethscan.org/tx/${txData.transactionHash}`,
+      "object": {
+        "@type": "FinancialProduct",
+        "name": "Transaction Details",
+        "blockNumber": txData.confirmedData.blockNumber,
+        "gasUsed": txData.confirmedData.gasUsed.toString(),
+        "gasLimit": txData.gasLimit.toString(),
+        "gasPrice": txData.gasPrice?.toString() || "0",
+        "blockBaseFee": block.baseFeePerGas?.toString() || "0",
+        "transactionFeeETH": formatUnits(totalFees, decimals),
+        "transactionFeeUSD": totalFeesUSD ? formatFiatValue(totalFeesUSD) : "N/A",
+        "etherPriceUSD": ethPriceUSD ? formatFiatValue(ethPriceUSD) : "N/A",
+        "timestamp": block.timestamp
+      }
     };
   }
 
@@ -538,7 +563,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
       </ContentFrame>
       {/* SEO Summary Section */}
       <div className="px-3 lg:px-9 mt-4">
-        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="p-4">
           <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Transaction Summary</h2>
           <p className="text-sm text-gray-700 dark:text-gray-300">
             Ethereum transaction <span className="font-mono break-all">{txData.transactionHash}</span> {txData.confirmedData ? (

@@ -10,6 +10,9 @@ import BTCIcon from './icons/btc-icon.svg'
 import ETHIcon from './icons/eth-icon.svg'
 import XMRIcon from './icons/xmr-icon.svg'
 import MempoolIcon from './icons/mempool-icon.svg'
+import MoneroIcon from './icons/monero-icon.svg'
+import BTCFeeIcon from './icons/btc-fee-icon.svg'
+import BTCFeesIcon from './icons/btc-fees-icon-action.svg'
 
 const SourcifyMenu: React.FC = () => {
   const { sourcifySource, setSourcifySource } = useAppConfigContext() ?? {
@@ -52,8 +55,8 @@ const SourcifyMenu: React.FC = () => {
             <div className="my-1 border-b border-gray-300" />
           </div>
           
-          {/* Explorers - mobile only */}
-          <div className="block lg:hidden">
+          {/* Explorers - desktop and mobile */}
+          <div>
             <SourcifyMenuTitle>Explorers</SourcifyMenuTitle>
             <ExternalMenuItem
               icon={BTCIcon}
@@ -74,10 +77,28 @@ const SourcifyMenu: React.FC = () => {
               XMR Explorer
             </ExternalMenuItem>
             <ExternalMenuItem
+              icon={MoneroIcon}
+              url="https://moneroexplorer.org/#/"
+            >
+              Monero Explorer
+            </ExternalMenuItem>
+            <ExternalMenuItem
               icon={MempoolIcon}
               url="https://btcmempool.org/"
             >
               BTC Mempool
+            </ExternalMenuItem>
+            <ExternalMenuItem
+              icon={BTCFeeIcon}
+              url="https://btcfee.org/"
+            >
+              BTC Fee
+            </ExternalMenuItem>
+            <ExternalMenuItem
+              icon={BTCFeesIcon}
+              url="https://btcfees.org/"
+            >
+              BTC Fees
             </ExternalMenuItem>
             <div className="my-1 border-b border-gray-300" />
           </div>

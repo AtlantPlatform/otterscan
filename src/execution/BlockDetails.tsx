@@ -22,6 +22,7 @@ import { RuntimeContext } from "../useRuntime";
 import { commify } from "../utils/utils";
 import DecoratedAddressLink from "./components/DecoratedAddressLink";
 import {Helmet} from 'react-helmet-async';
+import {useFiatValue, formatFiatValue} from '../usePriceOracle';
 
 interface BlockDetailsProps {
   blockNumberOrHash: undefined | string;
@@ -52,6 +53,10 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   const l1ExplorerUrl: string | undefined =
     config.opChainSettings?.l1ExplorerURL;
   const description = `Details for Ethereum block ${blockNumberOrHash}, including transaction count, miner address, gas used, and timestamp.`
+
+  // Get ETH/USD price
+  const ethPriceUSD = useFiatValue(10n ** 18n, block?.number);
+
   const payloadSchemaWebPage = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -67,7 +72,14 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
         "creator": {
           "@type": "Organization",
           "identifier": `${block?.miner}`
-        }
+        },
+        ...(block && {
+          "blockBaseFee": block.baseFeePerGas?.toString() || "0",
+          "gasUsed": block.gasUsed.toString(),
+          "gasLimit": block.gasLimit.toString(),
+          "etherPriceUSD": ethPriceUSD ? formatFiatValue(ethPriceUSD) : "N/A",
+          "burntFees": burntFees?.toString() || "0"
+        })
       }
     }
   )
@@ -271,7 +283,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
         </ContentFrame>
         {/* SEO Summary Section */}
         <div className="px-3 lg:px-9 mt-4">
-          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="p-4">
             <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Block Summary</h2>
             <p className="text-sm text-gray-700 dark:text-gray-300">
               Ethereum block #{commify(block.number)} was mined on {new Date(block.timestamp * 1000).toLocaleString()} by {block.miner}.

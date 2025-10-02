@@ -114,7 +114,7 @@ const RecentTransactions: React.FC = () => {
           <div className="flex items-center justify-between mb-6 px-3 lg:px-9">
             <h1 className="text-2xl font-bold flex items-center space-x-3">
               <FontAwesomeIcon icon={faExchangeAlt} className="text-gray-500" />
-              <span>Recent Transactions</span>
+              <span>Recent Ethereum Transactions</span>
             </h1>
             {!isLoadingAll && transactions.length > 0 && (
               <SimplePageControl
@@ -248,8 +248,8 @@ const RecentTransactions: React.FC = () => {
 
         {/* SEO Content Section */}
         <div className="mt-12 px-3 lg:px-9">
-          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Transactions</h2>
-          <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
+          <div className="h-96 overflow-y-auto p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Transactions</h2>
             <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-4">
               <p>Ethereum transactions are recorded on a public ledger called the blockchain. Transactions are verified by network validators through the Proof of Stake consensus mechanism, and every recorded transaction is immutable. Ethereum users engage with block explorers to track their ETH transactions, token transfers, and smart contract interactions.</p>
 

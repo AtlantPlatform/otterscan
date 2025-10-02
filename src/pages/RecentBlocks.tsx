@@ -150,7 +150,7 @@ const RecentBlocks: React.FC = () => {
           <div className="flex items-center justify-between mb-6 px-3 lg:px-9">
             <h1 className="text-2xl font-bold flex items-center space-x-3">
               <FontAwesomeIcon icon={faCube} className="text-gray-500" />
-              <span>Recent Blocks</span>
+              <span>Recent Ethereum Blocks</span>
             </h1>
             {!isLoading && (
               <SimplePageControl
@@ -253,8 +253,8 @@ const RecentBlocks: React.FC = () => {
 
           {/* SEO Content Section */}
           <div className="mt-12 px-3 lg:px-9">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Blocks</h2>
-            <div className="h-96 overflow-y-auto border border-gray-200 rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
+            <div className="h-96 overflow-y-auto p-6">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Blocks</h2>
               <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-4">
                 <p>The history of Ethereum starts with its creator, Vitalik Buterin. He proposed Ethereum in 2013 and launched it in 2015 as an open-source blockchain platform that extends beyond simple transactions to enable smart contracts and decentralized applications without any central authority or intermediary involvement.</p>
 
