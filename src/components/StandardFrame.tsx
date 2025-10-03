@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from "react";
 
 const StandardFrame: React.FC<PropsWithChildren> = ({ children }) => (
-  <div className="grow bg-gray-100 pb-12 pt-3 overflow-x-hidden">{children}</div>
+  <div className="grow pb-12 pt-3 overflow-x-hidden">{children}</div>
 );
 
 export default StandardFrame;
