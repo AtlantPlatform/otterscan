@@ -36,7 +36,7 @@ app.get('/health', async (req, res) => {
     ]);
     res.json({
       status: 'ok',
-      erigonUrl: ERIGON_URL,
+      rpcUrl: ERIGON_URL,
       latestBlock: blockNumber
     });
   } catch (error) {
@@ -45,42 +45,8 @@ app.get('/health', async (req, res) => {
     res.json({
       status: 'degraded',
       message: 'API server is running but cannot reach Erigon',
-      erigonUrl: ERIGON_URL,
+      rpcUrl: ERIGON_URL,
       error: error.message
-    });
-  }
-});
-
-// ============================================================================
-// JSON-RPC PROXY (for frontend compatibility)
-// ============================================================================
-
-/**
- * POST /api/rpc
- * JSON-RPC proxy endpoint for ethers.js compatibility
- * The frontend still uses ethers.js which expects JSON-RPC
- */
-app.post('/api/rpc', async (req, res) => {
-  try {
-    const { jsonrpc, method, params, id } = req.body;
-
-    // Forward the request to Erigon
-    const result = await provider.send(method, params || []);
-
-    res.json({
-      jsonrpc: jsonrpc || '2.0',
-      id: id || 1,
-      result,
-    });
-  } catch (error) {
-    console.error('JSON-RPC error:', error);
-    res.status(500).json({
-      jsonrpc: '2.0',
-      id: req.body.id || 1,
-      error: {
-        code: -32603,
-        message: error.message || 'Internal error',
-      },
     });
   }
 });
@@ -100,6 +66,81 @@ app.get('/api/blocks/latest', async (req, res) => {
   } catch (error) {
     console.error('Error getting latest block:', error);
     res.status(500).json({ error: 'Failed to get latest block' });
+  }
+});
+
+/**
+ * GET /api/blocks/recent
+ * Get recent blocks with pagination using batch RPC request
+ * Query params: page (default 1), limit (default 30, max 100)
+ *
+ * This endpoint uses a single batch JSON-RPC request to fetch multiple blocks efficiently
+ */
+app.get('/api/blocks/recent', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 30, 100);
+
+    // Get the latest block number
+    const latestBlockNumber = await provider.getBlockNumber();
+
+    // Calculate block range for this page
+    const startBlock = Math.max(0, latestBlockNumber - (page - 1) * limit);
+    const endBlock = Math.max(0, startBlock - limit + 1);
+
+    // Build batch JSON-RPC request for all blocks
+    const batchJSON = [];
+    for (let blockNum = startBlock; blockNum >= endBlock && blockNum >= 0; blockNum--) {
+      const blockHex = `0x${blockNum.toString(16)}`;
+      batchJSON.push({
+        jsonrpc: '2.0',
+        id: blockNum,
+        method: 'eth_getBlockByNumber',
+        params: [blockHex, false] // false = don't include full transactions
+      });
+    }
+
+    // Send batch request to Erigon
+    const batchResponse = await fetch(ERIGON_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(batchJSON)
+    });
+
+    if (!batchResponse.ok) {
+      throw new Error(`Erigon returned ${batchResponse.status}`);
+    }
+
+    const rawBlocks = await batchResponse.json();
+
+    // Transform blocks to minimal UI format
+    const blocks = rawBlocks
+      .filter(response => response.result && !response.error)
+      .map(response => {
+        const rawBlock = response.result;
+        return {
+          number: parseInt(rawBlock.number, 16),
+          hash: rawBlock.hash,
+          timestamp: parseInt(rawBlock.timestamp, 16),
+          miner: rawBlock.miner,
+          transactionCount: rawBlock.transactions ? rawBlock.transactions.length : 0,
+          gasUsed: parseInt(rawBlock.gasUsed, 16),
+          gasLimit: parseInt(rawBlock.gasLimit, 16),
+          baseFeePerGas: rawBlock.baseFeePerGas ? parseInt(rawBlock.baseFeePerGas, 16) : null,
+          size: parseInt(rawBlock.size, 16),
+          parentHash: rawBlock.parentHash,
+        };
+      });
+
+    res.json({
+      total: latestBlockNumber + 1,
+      page,
+      limit,
+      blocks
+    });
+  } catch (error) {
+    console.error('Error getting recent blocks:', error);
+    res.status(500).json({ error: 'Failed to get recent blocks' });
   }
 });
 
@@ -209,6 +250,122 @@ app.get('/api/blocks/:number/transactions', async (req, res) => {
 // ============================================================================
 // TRANSACTIONS API
 // ============================================================================
+
+/**
+ * GET /api/transactions/recent
+ * Get recent transactions from the latest blocks
+ * Query params: page (default 1), limit (default 30)
+ *
+ * This endpoint fetches transactions from multiple recent blocks to ensure
+ * we have enough transactions to display, combining them server-side.
+ */
+app.get('/api/transactions/recent', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 30, 100);
+
+    // Get the latest block number
+    const latestBlockNumber = await provider.getBlockNumber();
+
+    // Calculate how many blocks to fetch based on page
+    // We fetch from multiple blocks to ensure we have enough transactions
+    const blocksToSkip = (page - 1) * 2; // Skip 2 blocks per page
+    const startBlock = Math.max(0, latestBlockNumber - blocksToSkip);
+
+    // Fetch 3-5 recent blocks to ensure we have enough transactions
+    const blocksToFetch = Math.min(5, startBlock + 1);
+    const allTransactions = [];
+
+    for (let i = 0; i < blocksToFetch && (startBlock - i) >= 0; i++) {
+      const blockNum = startBlock - i;
+      const blockHex = `0x${blockNum.toString(16)}`;
+
+      // Get block with full transactions
+      const rawBlock = await provider.send('eth_getBlockByNumber', [blockHex, true]);
+
+      if (!rawBlock || !rawBlock.transactions || rawBlock.transactions.length === 0) {
+        continue;
+      }
+
+      const blockTimestamp = parseInt(rawBlock.timestamp, 16);
+
+      // Get receipts for all transactions in this block
+      const receipts = await Promise.all(
+        rawBlock.transactions.map(tx => provider.send('eth_getTransactionReceipt', [tx.hash]))
+      );
+
+      // Transform transactions to minimal format with block context
+      const blockTxs = rawBlock.transactions.map((tx, idx) => {
+        const receipt = receipts[idx];
+        const gasUsed = parseInt(receipt.gasUsed, 16);
+
+        // Calculate effective gas price
+        let gasPrice;
+        if (tx.type === '0x2' || tx.type === '0x02') {
+          // EIP-1559 transaction
+          const maxFeePerGas = parseInt(tx.maxFeePerGas || '0x0', 16);
+          const maxPriorityFeePerGas = parseInt(tx.maxPriorityFeePerGas || '0x0', 16);
+          const baseFeePerGas = parseInt(rawBlock.baseFeePerGas || '0x0', 16);
+          const tip = Math.min(maxPriorityFeePerGas, maxFeePerGas - baseFeePerGas);
+          gasPrice = baseFeePerGas + tip;
+        } else {
+          // Legacy transaction
+          gasPrice = parseInt(tx.gasPrice || '0x0', 16);
+        }
+
+        const fee = gasUsed * gasPrice;
+
+        return {
+          hash: tx.hash,
+          from: tx.from,
+          to: tx.to,
+          value: tx.value,
+          type: parseInt(tx.type || '0x0', 16),
+          status: parseInt(receipt.status, 16),
+          gasUsed,
+          fee: `0x${fee.toString(16)}`,
+          index: parseInt(tx.transactionIndex, 16),
+          blockNumber: blockNum,
+          timestamp: blockTimestamp,
+          data: tx.data || '0x',
+        };
+      });
+
+      allTransactions.push(...blockTxs);
+
+      // Stop if we have enough transactions
+      if (allTransactions.length >= limit * 2) {
+        break;
+      }
+    }
+
+    // Sort by block number (descending) then by transaction index
+    allTransactions.sort((a, b) => {
+      if (a.blockNumber !== b.blockNumber) {
+        return b.blockNumber - a.blockNumber;
+      }
+      return a.index - b.index;
+    });
+
+    // Paginate the combined results
+    const start = (page - 1) * limit;
+    const paginatedTxs = allTransactions.slice(start, start + limit);
+
+    // Estimate total (rough approximation based on average txs per block)
+    const avgTxsPerBlock = allTransactions.length / blocksToFetch;
+    const estimatedTotal = Math.floor(latestBlockNumber * avgTxsPerBlock);
+
+    res.json({
+      total: estimatedTotal,
+      page,
+      limit,
+      transactions: paginatedTxs,
+    });
+  } catch (error) {
+    console.error('Error getting recent transactions:', error);
+    res.status(500).json({ error: 'Failed to get recent transactions' });
+  }
+});
 
 /**
  * GET /api/transactions/:hash
@@ -529,6 +686,94 @@ app.get('/api/search/:query', async (req, res) => {
 });
 
 // ============================================================================
+// JSON-RPC PROXY (for unmigrated pages)
+// ============================================================================
+
+/**
+ * POST /api/rpc
+ * JSON-RPC proxy for ethers.js provider
+ *
+ * This endpoint is needed for pages that haven't been migrated to REST API yet.
+ * The 4 migrated pages (Dashboard, Recent Blocks, Recent Transactions, Block Transactions)
+ * use REST endpoints above. All other pages still use this proxy.
+ *
+ * Supports both single requests and batch requests.
+ */
+app.post('/api/rpc', async (req, res) => {
+  try {
+    const body = req.body;
+
+    // Handle batch requests (array of requests)
+    if (Array.isArray(body)) {
+      const results = await Promise.all(
+        body.map(async (request) => {
+          try {
+            const { jsonrpc, method, params, id } = request;
+
+            if (!method) {
+              return {
+                jsonrpc: '2.0',
+                id: id || null,
+                error: { code: -32600, message: 'Invalid Request: method is required' }
+              };
+            }
+
+            const result = await provider.send(method, params || []);
+            return {
+              jsonrpc: jsonrpc || '2.0',
+              id: id || null,
+              result
+            };
+          } catch (error) {
+            console.error(`JSON-RPC batch error for method ${request.method}:`, error);
+            return {
+              jsonrpc: '2.0',
+              id: request.id || null,
+              error: {
+                code: -32603,
+                message: error.message || 'Internal error'
+              }
+            };
+          }
+        })
+      );
+
+      return res.json(results);
+    }
+
+    // Handle single request
+    const { jsonrpc, method, params, id } = body;
+
+    if (!method) {
+      return res.status(400).json({
+        jsonrpc: '2.0',
+        id: id || null,
+        error: { code: -32600, message: 'Invalid Request: method is required' }
+      });
+    }
+
+    // Forward the JSON-RPC call to Erigon
+    const result = await provider.send(method, params || []);
+
+    res.json({
+      jsonrpc: jsonrpc || '2.0',
+      id: id || 1,
+      result
+    });
+  } catch (error) {
+    console.error('JSON-RPC proxy error:', error);
+    res.status(500).json({
+      jsonrpc: '2.0',
+      id: req.body?.id || null,
+      error: {
+        code: -32603,
+        message: error.message || 'Internal error'
+      }
+    });
+  }
+});
+
+// ============================================================================
 // ERROR HANDLING
 // ============================================================================
 
@@ -548,14 +793,15 @@ app.use((err, req, res, next) => {
 // ============================================================================
 
 app.listen(PORT, () => {
-  console.log(`Otterscan API server running on port ${PORT}`);
+  console.log(`Otterscan REST API server running on port ${PORT}`);
   console.log(`Erigon URL: ${ERIGON_URL}`);
-  console.log(`\nAvailable endpoints:`);
+  console.log(`\nAvailable REST endpoints:`);
   console.log(`  GET   /health`);
-  console.log(`  POST  /api/rpc                          - JSON-RPC proxy (for ethers.js)`);
   console.log(`  GET   /api/blocks/latest`);
+  console.log(`  GET   /api/blocks/recent`);
   console.log(`  GET   /api/blocks/:numberOrHash`);
   console.log(`  GET   /api/blocks/:number/transactions`);
+  console.log(`  GET   /api/transactions/recent`);
   console.log(`  GET   /api/transactions/:hash`);
   console.log(`  GET   /api/transactions/:hash/internal`);
   console.log(`  GET   /api/transactions/:hash/trace`);
@@ -565,4 +811,5 @@ app.listen(PORT, () => {
   console.log(`  GET   /api/addresses/:address/creator`);
   console.log(`  GET   /api/tokens/:address`);
   console.log(`  GET   /api/search/:query`);
+  console.log(`  POST  /api/rpc (JSON-RPC proxy for unmigrated pages)`);
 });

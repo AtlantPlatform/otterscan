@@ -15,6 +15,7 @@ import TransactionLink from "../../components/TransactionLink";
 import BlockLink from "../../components/BlockLink";
 import MethodName from "../../components/MethodName";
 import { formatEther } from "ethers";
+import SimplePageControl from "../../search/SimplePageControl";
 
 type BlockTransactionResultsProps = {
   page?: ProcessedTransaction[];
@@ -33,6 +34,20 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
 
   return (
     <>
+      {/* Pagination Control - Top */}
+      {!isLoading && total > PAGE_SIZE && (
+        <div className="flex justify-between items-center mb-4 px-3 lg:px-9">
+          <div className="text-sm text-gray-600">
+            Showing {((pageNumber - 1) * PAGE_SIZE) + 1} to {Math.min(pageNumber * PAGE_SIZE, total)} of {total} transactions
+          </div>
+          <SimplePageControl
+            pageNumber={pageNumber}
+            pageSize={PAGE_SIZE}
+            total={total}
+          />
+        </div>
+      )}
+
       <div className="px-3 lg:px-9">
         <ContentFrame isLoading={isLoading} marginSize="none">
           {/* Desktop Table */}
@@ -59,7 +74,7 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
           )}
         </StandardScrollableTable>
       </div>
-      
+
         </ContentFrame>
       </div>
 
@@ -135,6 +150,17 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
           <PendingPage rows={1} cols={1} />
         )}
       </div>
+
+      {/* Pagination Control - Bottom */}
+      {!isLoading && total > PAGE_SIZE && (
+        <div className="flex justify-center mt-6 px-3 lg:px-9">
+          <SimplePageControl
+            pageNumber={pageNumber}
+            pageSize={PAGE_SIZE}
+            total={total}
+          />
+        </div>
+      )}
     </>
   );
 };

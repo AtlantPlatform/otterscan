@@ -107,7 +107,7 @@ export type OtterscanConfig = {
   /**
    * URL for API JSON-RPC endpoint.
    */
-  erigonURL?: string;
+  rpcURL?: string;
 
   /**
    * (optional) URL for Beacon chain REST API (for merged chains)
@@ -236,7 +236,7 @@ export const loadOtterscanConfig = async (): Promise<OtterscanConfig> => {
     // Override config for local dev
     const config: OtterscanConfig = { ...data };
     if (import.meta.env.DEV) {
-      config.erigonURL = import.meta.env.VITE_ERIGON_URL ?? config.erigonURL;
+      config.rpcURL = import.meta.env.VITE_RPC_URL ?? config.rpcURL;
       config.beaconAPI =
         import.meta.env.VITE_BEACON_API_URL ?? config.beaconAPI;
       config.assetsURLPrefix =

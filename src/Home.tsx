@@ -6,8 +6,8 @@ import SourcifyMenu from "./SourcifyMenu";
 import ETHScanLogoSingle from "./ethscanlogosingle.png";
 import ETHScanLogoSingleText from "./LogoText.png";
 import ETHScanLogoSingleTextDark from "./LogoTextDark.png";
-import RecentBlocksSection from "./components/RecentBlocksSection";
-import RecentTransactionsSection from "./components/RecentTransactionsSection";
+import RecentBlocksSectionRest from "./components/RecentBlocksSectionRest";
+import RecentTransactionsSectionRest from "./components/RecentTransactionsSectionRest";
 import { useGenericSearch } from "./search/search";
 import { RuntimeContext } from "./useRuntime";
 import { Helmet } from 'react-helmet-async';
@@ -267,8 +267,8 @@ const Home: FC = () => {
 
         {/* Recent Blocks and Transactions Sections */}
         <div className="space-y-6">
-          <RecentBlocksSection />
-          <RecentTransactionsSection />
+          <RecentBlocksSectionRest />
+          <RecentTransactionsSectionRest />
         </div>
 
         {/* Main Content Section */}

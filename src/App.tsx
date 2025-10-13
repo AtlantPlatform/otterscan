@@ -38,7 +38,7 @@ import { createRuntime, RuntimeContext } from "./useRuntime";
 import WarningHeader from "./WarningHeader";
 
 const Block = lazy(() => import("./execution/Block"));
-const BlockTransactions = lazy(() => import("./execution/BlockTransactions"));
+const BlockTransactions = lazy(() => import("./execution/BlockTransactionsRest"));
 const BlockTransactionByIndex = lazy(
   () => import("./execution/block/BlockTransactionByIndex"),
 );
@@ -80,8 +80,8 @@ const SlotByBlockRoot = lazy(() => import("./consensus/slot/SlotByBlockRoot"));
 const Validator = lazy(() => import("./consensus/Validator"));
 const LiveBlocks = lazy(() => import("./special/london/LiveBlocks"));
 const Faucets = lazy(() => import("./Faucets"));
-const RecentBlocks = lazy(() => import("./pages/RecentBlocks"));
-const RecentTransactions = lazy(() => import("./pages/RecentTransactions"));
+const RecentBlocks = lazy(() => import("./pages/RecentBlocksRest"));
+const RecentTransactions = lazy(() => import("./pages/RecentTransactionsRest"));
 const PageNotFound = lazy(() => import("./PageNotFound"));
 const BroadcastTransactionPage = lazy(
   () => import("./execution/BroadcastTransactionPage"),

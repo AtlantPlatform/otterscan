@@ -53,7 +53,7 @@ Browser --> [Your Proxy/LB]
   - Dev mode proxies to local API server at `http://localhost:3001`
   - Proxy target configurable via `VITE_API_URL` env var
 
-- `public/config.json` - Updated erigonURL
+- `public/config.json` - Updated rpcURL
   - Set to relative path `/api`
   - Works with external proxy configuration
 

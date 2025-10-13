@@ -1,4 +1,4 @@
 {
-  "erigonURL": "/api/rpc",
+  "rpcURL": "/api/rpc",
   "experimentalFixedChainId": 1
 }

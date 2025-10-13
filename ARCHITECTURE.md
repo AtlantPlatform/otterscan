@@ -47,7 +47,7 @@ Otterscan is deployed as **two separate containers** with external routing confi
 - 80 (HTTP)
 
 **Configuration**:
-- `config.json` sets `erigonURL: "/api"`
+- `config.json` sets `rpcURL: "/api"`
 - No application logic, just static file serving
 - Environment variables for beacon API, assets, etc.
 
@@ -263,7 +263,7 @@ See `DEPLOYMENT.md` for full Kubernetes manifests.
 
 ### Health Checks
 
-- **API**: `GET /health` returns `{"status":"ok","erigonUrl":"..."}`
+- **API**: `GET /health` returns `{"status":"ok","rpcUrl":"..."}`
 - **Frontend**: HTTP 200 on `/` or any static path
 
 ### Metrics to Monitor
