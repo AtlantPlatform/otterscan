@@ -105,7 +105,7 @@ export const defaultChainInfo: ChainInfo = {
  */
 export type OtterscanConfig = {
   /**
-   * URL for Erigon JSON-RPC endpoint.
+   * URL for API JSON-RPC endpoint.
    */
   erigonURL?: string;
 

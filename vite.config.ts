@@ -3,7 +3,8 @@ import { defineConfig } from "vite";
 import { imagetools } from "vite-imagetools";
 import viteCompression from "vite-plugin-compression";
 
-const proxyTarget = 'https://ethscan.org/erigon/'
+// Proxy to local API server during development
+const proxyTarget = process.env.VITE_API_URL || 'http://localhost:3001'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,13 +18,9 @@ export default defineConfig({
     proxy: {
       '^/api': {
         target: proxyTarget,
-        ws: true,
+        ws: false,
         changeOrigin: true,
-        autoRewrite: true,
-        headers: {
-          origin: proxyTarget,
-          referer: proxyTarget,
-        },
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
     },
   },

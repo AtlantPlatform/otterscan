@@ -10,10 +10,10 @@ export const createAndProbeProvider = async (
 ): Promise<JsonRpcApiProvider> => {
   if (erigonURL !== undefined) {
     if (erigonURL === "") {
-      console.info(`Using default erigon URL: ${DEFAULT_ERIGON_URL}`);
+      console.info(`Using default API URL: ${DEFAULT_ERIGON_URL}`);
       erigonURL = DEFAULT_ERIGON_URL;
     } else {
-      console.log(`Using configured erigon URL: ${erigonURL}`);
+      console.log(`Using configured API URL: ${erigonURL}`);
     }
   }
 
