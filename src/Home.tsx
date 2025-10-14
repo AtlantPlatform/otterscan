@@ -68,18 +68,24 @@ const Home: FC = () => {
               <img
                 className="rounded-full logo-main"
                 src={ETHScanLogoSingle}
+                width={24}
+                height={24}
                 alt="Ethscan logo"
                 title="Ethscan logo"
               />
               <img
                 className="logo-text-dark hidden sm:block logo-text"
                 src={ETHScanLogoSingleText}
+                width={80}
+                height={18}
                 alt="Ethscan logo text"
                 title="Ethscan logo text"
               />
               <img
                 className="logo-text-white hidden sm:block logo-text"
                 src={ETHScanLogoSingleTextDark}
+                width={80}
+                height={18}
                 alt="Ethscan logo text"
                 title="Ethscan logo text"
               />
@@ -134,18 +140,24 @@ const Home: FC = () => {
             <img
               className="rounded-full logo-main"
               src={ETHScanLogoSingle}
+              width={60}
+              height={60}
               alt="Ethscan logo"
               title="Ethscan logo"
             />
             <img
               className="logo-text-dark hidden sm:block logo-text"
               src={ETHScanLogoSingleText}
+              width={120}
+              height={24}
               alt="Ethscan logo text"
               title="Ethscan logo text"
             />
             <img
               className="logo-text-white hidden sm:block logo-text"
               src={ETHScanLogoSingleTextDark}
+              width={120}
+              height={24}
               alt="Ethscan logo text"
               title="Ethscan logo text"
             />
@@ -213,6 +225,9 @@ const Home: FC = () => {
               <img
                 src={BTCIcon}
                 className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                width={32}
+                height={32}
+                loading="lazy"
                 alt="BTC Explorer"
                 title="BTC Explorer"
               />
@@ -221,6 +236,9 @@ const Home: FC = () => {
               <img
                 src={ETHIcon}
                 className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                width={32}
+                height={32}
+                loading="lazy"
                 alt="ETH Explorer"
                 title="ETH Explorer"
               />
@@ -229,6 +247,9 @@ const Home: FC = () => {
               <img
                 src={XMRIcon}
                 className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                width={32}
+                height={32}
+                loading="lazy"
                 alt="XMR Explorer"
                 title="XMR Explorer"
               />
@@ -237,6 +258,9 @@ const Home: FC = () => {
               <img
                 src={MempoolIcon}
                 className="w-[32px] h-[32px] hover:scale-110 transition-transform duration-200"
+                width={32}
+                height={32}
+                loading="lazy"
                 alt="BTC Mempool"
                 title="BTC Mempool"
               />

@@ -13,6 +13,10 @@
     -->
     <link rel="manifest" href="/manifest.json" />
 
+    <!-- Resource hints for better performance -->
+    <link rel="preconnect" href="https://analytics.ahrefs.com" />
+    <link rel="dns-prefetch" href="https://analytics.ahrefs.com" />
+
     <!-- Base meta tags for SEO and social media -->
     <meta name="description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
 
@@ -34,6 +38,15 @@
     <meta name="twitter:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
 
     <title>Ethscan</title>
+
+    <!-- Prevent layout shift by setting theme before render -->
+    <script>
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
   </head>
 
   <body>
