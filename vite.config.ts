@@ -43,6 +43,15 @@ export default defineConfig({
     },
     // Increase chunk size warning limit since we're splitting properly
     chunkSizeWarningLimit: 600,
+    // Enable tree-shaking for better dead code elimination
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+    },
   },
   server: {
     proxy: {

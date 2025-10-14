@@ -24,6 +24,28 @@ console.log(`Ethereum provider initialized for: ${ERIGON_URL}`);
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// Cache control middleware
+// Real-time blockchain data should not be cached as blocks arrive every 10-30s
+app.use((req, res, next) => {
+  // Set cache headers based on endpoint type
+  const path = req.path;
+
+  if (path.includes('/recent') || path.includes('/latest')) {
+    // Real-time endpoints: no caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  } else if (path.match(/\/blocks\/\d+/) || path.match(/\/transactions\/0x[a-fA-F0-9]{64}/)) {
+    // Historical data (specific blocks/transactions): cache for longer
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  } else {
+    // Default: short cache for other endpoints
+    res.setHeader('Cache-Control', 'public, max-age=10');
+  }
+
+  next();
+});
+
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
