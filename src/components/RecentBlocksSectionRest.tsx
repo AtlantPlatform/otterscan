@@ -75,7 +75,7 @@ const RecentBlocksSectionRest: React.FC = () => {
                     </NavLink>
                   </td>
                   <td>
-                    <DecoratedAddressLink address={block.miner} />
+                    <DecoratedAddressLink address={block.miner} plain />
                   </td>
                   <td>
                     <div className="flex items-center space-x-1">

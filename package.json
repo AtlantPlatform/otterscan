@@ -102,6 +102,7 @@
     "source-map-explorer": "^2.5.3",
     "storybook": "^8.4.7",
     "tailwindcss": "^3.4.17",
+    "terser": "^5.37.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tspeg": "^3.3.2",
