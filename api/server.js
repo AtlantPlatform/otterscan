@@ -16,7 +16,8 @@ const network = {
 
 const provider = new JsonRpcProvider(ERIGON_URL, network, {
   staticNetwork: true,
-  batchMaxCount: 1
+  batchMaxCount: 100, // Allow batching up to 100 RPC calls in single HTTP request
+  batchMaxSize: 1024 * 1024, // 1MB max batch size
 });
 console.log(`Ethereum provider initialized for: ${ERIGON_URL}`);
 

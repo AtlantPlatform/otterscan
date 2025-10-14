@@ -22,14 +22,14 @@ export default {
         "source-line-numbers": "#738a9486",
       },
       fontFamily: {
-        sans: ["Roboto"],
-        title: ["Space Grotesk"],
-        address: ["Roboto Mono"],
-        hash: ["Roboto Mono"],
-        data: ["Roboto Mono"],
-        balance: ["Fira Code"],
-        blocknum: ["Roboto"],
-        code: ["Fira Code"],
+        sans: ["Roboto", "system-ui", "-apple-system", "sans-serif"],
+        title: ["Space Grotesk", "system-ui", "-apple-system", "sans-serif"],
+        address: ["Roboto Mono", "ui-monospace", "Menlo", "Monaco", "monospace"],
+        hash: ["Roboto Mono", "ui-monospace", "Menlo", "Monaco", "monospace"],
+        data: ["Roboto Mono", "ui-monospace", "Menlo", "Monaco", "monospace"],
+        balance: ["Fira Code", "ui-monospace", "Menlo", "Monaco", "monospace"],
+        blocknum: ["Roboto", "system-ui", "-apple-system", "sans-serif"],
+        code: ["Fira Code", "ui-monospace", "Menlo", "Monaco", "monospace"],
       },
       borderColor: {
         skin: {

@@ -17,12 +17,65 @@ const RecentTransactionsSectionRest: React.FC = () => {
 
   if (isLoading || recentTransactions.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center space-x-2">
-          <FontAwesomeIcon icon={faExchangeAlt} className="text-gray-500" />
-          <span>Latest Transactions</span>
-        </h2>
-        <div className="text-gray-500 text-center py-8">Loading...</div>
+      <div className="bg-white sm:rounded-lg sm:shadow-md overflow-hidden">
+        <div className="flex items-center mb-4 px-3 lg:px-9 sm:px-6 pt-6">
+          <h2 className="text-lg font-semibold flex items-center space-x-2">
+            <FontAwesomeIcon icon={faExchangeAlt} className="text-gray-500" />
+            <span>Latest Transactions</span>
+          </h2>
+        </div>
+
+        {/* Desktop Skeleton */}
+        <div className="hidden sm:block overflow-x-scroll px-6 pb-6">
+          <table className="w-full table-auto border-gray-200 px-2 py-2 text-left text-sm">
+            <thead>
+              <tr className="bg-gray-100 text-gray-500 [&>th]:truncate [&>th:first-child]:pl-2 [&>th:last-child]:pr-2 [&>th]:px-1 [&>th]:py-2">
+                <th>Transaction</th>
+                <th>Method</th>
+                <th className="w-36">Age</th>
+                <th>Value</th>
+                <th>Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <tr key={i} className="border-t border-gray-200">
+                  <td className="px-1 py-3 pl-2">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                  </td>
+                  <td className="px-1 py-3">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                  </td>
+                  <td className="px-1 py-3">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                  </td>
+                  <td className="px-1 py-3">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+                  </td>
+                  <td className="px-1 py-3 pr-2">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Skeleton */}
+        <div className="block sm:hidden space-y-3 px-3 pb-6">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
+              <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+              <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* View More Button */}
+        <div className="flex justify-center mt-4 px-3 lg:px-9 sm:px-6 pb-6">
+          <div className="h-10 bg-gray-200 rounded animate-pulse w-48"></div>
+        </div>
       </div>
     );
   }

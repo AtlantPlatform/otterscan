@@ -295,14 +295,14 @@ const Home: FC = () => {
           <RecentTransactionsSectionRest />
         </div>
 
-        {/* Main Content Section */}
-        <div className="mt-12 px-3 lg:px-9">
+        {/* Main Content Section - Fixed height to prevent layout shift */}
+        <div className="mt-12 px-3 lg:px-9 min-h-[600px]">
           <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Blockchain Explorer</h1>
           <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 mb-8">
             <p>Ethscan is a powerful blockchain explorer that provides real-time access to Ethereum blockchain data. Search and navigate through transactions, blocks, addresses, and smart contracts with ease. Our explorer allows you to track ETH transactions, monitor DeFi positions, verify smart contracts, and investigate any address on the Ethereum network. Whether you're a developer, trader, or blockchain enthusiast, Ethscan offers comprehensive tools to explore and understand the Ethereum ecosystem.</p>
           </div>
 
-          <div className="h-96 overflow-y-auto p-6 min-h-[24rem]">
+          <div className="h-96 overflow-y-auto p-6">
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
             <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
               <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">What is Ethereum?</h3>
