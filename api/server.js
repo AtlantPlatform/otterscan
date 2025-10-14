@@ -218,10 +218,10 @@ app.get('/api/blocks/:number/transactions', async (req, res) => {
     const page = parseInt(req.query.page) || 0;
     const limit = Math.min(parseInt(req.query.limit) || 25, 100);
 
-    const blockNumber = `0x${parseInt(number).toString(16)}`;
+    const blockNumberHex = `0x${parseInt(number).toString(16)}`;
 
     // Get block with full transactions
-    const rawBlock = await provider.send('eth_getBlockByNumber', [blockNumber, true]);
+    const rawBlock = await provider.send('eth_getBlockByNumber', [blockNumberHex, true]);
 
     if (!rawBlock || !rawBlock.transactions) {
       return res.json({ total: 0, page, limit, transactions: [] });
@@ -232,12 +232,16 @@ app.get('/api/blocks/:number/transactions', async (req, res) => {
     const end = Math.min(start + limit, total);
     const pageTxs = rawBlock.transactions.slice(start, end);
 
+    // Extract block metadata
+    const blockNumber = parseInt(rawBlock.number, 16);
+    const blockTimestamp = parseInt(rawBlock.timestamp, 16);
+
     // Get receipts for the page
     const receipts = await Promise.all(
       pageTxs.map(tx => provider.send('eth_getTransactionReceipt', [tx.hash]))
     );
 
-    // Transform to minimal UI format
+    // Transform to minimal UI format with block context
     const transactions = pageTxs.map((tx, i) => {
       const receipt = receipts[i];
       const gasUsed = parseInt(receipt.gasUsed, 16);
@@ -254,6 +258,9 @@ app.get('/api/blocks/:number/transactions', async (req, res) => {
         gasUsed,
         fee: (gasUsed * gasPrice).toString(),
         index: start + i,
+        blockNumber: blockNumber,
+        timestamp: blockTimestamp,
+        data: tx.data || '0x',
       };
     });
 

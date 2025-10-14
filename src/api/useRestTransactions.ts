@@ -107,25 +107,12 @@ export const useRecentTransactions = (count: number = 5) => {
         const { blockNumber: latestBlockNumber } = await blocksAPI.getLatest();
 
         // Fetch transactions from the latest block
+        // Note: API now includes blockNumber, timestamp, and data in the response
         const txData = await blocksAPI.getTransactions(latestBlockNumber, 0, count);
 
-        // Fetch full transaction details to get the 'data' field for method detection
-        const txDetailsPromises = txData.transactions.map(tx =>
-          transactionsAPI.getTransaction(tx.hash)
-        );
-        const txDetails = await Promise.all(txDetailsPromises);
-
-        // Get block details for timestamp
-        const block = await blocksAPI.getBlock(latestBlockNumber);
-
         if (isMounted) {
-          // Combine the transaction data with block context and full details
-          const enrichedTxs: RestTransactionWithContext[] = txData.transactions.map((tx, i) => ({
-            ...tx,
-            blockNumber: latestBlockNumber,
-            timestamp: block.timestamp,
-            data: txDetails[i].data,
-          }));
+          // Transactions already have all needed fields from the API
+          const enrichedTxs: RestTransactionWithContext[] = txData.transactions as RestTransactionWithContext[];
 
           setTransactions(enrichedTxs);
           setError(undefined);
