@@ -39,7 +39,7 @@ const BlockTransactionsRest: React.FC = () => {
         // Transform REST API response to match the expected format
         const transformedTxs = result.transactions.map((tx: any) => ({
           blockNumber,
-          timestamp: 0, // Will be filled from block data if needed
+          timestamp: tx.timestamp, // Use timestamp from API response
           miner: "",
           idx: tx.index,
           hash: tx.hash,
@@ -49,7 +49,7 @@ const BlockTransactionsRest: React.FC = () => {
           type: tx.type,
           fee: BigInt(tx.fee),
           gasPrice: 0n,
-          data: "0x", // Minimal data for display
+          data: tx.data, // Include transaction data
           status: tx.status,
         }));
 
@@ -156,9 +156,9 @@ const BlockTransactionsRest: React.FC = () => {
           />
         </div>
 
-        {/* FAQ Section */}
+        {/* FAQ Section - Fixed height to prevent layout shift */}
         <div className="px-3 lg:px-9 py-6 max-w-7xl mx-auto">
-          <div className="mt-12 space-y-6">
+          <div className="mt-12 space-y-6 min-h-[600px]">
             <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
               <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h1>
 

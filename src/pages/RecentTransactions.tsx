@@ -126,9 +126,64 @@ const RecentTransactions: React.FC = () => {
           </div>
 
           {isLoadingAll ? (
-            <div className="text-center py-8 px-3 lg:px-9">
-              <div className="text-gray-500">Loading transactions...</div>
-            </div>
+            <>
+              {/* Desktop Skeleton */}
+              <div className="hidden sm:block mx-3 lg:mx-9">
+                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                  <div className="overflow-x-scroll">
+                    <table className="w-full table-auto border-gray-200 px-2 py-2 text-left text-sm">
+                      <thead>
+                        <tr className="bg-gray-100 text-gray-500 [&>th]:truncate [&>th:first-child]:pl-2 [&>th:last-child]:pr-2 [&>th]:px-1 [&>th]:py-2">
+                          <th>Transaction</th>
+                          <th>Method</th>
+                          <th className="w-28">Block</th>
+                          <th className="w-36">Date/Time</th>
+                          <th>Value</th>
+                          <th>Fee</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...Array(TRANSACTIONS_PER_PAGE)].map((_, i) => (
+                          <tr key={i} className="border-t border-gray-200">
+                            <td className="px-1 py-3 pl-2">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                            </td>
+                            <td className="px-1 py-3">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                            </td>
+                            <td className="px-1 py-3">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                            </td>
+                            <td className="px-1 py-3">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                            </td>
+                            <td className="px-1 py-3">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                            </td>
+                            <td className="px-1 py-3 pr-2">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile Skeleton */}
+              <div className="block sm:hidden space-y-3 px-3">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-sm border p-4 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : transactions.length > 0 ? (
             <>
               {/* Desktop Table */}
@@ -246,8 +301,8 @@ const RecentTransactions: React.FC = () => {
           </>
         ) : null}
 
-        {/* SEO Content Section */}
-        <div className="mt-12 px-3 lg:px-9">
+        {/* SEO Content Section - Fixed height to prevent layout shift */}
+        <div className="mt-12 px-3 lg:px-9 min-h-[600px]">
           <div className="h-96 overflow-y-auto p-6">
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Ethereum Transactions</h2>
             <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-4">

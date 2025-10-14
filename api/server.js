@@ -36,7 +36,12 @@ app.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-  } else if (path.match(/\/blocks\/\d+/) || path.match(/\/transactions\/0x[a-fA-F0-9]{64}/)) {
+  } else if (path.match(/\/blocks\/\d+\/transactions/)) {
+    // Block transactions endpoint: no caching (like recent transactions)
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  } else if (path.match(/\/blocks\/\d+$/) || path.match(/\/transactions\/0x[a-fA-F0-9]{64}$/)) {
     // Historical data (specific blocks/transactions): cache for longer
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   } else {

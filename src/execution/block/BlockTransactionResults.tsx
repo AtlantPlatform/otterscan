@@ -49,39 +49,87 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
       )}
 
       <div className="px-3 lg:px-9">
-        <ContentFrame isLoading={isLoading} marginSize="none">
-          {/* Desktop Table */}
-          <div className="hidden sm:block">
-        <StandardScrollableTable isAuto={true}>
-          <ResultHeader
-            feeDisplay={feeDisplay}
-            feeDisplayToggler={feeDisplayToggler}
-          />
-          {page ? (
-            <StandardSelectionBoundary>
-              <StandardTBody>
-                {page.map((tx) => (
-                  <TransactionItem
-                    key={tx.hash}
-                    tx={tx}
-                    feeDisplay={feeDisplay}
-                  />
-                ))}
-              </StandardTBody>
-            </StandardSelectionBoundary>
-          ) : (
-            <PendingPage rows={1} cols={8} />
-          )}
-        </StandardScrollableTable>
-      </div>
+        {isLoading ? (
+          <>
+            {/* Desktop Skeleton */}
+            <div className="hidden sm:block bg-white rounded-lg shadow-sm border overflow-hidden">
+              <div className="overflow-x-scroll">
+                <table className="w-full table-auto border-gray-200 px-2 py-2 text-left text-sm">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-500 [&>th]:truncate [&>th:first-child]:pl-2 [&>th:last-child]:pr-2 [&>th]:px-1 [&>th]:py-2">
+                      <th>Transaction</th>
+                      <th>Method</th>
+                      <th className="w-36">Date/Time</th>
+                      <th>Value</th>
+                      <th>Fee</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...Array(PAGE_SIZE)].map((_, i) => (
+                      <tr key={i} className="border-t border-gray-200">
+                        <td className="px-1 py-3 pl-2">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                        </td>
+                        <td className="px-1 py-3">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                        </td>
+                        <td className="px-1 py-3">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                        </td>
+                        <td className="px-1 py-3">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                        </td>
+                        <td className="px-1 py-3 pr-2">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-        </ContentFrame>
-      </div>
+            {/* Mobile Skeleton */}
+            <div className="block sm:hidden space-y-3">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg shadow-sm border p-4 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Desktop Table */}
+            <div className="hidden sm:block">
+              <StandardScrollableTable isAuto={true}>
+                <ResultHeader
+                  feeDisplay={feeDisplay}
+                  feeDisplayToggler={feeDisplayToggler}
+                />
+                {page ? (
+                  <StandardSelectionBoundary>
+                    <StandardTBody>
+                      {page.map((tx) => (
+                        <TransactionItem
+                          key={tx.hash}
+                          tx={tx}
+                          feeDisplay={feeDisplay}
+                        />
+                      ))}
+                    </StandardTBody>
+                  </StandardSelectionBoundary>
+                ) : null}
+              </StandardScrollableTable>
+            </div>
 
-      {/* Mobile Cards */}
-      <div className="block sm:hidden space-y-3 px-3">
-        {page ? (
-          page.map((tx) => {
+            {/* Mobile Cards */}
+            <div className="block sm:hidden space-y-3">
+              {page && page.map((tx) => {
             const timestamp = new Date(tx.timestamp * 1000);
             const formattedTime = timestamp.toLocaleString('en-US', {
               month: 'short',
@@ -145,9 +193,9 @@ const BlockTransactionResults: FC<BlockTransactionResultsProps> = ({
                 </div>
               </div>
             );
-          })
-        ) : (
-          <PendingPage rows={1} cols={1} />
+              })}
+            </div>
+          </>
         )}
       </div>
 
