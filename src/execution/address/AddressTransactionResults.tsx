@@ -157,13 +157,10 @@ const AddressTransactionResults: FC = () => {
     "url": `https://ethscan.org/address/${addressOrName}`,
     "name": "Ethereum Address Details",
     "mainEntity": {
-      "@type": "Person",
+      "@type": "DigitalDocument",
       "identifier": `${addressOrName}`,
-      "balance": {
-        "@type": "MonetaryAmount",
-        "currency": "ETH",
-        "value": `${formattedValue}`
-      }
+      "name": `Ethereum Address ${addressOrName}`,
+      "description": `Ethereum address with balance of ${formattedValue} ETH`
     }
   })
   const payloadSchemaFaqPage = JSON.stringify({

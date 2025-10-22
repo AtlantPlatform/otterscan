@@ -159,15 +159,15 @@ const BlockTransactionsRest: React.FC = () => {
         <div className="px-3 lg:px-9 py-6 max-w-7xl mx-auto">
           <div className="mt-12 space-y-6 min-h-[600px]">
             <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-              <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h1>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
 
-              <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is an Ethereum transaction?</h2>
+              <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is an Ethereum transaction?</h3>
               <p>An Ethereum transaction is a transfer of data or value between addresses on the Ethereum blockchain, often including smart contract interactions.</p>
 
-              <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I check the details of a transaction on Ethscan?</h2>
+              <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I check the details of a transaction on Ethscan?</h3>
               <p>Enter the transaction hash in the Ethscan search bar to view details like sender, recipient, and gas fees.</p>
 
-              <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What do gas fees in a transaction mean?</h2>
+              <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What do gas fees in a transaction mean?</h3>
               <p>Gas fees are the costs paid to execute a transaction on the Ethereum network. They compensate validators for the computing energy required to process and validate transactions.</p>
             </div>
           </div>

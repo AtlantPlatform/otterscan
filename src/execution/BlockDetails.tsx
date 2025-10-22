@@ -71,14 +71,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
         "creator": {
           "@type": "Organization",
           "identifier": `${block?.miner}`
-        },
-        ...(block && {
-          "blockBaseFee": block.baseFeePerGas?.toString() || "0",
-          "gasUsed": block.gasUsed.toString(),
-          "gasLimit": block.gasLimit.toString(),
-          "etherPriceUSD": ethPriceUSD ? formatFiatValue(ethPriceUSD) : "N/A",
-          "burntFees": burntFees?.toString() || "0"
-        })
+        }
       }
     }
   )

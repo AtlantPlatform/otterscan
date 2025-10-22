@@ -138,27 +138,6 @@ const Details: FC<DetailsProps> = ({ txData }) => {
     };
   }
 
-  // Add transaction-specific fields to schema
-  if (txData.confirmedData && block) {
-    schemaData.potentialAction = {
-      "@type": "ViewAction",
-      "target": `https://ethscan.org/tx/${txData.transactionHash}`,
-      "object": {
-        "@type": "FinancialProduct",
-        "name": "Transaction Details",
-        "blockNumber": txData.confirmedData.blockNumber,
-        "gasUsed": txData.confirmedData.gasUsed.toString(),
-        "gasLimit": txData.gasLimit.toString(),
-        "gasPrice": txData.gasPrice?.toString() || "0",
-        "blockBaseFee": block.baseFeePerGas?.toString() || "0",
-        "transactionFeeETH": formatUnits(totalFees, decimals),
-        "transactionFeeUSD": totalFeesUSD ? formatFiatValue(totalFeesUSD) : "N/A",
-        "etherPriceUSD": ethPriceUSD ? formatFiatValue(ethPriceUSD) : "N/A",
-        "timestamp": block.timestamp
-      }
-    };
-  }
-
   const payloadSchemaWebPage = JSON.stringify(schemaData);
 
   const payloadSchemaFaqPage = JSON.stringify({
