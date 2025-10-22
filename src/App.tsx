@@ -74,12 +74,7 @@ const AllERC4626 = lazy(() => import("./token/AllERC4626"));
 const AllERC721 = lazy(() => import("./token/AllERC721"));
 const AllERC1155 = lazy(() => import("./token/AllERC1155"));
 const AllERC1167 = lazy(() => import("./token/AllERC1167"));
-const Epoch = lazy(() => import("./consensus/Epoch"));
-const Slot = lazy(() => import("./consensus/Slot"));
-const SlotByBlockRoot = lazy(() => import("./consensus/slot/SlotByBlockRoot"));
-const Validator = lazy(() => import("./consensus/Validator"));
 const LiveBlocks = lazy(() => import("./special/london/LiveBlocks"));
-const Faucets = lazy(() => import("./Faucets"));
 const RecentBlocks = lazy(() => import("./pages/RecentBlocksRest"));
 const RecentTransactions = lazy(() => import("./pages/RecentTransactionsRest"));
 const PageNotFound = lazy(() => import("./PageNotFound"));
@@ -381,20 +376,8 @@ const router = createBrowserRouter(
         <Route path="contracts/erc1167/*" element={<AllERC1167 />} />
         {/* EXPERIMENTAL ROUTES */}
 
-        <Route path="epoch/:epochNumber" element={<Epoch />} />
-        <Route path="slot/:slotNumber">
-          <Route path="*" element={<Slot />} />
-        </Route>
-        <Route
-          path="slotByBlockRoot/:blockRoot"
-          element={<SlotByBlockRoot />}
-        />
-        <Route path="validator/:validatorIndex">
-          <Route path="*" element={<Validator />} />
-        </Route>
         <Route path="blocks/recent" element={<RecentBlocks />} />
         <Route path="tx/recent" element={<RecentTransactions />} />
-        <Route path="faucets" element={<Faucets />} />
         <Route path="broadcastTx" element={<BroadcastTransactionPage />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>

@@ -8,9 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useContext, useState } from "react";
 import Blockies from "react-blockies";
 import Copy from "../../components/Copy";
-import Faucet from "../../components/Faucet";
 import StandardSubtitle from "../../components/StandardSubtitle";
-import { useChainInfo } from "../../useChainInfo";
 import { useResolvedAddress } from "../../useResolvedAddresses";
 import { RuntimeContext } from "../../useRuntime";
 import { AddressAwareComponentProps } from "../types";
@@ -28,7 +26,6 @@ const AddressSubtitle: FC<AddressSubtitleProps> = ({
   addressOrName,
 }) => {
   const { config, provider } = useContext(RuntimeContext);
-  const { faucets } = useChainInfo();
 
   const resolvedAddress = useResolvedAddress(provider, address);
   let resolvedName = resolvedAddress
@@ -70,8 +67,6 @@ const AddressSubtitle: FC<AddressSubtitleProps> = ({
 
         {/* Actions and tags */}
         <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-          {/* Only display faucets for testnets who actually have any */}
-          {faucets && faucets.length > 0 && <Faucet address={address} rounded />}
           {config.experimental && <AddressAttributes address={address} full />}
           {resolvedName && resolvedNameTrusted && !editingAddressTag && (
             <div className="rounded-lg bg-gray-200 px-2 py-1 text-sm text-gray-500 text-nowrap">

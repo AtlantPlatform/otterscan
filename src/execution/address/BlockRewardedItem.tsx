@@ -2,8 +2,6 @@ import { FC, memo, useContext } from "react";
 import BlockLink from "../../components/BlockLink";
 import NativeTokenAmount from "../../components/NativeTokenAmount";
 import TimestampAge from "../../components/TimestampAge";
-import SlotLink from "../../consensus/components/SlotLink";
-import ValidatorLink from "../../consensus/components/ValidatorLink";
 import { BlockNumberContext } from "../../useBlockTagContext";
 import { useSlotHeader } from "../../useConsensus";
 import { useBlockData } from "../../useErigonHooks";
@@ -54,7 +52,7 @@ const BlockRewardedItem: FC<BlockRewardedItemProps> = ({
                 </div>
               ) : slot && slot?.data?.header?.message?.slot ? (
                 <div>
-                  <SlotLink slot={Number(slot?.data?.header?.message?.slot)} />
+                  <span>{Number(slot?.data?.header?.message?.slot)}</span>
                 </div>
               ) : (
                 <span className="text-gray-400">Not available</span>
@@ -68,7 +66,7 @@ const BlockRewardedItem: FC<BlockRewardedItemProps> = ({
               ) : (
                 <div>
                   {proposerIndex !== undefined ? (
-                    <ValidatorLink validatorIndex={proposerIndex} />
+                    <span>{proposerIndex}</span>
                   ) : (
                     <span className="text-gray-400">Not available</span>
                   )}
