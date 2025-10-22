@@ -1,7 +1,7 @@
 // Using system fonts for instant loading - no custom font imports needed
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { Helmet, HelmetProvider } from "react-helmet-async";
+import { HelmetProvider } from "react-helmet-async";
 import App from "./App";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
@@ -11,9 +11,6 @@ const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <HelmetProvider>
-      <Helmet>
-        <script src="https://analytics.ahrefs.com/analytics.js" data-key="trm7GqzX/ZpzFhsBA7bHyA" async></script>
-      </Helmet>
       <App />
     </HelmetProvider>
   </React.StrictMode>,

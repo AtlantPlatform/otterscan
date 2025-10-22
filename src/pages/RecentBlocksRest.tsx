@@ -94,20 +94,8 @@ const RecentBlocksRest: React.FC = () => {
       <StandardFrame>
         <Helmet>
           <title>Recent Blocks | Ethscan</title>
-          <meta name="description" content="Browse the latest Ethereum blocks with detailed information about gas usage and fees." />
+          <meta name="description" content="View the latest Ethereum blocks with live updates on gas usage, base fees, transaction counts, and miner information." />
           <link rel="canonical" href="https://ethscan.org/blocks/recent" />
-
-          {/* Open Graph tags */}
-          <meta property="og:title" content="Recent Blocks | Ethscan" />
-          <meta property="og:description" content="Browse the latest Ethereum blocks with detailed information about gas usage and fees." />
-          <meta property="og:url" content="https://ethscan.org/blocks/recent" />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Ethscan" />
-
-          {/* Twitter tags */}
-          <meta name="twitter:card" content="summary" />
-          <meta name="twitter:title" content="Recent Blocks | Ethscan" />
-          <meta name="twitter:description" content="Browse the latest Ethereum blocks with detailed information about gas usage and fees." />
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">

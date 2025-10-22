@@ -9,7 +9,6 @@ import { Helmet } from "react-helmet-async";
 import ContentFrame from "./components/ContentFrame";
 import ExternalLink from "./components/ExternalLink";
 import StandardFrame from "./components/StandardFrame";
-import StandardSubtitle from "./components/StandardSubtitle";
 import { useChainInfo } from "./useChainInfo";
 
 // URL displayed to the user as the source of the faucet information
@@ -40,11 +39,10 @@ const Faucets: React.FC = () => {
     <StandardFrame>
       <Helmet>
         <title>Ethereum Testnet Faucets | Ethscan</title>
-        <meta name="description" content="Find Ethereum testnet faucets to get free test ETH for development and testing purposes." />
+        <meta name="description" content="Find Ethereum testnet faucets to get free test ETH for development and testing on testnets like Sepolia, Goerli, and Holesky." />
         <link rel="canonical" href="https://ethscan.org/faucets" />
-
       </Helmet>
-      <StandardSubtitle>Faucets</StandardSubtitle>
+      <h1 className="pb-2 text-xl text-gray-700">Faucets</h1>
       <ContentFrame>
         <div className="space-y-3 py-4">
           {urls.length > 0 && (

@@ -132,21 +132,8 @@ const BroadcastTransactionPage: React.FC = () => {
   return (
     <StandardFrame>
       <Helmet>
-        <meta name="description" content={description}/>
+        <meta name="description" content="Broadcast raw Ethereum transactions to the network securely. Submit signed transaction data and track transaction status on Ethscan." />
         <link rel="canonical" href="https://ethscan.org/broadcastTx" />
-
-        {/* Open Graph tags */}
-        <meta property="og:title" content="Broadcast Ethereum Transactions | Ethscan" />
-        <meta property="og:description" content={description} />
-        <meta property="og:url" content="https://ethscan.org/broadcastTx" />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Ethscan" />
-
-        {/* Twitter tags */}
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Broadcast Ethereum Transactions | Ethscan" />
-        <meta name="twitter:description" content={description} />
-
         <script type="application/ld+json">{payloadSchemaFaqPageBaseInfo}</script>
         <script type="application/ld+json">{payloadSchemaFaqPageAdditionalInfo}</script>
         <script type="application/ld+json">{payloadSchemaFaqPage}</script>

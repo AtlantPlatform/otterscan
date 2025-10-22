@@ -36,12 +36,4 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Faucets -->
-  <url>
-    <loc>https://ethscan.org/faucets</loc>
-    <lastmod>2024-12-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
 </urlset>

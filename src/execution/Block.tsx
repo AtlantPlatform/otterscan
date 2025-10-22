@@ -41,8 +41,9 @@ const Block: React.FC = () => {
     <div className="min-h-screen overflow-x-hidden">
       <StandardFrame>
         <Helmet>
+          <title>Ethereum Block {blockNumberOrHash} - Transactions, Gas Used, and Miner Details | Ethscan</title>
+          <meta name="description" content={`View details for Ethereum block ${blockNumberOrHash} including all transactions, gas used, miner address, base fee, and timestamp information.`} />
           <link rel="canonical" href={`https://ethscan.org/block/${blockNumberOrHash}`} />
-
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">

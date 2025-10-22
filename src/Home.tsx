@@ -39,22 +39,8 @@ const Home: FC = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <Helmet>
-        <meta name="description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, logs, and more with Ethscan's user-friendly explorer" />
-        <title>Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | Ethscan</title>
+        <meta name="description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, and smart contracts with Ethscan's comprehensive blockchain explorer." />
         <link rel="canonical" href="https://ethscan.org/" />
-
-        {/* Open Graph tags */}
-        <meta property="og:title" content="Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | Ethscan" />
-        <meta property="og:description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, logs, and more with Ethscan's user-friendly explorer" />
-        <meta property="og:url" content="https://ethscan.org/" />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Ethscan" />
-
-        {/* Twitter tags */}
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Ethereum Explorer - Search Ethereum Transactions, Blocks, and Addresses | Ethscan" />
-        <meta name="twitter:description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, logs, and more with Ethscan's user-friendly explorer" />
-
         <script type="application/ld+json">{structuredJSON}</script>
       </Helmet>
       {/* Responsive header with conditional element display */}

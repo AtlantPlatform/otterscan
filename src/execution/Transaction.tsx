@@ -31,20 +31,9 @@ const Transaction: FC = () => {
       <BlockNumberContext.Provider value={txData?.confirmedData?.blockNumber}>
         <div className="min-h-screen overflow-x-hidden">
           <Helmet>
-            <meta name="description" content={`View details for Ethereum transaction ${txHash} including gas fees, input data, logs, and trace information.`} />
+            <title>Transaction {txHash} | Ethscan</title>
+            <meta name="description" content={`View details for Ethereum transaction ${txHash} including gas fees, sender, recipient, input data, logs, and execution trace.`} />
             <link rel="canonical" href={`https://ethscan.org/tx/${txHash}`} />
-
-            {/* Open Graph tags */}
-            <meta property="og:title" content="Ethereum Transaction Details | Ethscan" />
-            <meta property="og:description" content="View detailed information about Ethereum transactions including gas fees, input data, logs, and trace information." />
-            <meta property="og:url" content={`https://ethscan.org/tx/${txHash}`} />
-            <meta property="og:type" content="website" />
-            <meta property="og:site_name" content="Ethscan" />
-
-            {/* Twitter tags */}
-            <meta name="twitter:card" content="summary" />
-            <meta name="twitter:title" content="Ethereum Transaction Details | Ethscan" />
-            <meta name="twitter:description" content="View detailed information about Ethereum transactions including gas fees, input data, logs, and trace information." />
           </Helmet>
           <StandardFrame>
             <div className="py-6 max-w-7xl mx-auto">

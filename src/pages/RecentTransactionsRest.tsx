@@ -72,20 +72,8 @@ const RecentTransactionsRest: React.FC = () => {
       <StandardFrame>
         <Helmet>
           <title>Recent Transactions | Ethscan</title>
-          <meta name="description" content="Browse the latest Ethereum transactions with detailed information about transfers, fees, and methods." />
+          <meta name="description" content="View the latest Ethereum transactions with real-time updates on transaction hashes, values, gas prices, and contract interactions." />
           <link rel="canonical" href="https://ethscan.org/tx/recent" />
-
-          {/* Open Graph tags */}
-          <meta property="og:title" content="Recent Transactions | Ethscan" />
-          <meta property="og:description" content="Browse the latest Ethereum transactions with detailed information about transfers, fees, and methods." />
-          <meta property="og:url" content="https://ethscan.org/tx/recent" />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Ethscan" />
-
-          {/* Twitter tags */}
-          <meta name="twitter:card" content="summary" />
-          <meta name="twitter:title" content="Recent Transactions | Ethscan" />
-          <meta name="twitter:description" content="Browse the latest Ethereum transactions with detailed information about transfers, fees, and methods." />
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">
