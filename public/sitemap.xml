@@ -7,7 +7,7 @@
   <!-- Homepage / Dashboard -->
   <url>
     <loc>https://ethscan.org/</loc>
-    <lastmod>2024-12-18</lastmod>
+    <lastmod>2025-10-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -15,7 +15,7 @@
   <!-- Recent Blocks -->
   <url>
     <loc>https://ethscan.org/blocks/recent</loc>
-    <lastmod>2024-12-18</lastmod>
+    <lastmod>2025-10-27</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -23,7 +23,7 @@
   <!-- Recent Transactions -->
   <url>
     <loc>https://ethscan.org/tx/recent</loc>
-    <lastmod>2024-12-18</lastmod>
+    <lastmod>2025-10-27</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -31,7 +31,7 @@
   <!-- Broadcast Transaction -->
   <url>
     <loc>https://ethscan.org/broadcastTx</loc>
-    <lastmod>2024-12-18</lastmod>
+    <lastmod>2025-10-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
