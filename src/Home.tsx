@@ -25,7 +25,7 @@ const Home: FC = () => {
   const [searchRef, handleChange, handleSubmit] = useGenericSearch();
   const [isScanning, setScanning] = useState<boolean>(false);
 
-  usePageTitle("Ethereum Blockchain Explorer: find any Ethereum transaction", true);
+  usePageTitle("Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan", true);
 
   const structuredJSON = JSON.stringify({
     "@context": "https://schema.org",
