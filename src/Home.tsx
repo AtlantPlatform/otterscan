@@ -11,6 +11,7 @@ import RecentTransactionsSectionRest from "./components/RecentTransactionsSectio
 import { useGenericSearch } from "./search/search";
 import { RuntimeContext } from "./useRuntime";
 import { Helmet } from 'react-helmet-async';
+import { usePageTitle } from "./useTitle";
 import PriceBox from "./PriceBox";
 import BTCIcon from './icons/btc-icon.svg'
 import ETHIcon from './icons/eth-icon.svg'
@@ -23,6 +24,9 @@ const Home: FC = () => {
   const { provider, config } = useContext(RuntimeContext);
   const [searchRef, handleChange, handleSubmit] = useGenericSearch();
   const [isScanning, setScanning] = useState<boolean>(false);
+
+  usePageTitle("Ethereum Blockchain Explorer: find any Ethereum transaction", true);
+
   const structuredJSON = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebSite",
