@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { StaticRouter } from 'react-router-dom/server';
+import { StaticRouter } from 'react-router';
 import { HelmetProvider, HelmetServerState } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider, dehydrate } from '@tanstack/react-query';
 import AppSSR from './AppSSR';
