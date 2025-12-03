@@ -24,7 +24,10 @@ export const createAndProbeProvider = async (
   // Convert relative URLs to absolute URLs for ethers.js
   // ethers.js doesn't support relative URLs, so we need to prepend the origin
   if (rpcURL.startsWith("/")) {
-    const absoluteURL = `${window.location.origin}${rpcURL}`;
+    const baseUrl = typeof window !== 'undefined'
+      ? window.location.origin
+      : process.env.VITE_BASE_URL || 'http://localhost:3000';
+    const absoluteURL = `${baseUrl}${rpcURL}`;
     console.log(`Converting relative URL to absolute: ${absoluteURL}`);
     rpcURL = absoluteURL;
   }
