@@ -62,7 +62,10 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   // SSR Configuration
   ssr: {
-    // Externalize these packages in SSR build (they're browser-only)
-    noExternal: ['react-helmet-async'],
+    // Bundle these packages with SSR build (they need transformation)
+    noExternal: [
+      'react-helmet-async',
+      'use-keyboard-shortcut',  // CJS package that needs bundling
+    ],
   },
 }));

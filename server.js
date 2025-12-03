@@ -35,8 +35,12 @@ if (!isProduction) {
   app.use(base, express.static(path.resolve(__dirname, 'dist/client'), { index: false }));
 }
 
-// Serve HTML
-app.use('*', async (req, res) => {
+// Serve HTML for all routes (catch-all handler)
+app.use(async (req, res, next) => {
+  // Skip if not a GET request or if it's a static asset request
+  if (req.method !== 'GET') {
+    return next();
+  }
   try {
     const url = req.originalUrl.replace(base, '');
 

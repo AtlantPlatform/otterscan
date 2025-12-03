@@ -2,13 +2,14 @@ import { FC, lazy, Suspense, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Routes, Route } from "react-router";
 import ErrorFallback from "./components/ErrorFallback";
-import Home from "./Home";
-import Main from "./Main";
+import ClientOnly from "./components/ClientOnly";
 import { SourcifySource } from "./sourcify/useSourcify";
 import { AppConfig, AppConfigContext } from "./useAppConfig";
 import WarningHeader from "./WarningHeader";
 
-// Lazy loaded components (same as App.tsx)
+// Lazy loaded components - all require RuntimeContext so are client-only
+const Home = lazy(() => import("./Home"));
+const Main = lazy(() => import("./Main"));
 const Block = lazy(() => import("./execution/Block"));
 const BlockTransactions = lazy(() => import("./execution/BlockTransactionsRest"));
 const BlockTransactionByIndex = lazy(
@@ -73,57 +74,74 @@ const AppConfigProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 /**
+ * SSR loading skeleton - rendered during SSR while waiting for hydration.
+ * This provides a basic page structure that gets replaced on the client.
+ */
+const SSRSkeleton: FC = () => (
+  <div className="flex h-screen flex-col">
+    <div className="flex-1 flex items-center justify-center">
+      <div className="text-gray-500">Loading...</div>
+    </div>
+  </div>
+);
+
+/**
  * SSR-compatible App component.
  * Uses Routes instead of createBrowserRouter for server compatibility.
  * Note: Provider/runtime initialization happens only on client after hydration.
  * QueryClientProvider is wrapped in entry-server.tsx and index.tsx
+ *
+ * Components requiring RuntimeContext are wrapped in ClientOnly to prevent
+ * SSR errors since the Ethereum provider isn't available during server render.
  */
 const AppSSR: FC = () => {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <AppConfigProvider>
-        <div className="flex h-screen flex-col">
-          <WarningHeader />
-          <Suspense fallback={<div className="flex-1" />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/special/liveBlocks" element={<LiveBlocks />} />
-              <Route path="/*" element={<Main />}>
-                <Route path="block/:blockNumberOrHash" element={<Block />} />
-                <Route path="block/:blockNumber/txs" element={<BlockTransactions />} />
-                <Route
-                  path="block/:blockNumberOrHash/tx/:txIndex"
-                  element={<BlockTransactionByIndex />}
-                />
-                <Route path="tx/:txhash/*" element={<Transaction />} />
-                <Route path="address/:addressOrName/" element={<Address />}>
-                  <Route index element={<AddressTransactionResults />} />
-                  <Route path="txs/:direction" element={<AddressTransactionResults />} />
-                  <Route path="erc20" element={<AddressERC20Results />} />
-                  <Route path="erc721" element={<AddressERC721Results />} />
-                  <Route path="tokens" element={<AddressTokens />} />
-                  <Route path="withdrawals" element={<AddressWithdrawals />} />
-                  <Route path="blocksRewarded" element={<BlocksRewarded />} />
-                  <Route path="contract" element={<AddressContract />} />
-                  <Route path="readContract" element={<AddressReadContract />} />
-                  <Route path="proxyLogicContract" element={<ProxyContract />} />
-                  <Route path="readContractAsProxy" element={<ProxyReadContract />} />
-                  <Route path="*" element={null} />
+        <ClientOnly fallback={<SSRSkeleton />}>
+          <div className="flex h-screen flex-col">
+            <WarningHeader />
+            <Suspense fallback={<div className="flex-1" />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/special/liveBlocks" element={<LiveBlocks />} />
+                <Route path="/*" element={<Main />}>
+                  <Route path="block/:blockNumberOrHash" element={<Block />} />
+                  <Route path="block/:blockNumber/txs" element={<BlockTransactions />} />
+                  <Route
+                    path="block/:blockNumberOrHash/tx/:txIndex"
+                    element={<BlockTransactionByIndex />}
+                  />
+                  <Route path="tx/:txhash/*" element={<Transaction />} />
+                  <Route path="address/:addressOrName/" element={<Address />}>
+                    <Route index element={<AddressTransactionResults />} />
+                    <Route path="txs/:direction" element={<AddressTransactionResults />} />
+                    <Route path="erc20" element={<AddressERC20Results />} />
+                    <Route path="erc721" element={<AddressERC721Results />} />
+                    <Route path="tokens" element={<AddressTokens />} />
+                    <Route path="withdrawals" element={<AddressWithdrawals />} />
+                    <Route path="blocksRewarded" element={<BlocksRewarded />} />
+                    <Route path="contract" element={<AddressContract />} />
+                    <Route path="readContract" element={<AddressReadContract />} />
+                    <Route path="proxyLogicContract" element={<ProxyContract />} />
+                    <Route path="readContractAsProxy" element={<ProxyReadContract />} />
+                    <Route path="*" element={null} />
+                  </Route>
+                  <Route path="contracts/*" element={<AllContracts />} />
+                  <Route path="contracts/erc20/*" element={<AllERC20 />} />
+                  <Route path="contracts/erc4626/*" element={<AllERC4626 />} />
+                  <Route path="contracts/erc721/*" element={<AllERC721 />} />
+                  <Route path="contracts/erc1155/*" element={<AllERC1155 />} />
+                  <Route path="contracts/erc1167/*" element={<AllERC1167 />} />
+                  <Route path="blocks/recent" element={<RecentBlocks />} />
+                  <Route path="tx/recent" element={<RecentTransactions />} />
+                  <Route path="broadcastTx" element={<BroadcastTransactionPage />} />
+                  <Route path="*" element={<PageNotFound />} />
                 </Route>
-                <Route path="contracts/*" element={<AllContracts />} />
-                <Route path="contracts/erc20/*" element={<AllERC20 />} />
-                <Route path="contracts/erc4626/*" element={<AllERC4626 />} />
-                <Route path="contracts/erc721/*" element={<AllERC721 />} />
-                <Route path="contracts/erc1155/*" element={<AllERC1155 />} />
-                <Route path="contracts/erc1167/*" element={<AllERC1167 />} />
-                <Route path="blocks/recent" element={<RecentBlocks />} />
-                <Route path="tx/recent" element={<RecentTransactions />} />
-                <Route path="broadcastTx" element={<BroadcastTransactionPage />} />
-                <Route path="*" element={<PageNotFound />} />
-              </Route>
-            </Routes>
-          </Suspense>
-        </div>
+              </Routes>
+            </Suspense>
+          </div>
+        </ClientOnly>
       </AppConfigProvider>
     </ErrorBoundary>
   );
