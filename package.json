@@ -51,9 +51,13 @@
     "web-vitals": "^3.5.2"
   },
   "scripts": {
+    "dev": "node server.js",
+    "dev:csr": "vite",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build --ssrManifest --outDir dist/client",
+    "build:server": "vite build --ssr src/entry-server.tsx --outDir dist/server",
+    "preview": "cross-env NODE_ENV=production node server.js",
     "start": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
     "test": "jest",
     "source-map-explorer": "source-map-explorer build/static/js/*.js",
     "assets-start": "docker run --rm -p 5175:80 --name otterscan-assets -d otterscan/otterscan-assets:v1.0.1",
