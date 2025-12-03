@@ -3,10 +3,13 @@ import { faDisplay } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { SourcifyMenuItem, SourcifyMenuTitle } from "../SourcifyMenu";
+import { useIsClient } from "../hooks/useIsClient";
 
 type Theme = "light" | "dark" | "system";
 
 function updateTheme(theme: Theme) {
+  if (typeof window === 'undefined') return;
+
   const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
   const isDarkMode =
     theme === "dark" || (theme === "system" && darkModeQuery.matches);
@@ -17,13 +20,27 @@ function updateTheme(theme: Theme) {
   }
 }
 
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return "system";
+  return (localStorage.getItem("theme") as Theme) ?? "system";
+}
+
 const ThemeToggler: React.FC = () => {
-  const [theme, setTheme] = useState<Theme>(localStorage.theme ?? "system");
+  const isClient = useIsClient();
+  const [theme, setTheme] = useState<Theme>("system");
   const [updated, setUpdated] = useState<number | null>(null);
 
-  const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  // Initialize theme from localStorage on client
   useEffect(() => {
-    const mediaQueryListener = (event: MediaQueryListEvent) => {
+    setTheme(getInitialTheme());
+  }, []);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (!isClient) return;
+
+    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const mediaQueryListener = () => {
       if (theme === "system") {
         setUpdated(Date.now());
       }
@@ -33,17 +50,20 @@ const ThemeToggler: React.FC = () => {
     return () => {
       darkModeQuery.removeEventListener("change", mediaQueryListener);
     };
-  }, [theme, setTheme, setUpdated]);
+  }, [isClient, theme]);
 
+  // Apply theme changes
   useEffect(() => {
-    updateTheme(theme);
-  }, [theme, updated]);
+    if (isClient) {
+      updateTheme(theme);
+    }
+  }, [isClient, theme, updated]);
 
   const handleThemeChange = (newTheme: Theme) => {
     if (newTheme === "system") {
       localStorage.removeItem("theme");
     } else {
-      localStorage.theme = newTheme;
+      localStorage.setItem("theme", newTheme);
     }
     setTheme(newTheme);
     updateTheme(newTheme);
