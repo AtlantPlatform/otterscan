@@ -3,7 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 import { HelmetProvider, HelmetServerState } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider, dehydrate } from '@tanstack/react-query';
-import App from './App';
+import AppSSR from './AppSSR';
 
 interface RenderResult {
   html: string;
@@ -27,7 +27,7 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
       <HelmetProvider context={helmetContext}>
         <QueryClientProvider client={queryClient}>
           <StaticRouter location={url}>
-            <App />
+            <AppSSR />
           </StaticRouter>
         </QueryClientProvider>
       </HelmetProvider>
