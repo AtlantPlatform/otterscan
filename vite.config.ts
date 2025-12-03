@@ -63,4 +63,9 @@ export default defineConfig({
       },
     },
   },
+  // SSR Configuration
+  ssr: {
+    // Externalize these packages in SSR build (they're browser-only)
+    noExternal: ['react-helmet-async'],
+  },
 });
