@@ -60,10 +60,12 @@ const ThemeToggler: React.FC = () => {
   }, [isClient, theme, updated]);
 
   const handleThemeChange = (newTheme: Theme) => {
-    if (newTheme === "system") {
-      localStorage.removeItem("theme");
-    } else {
-      localStorage.setItem("theme", newTheme);
+    if (typeof localStorage !== 'undefined') {
+      if (newTheme === "system") {
+        localStorage.removeItem("theme");
+      } else {
+        localStorage.setItem("theme", newTheme);
+      }
     }
     setTheme(newTheme);
     updateTheme(newTheme);

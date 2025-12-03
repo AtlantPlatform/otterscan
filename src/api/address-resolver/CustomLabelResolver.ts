@@ -47,20 +47,22 @@ export class CustomLabelFetcher {
       );
     }
 
-    // Load labels from localStorage
+    // Load labels from localStorage (only available on client)
     this.localStorageLabels.clear();
-    const localStorageAddrsString = localStorage.getItem("customAddressLabels");
-    if (typeof localStorageAddrsString === "string") {
-      try {
-        const localLabels = JSON.parse(localStorageAddrsString) as [
-          string,
-          string,
-        ][];
-        for (let addressTag of localLabels) {
-          this.localStorageLabels.set(addressTag[0], addressTag[1]);
+    if (typeof localStorage !== 'undefined') {
+      const localStorageAddrsString = localStorage.getItem("customAddressLabels");
+      if (typeof localStorageAddrsString === "string") {
+        try {
+          const localLabels = JSON.parse(localStorageAddrsString) as [
+            string,
+            string,
+          ][];
+          for (let addressTag of localLabels) {
+            this.localStorageLabels.set(addressTag[0], addressTag[1]);
+          }
+        } catch (e) {
+          console.error(e);
         }
-      } catch (e) {
-        console.error(e);
       }
     }
 
@@ -79,10 +81,14 @@ export class CustomLabelFetcher {
         this.localStorageLabels.set(key, value);
       }
     });
-    localStorage.setItem(
-      "customAddressLabels",
-      JSON.stringify([...this.localStorageLabels]),
-    );
+
+    // Only update localStorage if we're on the client
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(
+        "customAddressLabels",
+        JSON.stringify([...this.localStorageLabels]),
+      );
+    }
   }
 
   public async getItem(key: string): Promise<string | undefined> {
