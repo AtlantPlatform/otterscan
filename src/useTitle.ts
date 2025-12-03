@@ -14,7 +14,9 @@ export const usePageTitle = (title: string | undefined, exact?: boolean) => {
   }
 
   if (exact) {
-    document.title = title;
+    if (typeof document !== 'undefined') {
+      document.title = title;
+    }
 
     return;
   }
@@ -23,7 +25,9 @@ export const usePageTitle = (title: string | undefined, exact?: boolean) => {
   // const networkTitle = config.branding?.networkTitle
   //   ? `| ${config.branding?.networkTitle} `
   //   : "";
-  document.title = `${title} | ${siteName}`;
+  if (typeof document !== 'undefined') {
+    document.title = `${title} | ${siteName}`;
+  }
 };
 
 /**
