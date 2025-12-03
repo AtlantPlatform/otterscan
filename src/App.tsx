@@ -1,4 +1,4 @@
-import { QueryClientProvider } from "@tanstack/react-query";
+// QueryClientProvider moved to index.tsx (CSR) and entry-server.tsx (SSR)
 import { isAddress } from "ethers";
 import { FC, lazy, Suspense, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -263,20 +263,19 @@ const Layout: FC = () => {
             <Await resolve={data.rt} errorElement={<ProbeErrorHandler />}>
               {(runtime) => (
                 // App is healthy from here
-                <QueryClientProvider client={queryClient}>
-                  <RuntimeContext.Provider value={runtime}>
-                    <ChainInfoContext.Provider
-                      value={runtime.config!.chainInfo}
-                    >
-                      <AppConfigProvider>
-                        <div className="flex h-screen flex-col">
-                          <WarningHeader />
-                          <Outlet />
-                        </div>
-                      </AppConfigProvider>
-                    </ChainInfoContext.Provider>
-                  </RuntimeContext.Provider>
-                </QueryClientProvider>
+                // QueryClientProvider is in index.tsx (CSR) and entry-server.tsx (SSR)
+                <RuntimeContext.Provider value={runtime}>
+                  <ChainInfoContext.Provider
+                    value={runtime.config!.chainInfo}
+                  >
+                    <AppConfigProvider>
+                      <div className="flex h-screen flex-col">
+                        <WarningHeader />
+                        <Outlet />
+                      </div>
+                    </AppConfigProvider>
+                  </ChainInfoContext.Provider>
+                </RuntimeContext.Provider>
               )}
             </Await>
           </Suspense>
