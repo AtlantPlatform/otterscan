@@ -92,8 +92,8 @@ const SSRSkeleton: FC = () => (
  * Note: Provider/runtime initialization happens only on client after hydration.
  * QueryClientProvider is wrapped in entry-server.tsx and index.tsx
  *
- * The homepage uses HomeSSR which is fully SSR-safe and renders data from prefetched queries.
- * Other routes are wrapped in ClientOnly since they require RuntimeContext.
+ * SSR-safe routes (homepage, recent blocks, recent transactions) are rendered directly.
+ * Other routes require RuntimeContext and are wrapped in ClientOnly.
  */
 const AppSSR: FC = () => {
   return (
@@ -102,8 +102,10 @@ const AppSSR: FC = () => {
         <div className="flex h-screen flex-col">
           <Suspense fallback={<div className="flex-1" />}>
             <Routes>
-              {/* Homepage is SSR-safe - renders with prefetched data */}
+              {/* SSR-safe routes - render with prefetched data, no RuntimeContext needed */}
               <Route path="/" element={<HomeSSR />} />
+              <Route path="/blocks/recent" element={<RecentBlocks />} />
+              <Route path="/tx/recent" element={<RecentTransactions />} />
 
               {/* All other routes require RuntimeContext, so wrap in ClientOnly */}
               <Route path="/*" element={
@@ -139,8 +141,6 @@ const AppSSR: FC = () => {
                       <Route path="contracts/erc721/*" element={<AllERC721 />} />
                       <Route path="contracts/erc1155/*" element={<AllERC1155 />} />
                       <Route path="contracts/erc1167/*" element={<AllERC1167 />} />
-                      <Route path="blocks/recent" element={<RecentBlocks />} />
-                      <Route path="tx/recent" element={<RecentTransactions />} />
                       <Route path="broadcastTx" element={<BroadcastTransactionPage />} />
                       <Route path="*" element={<PageNotFound />} />
                     </Route>
