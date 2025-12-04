@@ -1,6 +1,6 @@
 import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSearchParams, NavLink } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { formatEther } from "ethers";
@@ -9,26 +9,13 @@ import SimplePageControl from "../search/SimplePageControl";
 import StandardSelectionBoundary from "../selection/StandardSelectionBoundary";
 import TransactionItem from "../search/TransactionItem";
 import { FeeDisplay } from "../search/useFeeToggler";
-import { transactionsAPI } from "../api/client";
-import { useChainInfo } from "../useChainInfo";
+import { RestTransactionWithContext, usePaginatedTransactions } from "../api/useRestTransactions";
 import MethodName from "../components/MethodName";
 
 const TRANSACTIONS_PER_PAGE = 30;
 
-interface RestTransaction {
-  hash: string;
-  from: string;
-  to: string;
-  value: string;
-  type: number;
-  status: number;
-  gasUsed: number;
-  fee: string;
-  index: number;
-  blockNumber: number;
-  timestamp: number;
-  data: string;
-}
+// Default symbol for SSR - ChainInfo context not available on server
+const DEFAULT_SYMBOL = "ETH";
 
 const RecentTransactionsRest: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -40,32 +27,11 @@ const RecentTransactionsRest: React.FC = () => {
     } catch (err) { }
   }
 
-  const [transactions, setTransactions] = useState<RestTransaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [estimatedTotal, setEstimatedTotal] = useState(0);
+  // Use React Query hook for SSR-compatible data fetching
+  const { transactions, total: estimatedTotal, isLoading } = usePaginatedTransactions(pageNumber, TRANSACTIONS_PER_PAGE);
 
-  const {
-    nativeCurrency: { symbol },
-  } = useChainInfo();
-
-  // Fetch transactions for current page
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setIsLoading(true);
-      try {
-        const data = await transactionsAPI.getRecent(pageNumber, TRANSACTIONS_PER_PAGE);
-        setTransactions(data.transactions);
-        setEstimatedTotal(data.total);
-      } catch (error) {
-        console.error("Failed to fetch recent transactions:", error);
-        setTransactions([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, [pageNumber]);
+  // Use default symbol for SSR compatibility (ChainInfo context not available on server)
+  const symbol = DEFAULT_SYMBOL;
 
   return (
     <div className="min-h-screen overflow-x-hidden">

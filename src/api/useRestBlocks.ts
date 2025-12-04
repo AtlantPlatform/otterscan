@@ -2,6 +2,7 @@
  * React hooks for fetching block data using REST API instead of JSON-RPC
  */
 import { useEffect, useMemo, useState } from "react";
+import { useQuery, queryOptions } from "@tanstack/react-query";
 import { blocksAPI } from "./client";
 
 /**
@@ -152,45 +153,53 @@ export const useBlock = (numberOrHash: number | string | undefined) => {
 };
 
 /**
- * Hook to get recent blocks (static snapshot, no auto-refresh)
+ * Query options for recent blocks - can be used for both useQuery and prefetchQuery
+ * This enables SSR data prefetching
+ */
+export const recentBlocksQueryOptions = (count: number = 5) =>
+  queryOptions({
+    queryKey: ['recentBlocks', count],
+    queryFn: () => blocksAPI.getRecent(1, count),
+    staleTime: 15000, // 15 seconds
+  });
+
+/**
+ * Query options for paginated recent blocks - can be used for both useQuery and prefetchQuery
+ * This enables SSR data prefetching for the recent blocks page
+ */
+export const paginatedBlocksQueryOptions = (page: number = 1, limit: number = 30) =>
+  queryOptions({
+    queryKey: ['paginatedBlocks', page, limit],
+    queryFn: () => blocksAPI.getRecent(page, limit),
+    staleTime: 15000, // 15 seconds
+  });
+
+/**
+ * Hook to get paginated blocks using React Query (SSR-compatible)
+ * Used by RecentBlocksRest page component
+ */
+export const usePaginatedBlocks = (page: number = 1, limit: number = 30) => {
+  const { data, isLoading, error } = useQuery(paginatedBlocksQueryOptions(page, limit));
+
+  return {
+    blocks: data?.blocks ?? [],
+    total: data?.total ?? 0,
+    isLoading,
+    error: error as Error | undefined,
+  };
+};
+
+/**
+ * Hook to get recent blocks using React Query (SSR-compatible)
  * Used by RecentBlocksSection component
  * Now uses batched API for efficient loading
  */
 export const useRecentBlocks = (count: number = 5) => {
-  const [blocks, setBlocks] = useState<RestBlock[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error>();
+  const { data, isLoading, error } = useQuery(recentBlocksQueryOptions(count));
 
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
-
-    const fetchRecentBlocks = async () => {
-      try {
-        // Use batched API endpoint to fetch recent blocks
-        const data = await blocksAPI.getRecent(1, count);
-
-        if (isMounted) {
-          setBlocks(data.blocks);
-          setError(undefined);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err instanceof Error ? err : new Error(String(err)));
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchRecentBlocks();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [count]);
-
-  return { blocks, isLoading, error };
+  return {
+    blocks: data?.blocks ?? [],
+    isLoading,
+    error: error as Error | undefined,
+  };
 };

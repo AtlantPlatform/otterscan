@@ -2,6 +2,7 @@
  * React hooks for fetching transaction data using REST API instead of JSON-RPC
  */
 import { useEffect, useMemo, useState } from "react";
+import { useQuery, queryOptions } from "@tanstack/react-query";
 import { blocksAPI, transactionsAPI } from "./client";
 
 /**
@@ -89,53 +90,54 @@ export const useBlockTransactions = (
 };
 
 /**
- * Hook to get recent transactions from the latest block (static snapshot)
+ * Query options for recent transactions - can be used for both useQuery and prefetchQuery
+ * This enables SSR data prefetching
+ */
+export const recentTransactionsQueryOptions = (count: number = 5) =>
+  queryOptions({
+    queryKey: ['recentTransactions', count],
+    queryFn: () => transactionsAPI.getRecent(1, count),
+    staleTime: 15000, // 15 seconds
+  });
+
+/**
+ * Query options for paginated recent transactions - can be used for both useQuery and prefetchQuery
+ * This enables SSR data prefetching for the recent transactions page
+ */
+export const paginatedTransactionsQueryOptions = (page: number = 1, limit: number = 30) =>
+  queryOptions({
+    queryKey: ['paginatedTransactions', page, limit],
+    queryFn: () => transactionsAPI.getRecent(page, limit),
+    staleTime: 15000, // 15 seconds
+  });
+
+/**
+ * Hook to get paginated transactions using React Query (SSR-compatible)
+ * Used by RecentTransactionsRest page component
+ */
+export const usePaginatedTransactions = (page: number = 1, limit: number = 30) => {
+  const { data, isLoading, error } = useQuery(paginatedTransactionsQueryOptions(page, limit));
+
+  return {
+    transactions: (data?.transactions ?? []) as RestTransactionWithContext[],
+    total: data?.total ?? 0,
+    isLoading,
+    error: error as Error | undefined,
+  };
+};
+
+/**
+ * Hook to get recent transactions using React Query (SSR-compatible)
  * Used by RecentTransactionsSection component
  */
 export const useRecentTransactions = (count: number = 5) => {
-  const [transactions, setTransactions] = useState<RestTransactionWithContext[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error>();
+  const { data, isLoading, error } = useQuery(recentTransactionsQueryOptions(count));
 
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoading(true);
-
-    const fetchRecentTransactions = async () => {
-      try {
-        // Get the latest block number
-        const { blockNumber: latestBlockNumber } = await blocksAPI.getLatest();
-
-        // Fetch transactions from the latest block
-        // Note: API now includes blockNumber, timestamp, and data in the response
-        const txData = await blocksAPI.getTransactions(latestBlockNumber, 0, count);
-
-        if (isMounted) {
-          // Transactions already have all needed fields from the API
-          const enrichedTxs: RestTransactionWithContext[] = txData.transactions as RestTransactionWithContext[];
-
-          setTransactions(enrichedTxs);
-          setError(undefined);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err instanceof Error ? err : new Error(String(err)));
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchRecentTransactions();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [count]);
-
-  return { transactions, isLoading, error };
+  return {
+    transactions: (data?.transactions ?? []) as RestTransactionWithContext[],
+    isLoading,
+    error: error as Error | undefined,
+  };
 };
 
 /**

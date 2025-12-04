@@ -1,13 +1,12 @@
 import { faCube } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSearchParams } from "react-router";
 import { Helmet } from "react-helmet-async";
 import BlockLink from "../components/BlockLink";
 import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
-import { blocksAPI } from "../api/client";
-import { RestBlock } from "../api/useRestBlocks";
+import { RestBlock, usePaginatedBlocks } from "../api/useRestBlocks";
 import { commify } from "../utils/utils";
 
 const ELASTICITY_MULTIPLIER = 2;
@@ -23,27 +22,8 @@ const RecentBlocksRest: React.FC = () => {
     } catch (err) {}
   }
 
-  const [blocks, setBlocks] = useState<RestBlock[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [totalBlocks, setTotalBlocks] = useState(0);
-
-  // Fetch blocks for current page using batched API
-  useEffect(() => {
-    const fetchBlocks = async () => {
-      setIsLoading(true);
-      try {
-        const data = await blocksAPI.getRecent(pageNumber, BLOCKS_PER_PAGE);
-        setBlocks(data.blocks);
-        setTotalBlocks(data.total);
-      } catch (error) {
-        console.error("Failed to fetch blocks:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBlocks();
-  }, [pageNumber]);
+  // Use React Query hook for SSR-compatible data fetching
+  const { blocks, total: totalBlocks, isLoading } = usePaginatedBlocks(pageNumber, BLOCKS_PER_PAGE);
 
   const BlockRow: React.FC<{ block: RestBlock }> = ({ block }) => {
     const gasTarget = block.gasLimit / ELASTICITY_MULTIPLIER;

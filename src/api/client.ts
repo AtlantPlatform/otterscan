@@ -3,7 +3,20 @@
  * All blockchain data is fetched through REST API endpoints
  */
 
-const API_BASE = '/api';
+// For SSR, we need absolute URLs pointing to the API server directly.
+// On client, relative URLs work fine (proxied by Express).
+// Note: This function is called at module load time
+const isServer = typeof window === 'undefined';
+
+// Server-side: always use absolute URL to API server
+// Client-side: use relative URL (proxied by Express)
+const API_BASE = isServer
+  ? 'http://localhost:3001/api'  // Direct API server URL for SSR
+  : '/api';                       // Relative URL for browser (proxied)
+
+if (isServer) {
+  console.log('[API Client] Running on server, API base:', API_BASE);
+}
 
 /**
  * Generic fetch wrapper with error handling

@@ -3,7 +3,9 @@ import React from "react";
 import { hydrateRoot, createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router";
 import App from "./App";
+import AppSSR from "./AppSSR";
 import { queryClient } from "./queryClient";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
@@ -16,25 +18,39 @@ const hasSSRContent = container.innerHTML.trim().length > 0;
 // Get dehydrated state from SSR if available
 const dehydratedState = (window as any).__REACT_QUERY_STATE__;
 
-const AppWithProviders = () => (
+// SSR hydration uses AppSSR (same component tree as server)
+const AppSSRWithProviders = () => (
   <React.StrictMode>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <HydrationBoundary state={dehydratedState}>
-          <App />
+          <BrowserRouter>
+            <AppSSR />
+          </BrowserRouter>
         </HydrationBoundary>
       </QueryClientProvider>
     </HelmetProvider>
   </React.StrictMode>
 );
 
+// CSR fallback uses App (with createBrowserRouter)
+const AppCSRWithProviders = () => (
+  <React.StrictMode>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </HelmetProvider>
+  </React.StrictMode>
+);
+
 if (hasSSRContent) {
-  // Hydrate SSR content
-  hydrateRoot(container, <AppWithProviders />);
+  // Hydrate SSR content - must use same component tree as server (AppSSR)
+  hydrateRoot(container, <AppSSRWithProviders />);
 } else {
   // CSR fallback (development without SSR server)
   const root = createRoot(container);
-  root.render(<AppWithProviders />);
+  root.render(<AppCSRWithProviders />);
 }
 
 // If you want to start measuring performance in your app, pass a function
