@@ -102,7 +102,7 @@ const AppSSR: FC = () => {
       <AppConfigProvider>
         <div className="flex h-screen flex-col">
           <Routes>
-            {/* SSR-safe routes - render synchronously with prefetched data */}
+            {/* SSR-safe routes - render synchronously with prefetched data from QueryClient cache */}
             <Route path="/" element={<HomeSSR />} />
             <Route path="/blocks/recent" element={<RecentBlocksRest />} />
             <Route path="/tx/recent" element={<RecentTransactionsRest />} />

@@ -73,6 +73,16 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
     console.error('[SSR] Prefetch error:', error);
   }
 
+  // Debug: Log cache state before rendering
+  const cacheData = queryClient.getQueryData(['paginatedBlocks', pageNumber, 30]);
+  console.log('[SSR] Cache state before render:', {
+    url,
+    urlPath,
+    pageNumber,
+    hasData: !!cacheData,
+    dataLength: cacheData ? (cacheData as any).blocks?.length : 0,
+  });
+
   const html = renderToString(
     <React.StrictMode>
       <HelmetProvider context={helmetContext}>
@@ -84,6 +94,8 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
       </HelmetProvider>
     </React.StrictMode>
   );
+
+  console.log('[SSR] Rendered HTML length:', html.length);
 
   const { helmet } = helmetContext;
   const dehydratedState = dehydrate(queryClient);

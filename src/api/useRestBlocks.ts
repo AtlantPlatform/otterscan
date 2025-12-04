@@ -2,8 +2,11 @@
  * React hooks for fetching block data using REST API instead of JSON-RPC
  */
 import { useEffect, useMemo, useState } from "react";
-import { useQuery, queryOptions } from "@tanstack/react-query";
+import { useQuery, useQueryClient, queryOptions } from "@tanstack/react-query";
 import { blocksAPI } from "./client";
+
+// Check if running on server
+const isServer = typeof window === 'undefined';
 
 /**
  * Block data structure matching REST API response
@@ -176,16 +179,37 @@ export const paginatedBlocksQueryOptions = (page: number = 1, limit: number = 30
 
 /**
  * Hook to get paginated blocks using React Query (SSR-compatible)
+ * On server: reads from QueryClient cache (synchronous, set by prefetchQuery), query disabled
+ * On client: uses useQuery for data fetching and updates
  * Used by RecentBlocksRest page component
  */
 export const usePaginatedBlocks = (page: number = 1, limit: number = 30) => {
-  const { data, isLoading, error } = useQuery(paginatedBlocksQueryOptions(page, limit));
+  const queryClient = useQueryClient();
+  const queryKey = ['paginatedBlocks', page, limit];
+
+  // On server, directly read from cache (synchronous)
+  // This works because prefetchQuery populates the cache before renderToString
+  const cachedData = queryClient.getQueryData<{ blocks: RestBlock[]; total: number }>(queryKey);
+
+  // Use useQuery for client-side fetching and updates
+  // On server, disable the query - we just use the cached data directly
+  const { data, isLoading } = useQuery({
+    ...paginatedBlocksQueryOptions(page, limit),
+    // Use cached data as initial data
+    initialData: cachedData,
+    // Disable query on server - prevents any async operations during renderToString
+    enabled: !isServer,
+  });
+
+  // On server, use cached data directly
+  // On client, use query data (which starts with initialData)
+  const resultData = isServer ? cachedData : data;
 
   return {
-    blocks: data?.blocks ?? [],
-    total: data?.total ?? 0,
-    isLoading,
-    error: error as Error | undefined,
+    blocks: resultData?.blocks ?? [],
+    total: resultData?.total ?? 0,
+    // On server: loading if no cached data; on client: use React Query's loading state
+    isLoading: isServer ? !cachedData : isLoading,
   };
 };
 

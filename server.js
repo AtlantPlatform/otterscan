@@ -42,7 +42,9 @@ app.use(async (req, res, next) => {
     return next();
   }
   try {
-    const url = req.originalUrl.replace(base, '');
+    // Keep leading slash - React Router needs it for route matching
+    // Only strip base if it's a custom base path (not just '/')
+    const url = base === '/' ? req.originalUrl : req.originalUrl.replace(base, '');
 
     let template;
     let render;

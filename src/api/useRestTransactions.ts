@@ -2,8 +2,11 @@
  * React hooks for fetching transaction data using REST API instead of JSON-RPC
  */
 import { useEffect, useMemo, useState } from "react";
-import { useQuery, queryOptions } from "@tanstack/react-query";
+import { useQuery, useQueryClient, queryOptions } from "@tanstack/react-query";
 import { blocksAPI, transactionsAPI } from "./client";
+
+// Check if running on server
+const isServer = typeof window === 'undefined';
 
 /**
  * Transaction data structure from REST API block transactions endpoint
@@ -113,16 +116,36 @@ export const paginatedTransactionsQueryOptions = (page: number = 1, limit: numbe
 
 /**
  * Hook to get paginated transactions using React Query (SSR-compatible)
+ * On server: directly reads from QueryClient cache (synchronous, set by prefetchQuery)
+ * On client: uses useQuery for data fetching and updates
  * Used by RecentTransactionsRest page component
  */
 export const usePaginatedTransactions = (page: number = 1, limit: number = 30) => {
-  const { data, isLoading, error } = useQuery(paginatedTransactionsQueryOptions(page, limit));
+  const queryClient = useQueryClient();
+  const queryKey = ['paginatedTransactions', page, limit];
+
+  // On server, directly read from cache (synchronous)
+  // This works because prefetchQuery populates the cache before renderToString
+  const cachedData = queryClient.getQueryData<{ transactions: RestTransactionWithContext[]; total: number }>(queryKey);
+
+  // Use useQuery for client-side fetching and updates
+  // On server, disable the query - we just use the cached data directly
+  const { data, isLoading } = useQuery({
+    ...paginatedTransactionsQueryOptions(page, limit),
+    // Use cached data as initial data
+    initialData: cachedData,
+    // Disable query on server - prevents any async operations during renderToString
+    enabled: !isServer,
+  });
+
+  // On server, prefer cached data (synchronous)
+  // On client, use query data
+  const resultData = isServer ? cachedData : data;
 
   return {
-    transactions: (data?.transactions ?? []) as RestTransactionWithContext[],
-    total: data?.total ?? 0,
-    isLoading,
-    error: error as Error | undefined,
+    transactions: (resultData?.transactions ?? []) as RestTransactionWithContext[],
+    total: resultData?.total ?? 0,
+    isLoading: isServer ? !cachedData : (!cachedData && isLoading),
   };
 };
 
