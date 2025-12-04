@@ -20,21 +20,29 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  # Otterscan Frontend - serves the web UI
+  # Otterscan Frontend - SSR Node.js server
   otterscan-frontend:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5173:80"
+      - "5173:3000"
     environment:
+      - NODE_ENV=production
+      - PORT=3000
       # Point to the API's JSON-RPC proxy endpoint
-      - ERIGON_URL=/api/rpc
+      - VITE_ERIGON_URL=/api/rpc
       # Optional configurations
-      # - BEACON_API_URL=http://host.docker.internal:5052
-      # - ASSETS_URL_PREFIX=http://localhost:5175
-      # - OTS2=true
+      # - VITE_BEACON_API_URL=http://host.docker.internal:5052
+      # - VITE_ASSETS_URL_PREFIX=http://localhost:5175
+      # - VITE_OTS2=true
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     depends_on:
       otterscan-api:
         condition: service_healthy
