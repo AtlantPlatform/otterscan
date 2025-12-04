@@ -101,15 +101,15 @@ const AppSSR: FC = () => {
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <AppConfigProvider>
         <div className="flex h-screen flex-col">
-          <Suspense fallback={<div className="flex-1" />}>
-            <Routes>
-              {/* SSR-safe routes - render with prefetched data, no RuntimeContext needed */}
-              <Route path="/" element={<HomeSSR />} />
-              <Route path="/blocks/recent" element={<RecentBlocksRest />} />
-              <Route path="/tx/recent" element={<RecentTransactionsRest />} />
+          <Routes>
+            {/* SSR-safe routes - render synchronously with prefetched data */}
+            <Route path="/" element={<HomeSSR />} />
+            <Route path="/blocks/recent" element={<RecentBlocksRest />} />
+            <Route path="/tx/recent" element={<RecentTransactionsRest />} />
 
-              {/* All other routes require RuntimeContext, so wrap in ClientOnly */}
-              <Route path="/*" element={
+            {/* All other routes require RuntimeContext and lazy loading, wrap in Suspense + ClientOnly */}
+            <Route path="/*" element={
+              <Suspense fallback={<SSRSkeleton />}>
                 <ClientOnly fallback={<SSRSkeleton />}>
                   <WarningHeader />
                   <Routes>
@@ -147,9 +147,9 @@ const AppSSR: FC = () => {
                     </Route>
                   </Routes>
                 </ClientOnly>
-              } />
-            </Routes>
-          </Suspense>
+              </Suspense>
+            } />
+          </Routes>
         </div>
       </AppConfigProvider>
     </ErrorBoundary>
