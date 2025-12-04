@@ -7,6 +7,9 @@ import { SourcifySource } from "./sourcify/useSourcify";
 import { AppConfig, AppConfigContext } from "./useAppConfig";
 import WarningHeader from "./WarningHeader";
 import HomeSSR from "./HomeSSR";
+// SSR-safe pages - imported directly (not lazy) so they render during SSR
+import RecentBlocksRest from "./pages/RecentBlocksRest";
+import RecentTransactionsRest from "./pages/RecentTransactionsRest";
 
 // Lazy loaded components - all require RuntimeContext so are client-only
 const Home = lazy(() => import("./Home"));
@@ -49,8 +52,6 @@ const AllERC721 = lazy(() => import("./token/AllERC721"));
 const AllERC1155 = lazy(() => import("./token/AllERC1155"));
 const AllERC1167 = lazy(() => import("./token/AllERC1167"));
 const LiveBlocks = lazy(() => import("./special/london/LiveBlocks"));
-const RecentBlocks = lazy(() => import("./pages/RecentBlocksRest"));
-const RecentTransactions = lazy(() => import("./pages/RecentTransactionsRest"));
 const PageNotFound = lazy(() => import("./PageNotFound"));
 const BroadcastTransactionPage = lazy(
   () => import("./execution/BroadcastTransactionPage"),
@@ -104,8 +105,8 @@ const AppSSR: FC = () => {
             <Routes>
               {/* SSR-safe routes - render with prefetched data, no RuntimeContext needed */}
               <Route path="/" element={<HomeSSR />} />
-              <Route path="/blocks/recent" element={<RecentBlocks />} />
-              <Route path="/tx/recent" element={<RecentTransactions />} />
+              <Route path="/blocks/recent" element={<RecentBlocksRest />} />
+              <Route path="/tx/recent" element={<RecentTransactionsRest />} />
 
               {/* All other routes require RuntimeContext, so wrap in ClientOnly */}
               <Route path="/*" element={
