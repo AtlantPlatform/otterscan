@@ -1,5 +1,6 @@
 import { FC, memo } from "react";
 import { Link } from "react-router";
+import SourcifyMenu from "../SourcifyMenu";
 import ETHScanLogoSingle from "../ethscanlogosingle.png";
 import ETHScanLogoSingleText from "../LogoText.png";
 import ETHScanLogoSingleTextDark from "../LogoTextDark.png";
@@ -19,7 +20,7 @@ const HeaderSSR: FC = () => {
       <div className="px-3 lg:px-9 py-2 lg:py-4 max-w-7xl mx-auto">
         {/* Mobile Header Layout */}
         <div className="flex flex-col space-y-3 lg:hidden">
-          {/* Top row: Logo */}
+          {/* Top row: Logo and Menu */}
           <div className="flex items-center justify-between">
             <Link className="flex items-center space-x-2 font-title text-lg font-bold flex-shrink-0" to="/">
               <img
@@ -47,6 +48,7 @@ const HeaderSSR: FC = () => {
                 title="Ethscan logo text"
               />
             </Link>
+            <SourcifyMenu />
           </div>
 
           {/* Search Bar placeholder - SSR safe */}
@@ -171,6 +173,11 @@ const HeaderSSR: FC = () => {
                 title="BTC Mempool"
               />
             </a>
+          </div>
+
+          {/* Menu */}
+          <div>
+            <SourcifyMenu />
           </div>
         </div>
       </div>
