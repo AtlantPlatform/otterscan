@@ -117,7 +117,7 @@ export const paginatedTransactionsQueryOptions = (page: number = 1, limit: numbe
 /**
  * Hook to get paginated transactions using React Query (SSR-compatible)
  * On server: directly reads from QueryClient cache (synchronous, set by prefetchQuery)
- * On client: uses useQuery for data fetching and updates
+ * On client: uses useQuery for data fetching and updates (hydrated from SSR state)
  * Used by RecentTransactionsRest page component
  */
 export const usePaginatedTransactions = (page: number = 1, limit: number = 30) => {
@@ -130,22 +130,25 @@ export const usePaginatedTransactions = (page: number = 1, limit: number = 30) =
 
   // Use useQuery for client-side fetching and updates
   // On server, disable the query - we just use the cached data directly
-  const { data, isLoading } = useQuery({
+  // On client, HydrationBoundary restores the cache before this runs,
+  // so useQuery will find the prefetched data in the cache
+  const { data, isLoading, isFetching } = useQuery({
     ...paginatedTransactionsQueryOptions(page, limit),
-    // Use cached data as initial data
-    initialData: cachedData,
     // Disable query on server - prevents any async operations during renderToString
     enabled: !isServer,
   });
 
-  // On server, prefer cached data (synchronous)
-  // On client, use query data
-  const resultData = isServer ? cachedData : data;
+  // CRITICAL: Use same data source for both server and client initial render
+  // to avoid hydration mismatch. On server, cachedData is from prefetchQuery.
+  // On client during hydration, cachedData is from HydrationBoundary (same data).
+  // After hydration, data from useQuery takes over for reactivity.
+  const resultData = cachedData ?? data;
 
   return {
     transactions: (resultData?.transactions ?? []) as RestTransactionWithContext[],
     total: resultData?.total ?? 0,
-    isLoading: isServer ? !cachedData : (!cachedData && isLoading),
+    // Loading if no data available from either source
+    isLoading: !resultData && (isServer ? true : (isLoading || isFetching)),
   };
 };
 

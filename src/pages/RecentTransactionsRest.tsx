@@ -6,11 +6,8 @@ import { Helmet } from "react-helmet-async";
 import { formatEther } from "ethers";
 import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
-import StandardSelectionBoundary from "../selection/StandardSelectionBoundary";
-import TransactionItem from "../search/TransactionItem";
-import { FeeDisplay } from "../search/useFeeToggler";
 import { RestTransactionWithContext, usePaginatedTransactions } from "../api/useRestTransactions";
-import MethodName from "../components/MethodName";
+import { extract4Bytes } from "../use4Bytes";
 
 const TRANSACTIONS_PER_PAGE = 30;
 
@@ -118,53 +115,82 @@ const RecentTransactionsRest: React.FC = () => {
             </>
           ) : transactions.length > 0 ? (
             <>
-              {/* Desktop Table */}
+              {/* Desktop Table - SSR-safe inline rendering */}
               <div className="hidden sm:block mx-3 lg:mx-9">
-                <StandardSelectionBoundary>
-                  <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                    <div className="overflow-x-scroll">
-                      <table className="w-full table-auto border-gray-200 px-2 py-2 text-left text-sm [&>*>tr]:items-baseline">
-                        <thead>
-                          <tr className="bg-gray-100 text-gray-500 [&>th]:truncate [&>th:first-child]:pl-2 [&>th:last-child]:pr-2 [&>th]:px-1 [&>th]:py-2">
-                            <th>Transaction</th>
-                            <th>Method</th>
-                            <th className="w-28">Block</th>
-                            <th className="w-36">Date/Time</th>
-                            <th>Value</th>
-                            <th>Fee</th>
-                          </tr>
-                        </thead>
-                        <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200">
-                          {transactions.map((tx) => {
-                            // Convert REST API format to ProcessedTransaction format for TransactionItem
-                            const processedTx = {
-                              blockNumber: tx.blockNumber,
-                              timestamp: tx.timestamp,
-                              miner: "",
-                              idx: tx.index,
-                              hash: tx.hash,
-                              from: tx.from,
-                              to: tx.to,
-                              value: BigInt(tx.value),
-                              type: tx.type,
-                              fee: BigInt(tx.fee),
-                              gasPrice: 0n,
-                              data: tx.data,
-                              status: tx.status,
-                            };
-                            return (
-                              <TransactionItem
-                                key={tx.hash}
-                                tx={processedTx}
-                                feeDisplay={FeeDisplay.TX_FEE}
-                              />
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                  <div className="overflow-x-scroll">
+                    <table className="w-full table-auto border-gray-200 px-2 py-2 text-left text-sm [&>*>tr]:items-baseline">
+                      <thead>
+                        <tr className="bg-gray-100 text-gray-500 [&>th]:truncate [&>th:first-child]:pl-2 [&>th:last-child]:pr-2 [&>th]:px-1 [&>th]:py-2">
+                          <th>Transaction</th>
+                          <th>Method</th>
+                          <th className="w-28">Block</th>
+                          <th className="w-36">Date/Time</th>
+                          <th>Value</th>
+                          <th>Fee</th>
+                        </tr>
+                      </thead>
+                      <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200">
+                        {transactions.map((tx) => {
+                          const valueBigInt = BigInt(tx.value);
+                          const feeBigInt = BigInt(tx.fee);
+                          const fourBytes = extract4Bytes(tx.data);
+                          const isSimpleTransfer = tx.data === "0x";
+                          const methodLabel = isSimpleTransfer ? "transfer" : (fourBytes ?? "-");
+
+                          return (
+                            <tr key={tx.hash}>
+                              <td className="max-w-[14.5rem]">
+                                <NavLink
+                                  to={`/tx/${tx.hash}`}
+                                  className={`flex items-baseline space-x-1 font-hash text-link-blue hover:text-link-blue-hover ${tx.status === 0 ? 'line-through opacity-70' : ''}`}
+                                >
+                                  <span className="truncate">{tx.hash}</span>
+                                </NavLink>
+                              </td>
+                              <td className="min-w-32 max-w-32">
+                                <div className={`${isSimpleTransfer ? "bg-amber-100" : "bg-blue-50"} flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs`}>
+                                  <p className="truncate">{methodLabel}</p>
+                                </div>
+                              </td>
+                              <td className="max-w-28">
+                                <NavLink
+                                  to={`/block/${tx.blockNumber}`}
+                                  className="flex items-baseline space-x-1 text-link-blue hover:text-link-blue-hover font-blocknum whitespace-nowrap"
+                                >
+                                  <span>{tx.blockNumber.toLocaleString()}</span>
+                                </NavLink>
+                              </td>
+                              <td className="min-w-36 max-w-36 text-gray-600" title={new Date(tx.timestamp * 1000).toLocaleString()}>
+                                {new Date(tx.timestamp * 1000).toLocaleString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  second: '2-digit',
+                                  hour12: false
+                                })}
+                              </td>
+                              <td className="min-w-48 max-w-48">
+                                {valueBigInt > 0n ? (
+                                  <span>{formatEther(valueBigInt).substring(0, 10)} {symbol}</span>
+                                ) : (
+                                  <span className="text-gray-400">0 {symbol}</span>
+                                )}
+                              </td>
+                              <td className="min-w-16 max-w-28">
+                                <span className="truncate font-balance text-xs text-gray-500">
+                                  {feeBigInt > 0n ? formatEther(feeBigInt).substring(0, 10) : "-"}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
-                </StandardSelectionBoundary>
+                </div>
               </div>
 
               {/* Mobile Cards */}
@@ -203,8 +229,8 @@ const RecentTransactionsRest: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Method</span>
-                        <div className="text-xs bg-gray-100 px-2 py-1 rounded">
-                          {tx.to && <MethodName data={tx.data} to={tx.to} />}
+                        <div className={`text-xs px-2 py-1 rounded ${tx.data === "0x" ? "bg-amber-100" : "bg-blue-50"}`}>
+                          {tx.data === "0x" ? "transfer" : (extract4Bytes(tx.data) ?? "-")}
                         </div>
                       </div>
                       <div className="flex justify-between items-center">

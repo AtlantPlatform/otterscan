@@ -180,7 +180,7 @@ export const paginatedBlocksQueryOptions = (page: number = 1, limit: number = 30
 /**
  * Hook to get paginated blocks using React Query (SSR-compatible)
  * On server: reads from QueryClient cache (synchronous, set by prefetchQuery), query disabled
- * On client: uses useQuery for data fetching and updates
+ * On client: uses useQuery for data fetching and updates (hydrated from SSR state)
  * Used by RecentBlocksRest page component
  */
 export const usePaginatedBlocks = (page: number = 1, limit: number = 30) => {
@@ -193,23 +193,25 @@ export const usePaginatedBlocks = (page: number = 1, limit: number = 30) => {
 
   // Use useQuery for client-side fetching and updates
   // On server, disable the query - we just use the cached data directly
-  const { data, isLoading } = useQuery({
+  // On client, HydrationBoundary restores the cache before this runs,
+  // so useQuery will find the prefetched data in the cache
+  const { data, isLoading, isFetching } = useQuery({
     ...paginatedBlocksQueryOptions(page, limit),
-    // Use cached data as initial data
-    initialData: cachedData,
     // Disable query on server - prevents any async operations during renderToString
     enabled: !isServer,
   });
 
-  // On server, use cached data directly
-  // On client, use query data (which starts with initialData)
-  const resultData = isServer ? cachedData : data;
+  // CRITICAL: Use same data source for both server and client initial render
+  // to avoid hydration mismatch. On server, cachedData is from prefetchQuery.
+  // On client during hydration, cachedData is from HydrationBoundary (same data).
+  // After hydration, data from useQuery takes over for reactivity.
+  const resultData = cachedData ?? data;
 
   return {
     blocks: resultData?.blocks ?? [],
     total: resultData?.total ?? 0,
-    // On server: loading if no cached data; on client: use React Query's loading state
-    isLoading: isServer ? !cachedData : isLoading,
+    // Loading if no data available from either source
+    isLoading: !resultData && (isServer ? true : (isLoading || isFetching)),
   };
 };
 
