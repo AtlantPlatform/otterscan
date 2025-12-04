@@ -4,6 +4,7 @@ import React from "react";
 import { useSearchParams, NavLink } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { formatEther } from "ethers";
+import HeaderSSR from "../components/HeaderSSR";
 import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
 import { RestTransactionWithContext, usePaginatedTransactions } from "../api/useRestTransactions";
@@ -32,6 +33,7 @@ const RecentTransactionsRest: React.FC = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      <HeaderSSR />
       <StandardFrame>
         <Helmet>
           <title>Recent Transactions | Ethscan</title>

@@ -4,6 +4,7 @@ import React from "react";
 import { useSearchParams } from "react-router";
 import { Helmet } from "react-helmet-async";
 import BlockLink from "../components/BlockLink";
+import HeaderSSR from "../components/HeaderSSR";
 import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
 import { RestBlock, usePaginatedBlocks } from "../api/useRestBlocks";
@@ -71,6 +72,7 @@ const RecentBlocksRest: React.FC = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      <HeaderSSR />
       <StandardFrame>
         <Helmet>
           <title>Recent Blocks | Ethscan</title>
