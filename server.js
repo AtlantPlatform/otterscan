@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import compression from 'compression';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === 'production';
@@ -34,6 +35,13 @@ if (!isProduction) {
   app.use(compression());
   app.use(base, express.static(path.resolve(__dirname, 'dist/client'), { index: false }));
 }
+
+// Proxy API requests to API server (must be before SSR catch-all)
+const apiTarget = process.env.API_URL || 'http://localhost:3001';
+app.use('/api', createProxyMiddleware({
+  target: `${apiTarget}/api`,  // Include /api since mount path is stripped
+  changeOrigin: true,
+}));
 
 // Serve HTML for all routes (catch-all handler)
 app.use(async (req, res, next) => {
