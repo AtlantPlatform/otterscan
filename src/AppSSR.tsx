@@ -14,6 +14,8 @@ import HomeSSR from "./HomeSSR";
 import RecentBlocksRest from "./pages/RecentBlocksRest";
 import RecentTransactionsRest from "./pages/RecentTransactionsRest";
 import BlockSSR from "./execution/BlockSSR";
+import TransactionSSR from "./execution/TransactionSSR";
+import BlockTransactionsSSR from "./execution/BlockTransactionsSSR";
 
 // Lazy loaded components - all require RuntimeContext so are client-only
 const Home = lazy(() => import("./Home"));
@@ -167,6 +169,8 @@ const AppSSR: FC = () => {
             <Route path="/blocks/recent" element={<RecentBlocksRest />} />
             <Route path="/tx/recent" element={<RecentTransactionsRest />} />
             <Route path="/block/:blockNumberOrHash" element={<BlockSSR />} />
+            <Route path="/block/:blockNumber/txs" element={<BlockTransactionsSSR />} />
+            <Route path="/tx/:txhash" element={<TransactionSSR />} />
 
             {/* All other routes require RuntimeContext and lazy loading, wrap in Suspense + ClientOnly + RuntimeProvider */}
             <Route path="/*" element={

@@ -211,3 +211,88 @@ export const useTransaction = (txHash: string | undefined) => {
 
   return { transaction, isLoading, error };
 };
+
+/**
+ * Query options for single transaction - can be used for both useQuery and prefetchQuery
+ * This enables SSR data prefetching for transaction pages
+ */
+export const singleTransactionQueryOptions = (txHash: string) =>
+  queryOptions({
+    queryKey: ['transaction', txHash],
+    queryFn: () => transactionsAPI.getTransaction(txHash),
+    staleTime: 60000, // 1 minute - transactions are immutable once confirmed
+  });
+
+/**
+ * Hook to get a single transaction using React Query (SSR-compatible)
+ * On server: reads from QueryClient cache (synchronous, set by prefetchQuery), query disabled
+ * On client: uses useQuery for data fetching and updates (hydrated from SSR state)
+ * Used by TransactionSSR page component
+ */
+export const useSingleTransaction = (txHash: string | undefined) => {
+  const queryClient = useQueryClient();
+  const queryKey = ['transaction', txHash];
+
+  // On server, directly read from cache (synchronous)
+  const cachedData = txHash
+    ? queryClient.getQueryData<any>(queryKey)
+    : undefined;
+
+  // Use useQuery for client-side fetching and updates
+  const { data, isLoading, isFetching, error } = useQuery({
+    ...singleTransactionQueryOptions(txHash ?? ''),
+    enabled: !isServer && !!txHash,
+  });
+
+  // Use same data source for both server and client initial render
+  const resultData = cachedData ?? data;
+
+  return {
+    transaction: resultData ?? null,
+    isLoading: !resultData && (isServer ? true : (isLoading || isFetching)),
+    error: error as Error | undefined,
+  };
+};
+
+/**
+ * Query options for block transactions - can be used for both useQuery and prefetchQuery
+ * This enables SSR data prefetching for block transactions pages
+ */
+export const blockTransactionsQueryOptions = (blockNumber: number, page: number = 1, limit: number = 25) =>
+  queryOptions({
+    queryKey: ['blockTransactions', blockNumber, page, limit],
+    queryFn: () => blocksAPI.getTransactions(blockNumber, page - 1, limit),
+    staleTime: 60000, // 1 minute - block transactions are immutable
+  });
+
+/**
+ * Hook to get block transactions using React Query (SSR-compatible)
+ * On server: reads from QueryClient cache (synchronous, set by prefetchQuery), query disabled
+ * On client: uses useQuery for data fetching and updates (hydrated from SSR state)
+ * Used by BlockTransactionsSSR page component
+ */
+export const useBlockTransactionsSSR = (blockNumber: number | undefined, page: number = 1, limit: number = 25) => {
+  const queryClient = useQueryClient();
+  const queryKey = ['blockTransactions', blockNumber, page, limit];
+
+  // On server, directly read from cache (synchronous)
+  const cachedData = blockNumber !== undefined
+    ? queryClient.getQueryData<any>(queryKey)
+    : undefined;
+
+  // Use useQuery for client-side fetching and updates
+  const { data, isLoading, isFetching, error } = useQuery({
+    ...blockTransactionsQueryOptions(blockNumber ?? 0, page, limit),
+    enabled: !isServer && blockNumber !== undefined,
+  });
+
+  // Use same data source for both server and client initial render
+  const resultData = cachedData ?? data;
+
+  return {
+    transactions: resultData?.transactions ?? [],
+    total: resultData?.total ?? 0,
+    isLoading: !resultData && (isServer ? true : (isLoading || isFetching)),
+    error: error as Error | undefined,
+  };
+};

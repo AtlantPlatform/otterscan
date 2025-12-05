@@ -5,7 +5,8 @@ import { HelmetProvider, HelmetServerState } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider, dehydrate } from '@tanstack/react-query';
 import AppSSR from './AppSSR';
 import { recentBlocksQueryOptions, paginatedBlocksQueryOptions, singleBlockQueryOptions } from './api/useRestBlocks';
-import { recentTransactionsQueryOptions, paginatedTransactionsQueryOptions } from './api/useRestTransactions';
+import { recentTransactionsQueryOptions, paginatedTransactionsQueryOptions, singleTransactionQueryOptions, blockTransactionsQueryOptions } from './api/useRestTransactions';
+import { PAGE_SIZE } from './params';
 
 interface RenderResult {
   html: string;
@@ -35,7 +36,19 @@ function getUrlPath(url: string): string {
 
 // Extract block number or hash from block page URL
 function getBlockNumberOrHash(urlPath: string): string | null {
-  const match = urlPath.match(/^\/block\/([^/]+)/);
+  const match = urlPath.match(/^\/block\/([^/]+)$/);
+  return match ? match[1] : null;
+}
+
+// Extract block number from block transactions page URL
+function getBlockNumberFromTxsUrl(urlPath: string): number | null {
+  const match = urlPath.match(/^\/block\/(\d+)\/txs/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+// Extract transaction hash from transaction page URL
+function getTxHash(urlPath: string): string | null {
+  const match = urlPath.match(/^\/tx\/([^/]+)/);
   return match ? match[1] : null;
 }
 
@@ -73,12 +86,26 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
       // Recent transactions page - prefetch paginated transactions (30 items)
       console.log('[SSR] Prefetching transactions page data...');
       await queryClient.prefetchQuery(paginatedTransactionsQueryOptions(pageNumber, 30));
+    } else if (urlPath.match(/^\/block\/\d+\/txs/)) {
+      // Block transactions page - prefetch block transactions
+      const blockNumber = getBlockNumberFromTxsUrl(urlPath);
+      if (blockNumber !== null) {
+        console.log('[SSR] Prefetching block transactions for block:', blockNumber);
+        await queryClient.prefetchQuery(blockTransactionsQueryOptions(blockNumber, pageNumber, PAGE_SIZE));
+      }
     } else if (urlPath.startsWith('/block/')) {
       // Block detail page - prefetch single block data
       const blockNumberOrHash = getBlockNumberOrHash(urlPath);
       if (blockNumberOrHash) {
         console.log('[SSR] Prefetching block data for:', blockNumberOrHash);
         await queryClient.prefetchQuery(singleBlockQueryOptions(blockNumberOrHash));
+      }
+    } else if (urlPath.startsWith('/tx/')) {
+      // Transaction detail page - prefetch single transaction data
+      const txHash = getTxHash(urlPath);
+      if (txHash) {
+        console.log('[SSR] Prefetching transaction data for:', txHash);
+        await queryClient.prefetchQuery(singleTransactionQueryOptions(txHash));
       }
     }
   } catch (error) {
