@@ -80,6 +80,18 @@ export const blocksAPI = {
     baseFeePerGas: number | null;
     size: number;
     parentHash: string;
+    // Additional fields for detailed block view
+    extraData: string;
+    difficulty: number;
+    totalDifficulty: string | null;
+    sha3Uncles: string;
+    stateRoot: string;
+    receiptsRoot: string;
+    nonce: string;
+    // Post-Cancun fields (may be null for older blocks)
+    blobGasUsed: number | null;
+    excessBlobGas: number | null;
+    parentBeaconBlockRoot: string | null;
   }> {
     return apiFetch(`/blocks/${numberOrHash}`);
   },
@@ -166,6 +178,17 @@ export const transactionsAPI = {
       logIndex: number;
     }>;
     contractAddress: string | null;
+    // EIP-1559 fields (type 2 transactions)
+    maxPriorityFeePerGas: string | null;
+    maxFeePerGas: string | null;
+    // EIP-4844 blob transaction fields (type 3)
+    maxFeePerBlobGas: string | null;
+    blobVersionedHashes: string[] | null;
+    // Block data
+    timestamp: number | null;
+    baseFeePerGas: number | null;
+    blockTransactionCount: number | null;
+    confirmations: number;
   }> {
     return apiFetch(`/transactions/${hash}`);
   },

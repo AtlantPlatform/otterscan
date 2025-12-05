@@ -192,7 +192,7 @@ app.get('/api/blocks/:numberOrHash', async (req, res) => {
       return res.status(404).json({ error: 'Block not found' });
     }
 
-    // Return minimal fields for UI
+    // Return full block fields for UI
     const block = {
       number: parseInt(rawBlock.number, 16),
       hash: rawBlock.hash,
@@ -204,6 +204,18 @@ app.get('/api/blocks/:numberOrHash', async (req, res) => {
       baseFeePerGas: rawBlock.baseFeePerGas ? parseInt(rawBlock.baseFeePerGas, 16) : null,
       size: parseInt(rawBlock.size, 16),
       parentHash: rawBlock.parentHash,
+      // Additional fields for detailed block view
+      extraData: rawBlock.extraData,
+      difficulty: rawBlock.difficulty ? parseInt(rawBlock.difficulty, 16) : 0,
+      totalDifficulty: rawBlock.totalDifficulty ? rawBlock.totalDifficulty : null,
+      sha3Uncles: rawBlock.sha3Uncles,
+      stateRoot: rawBlock.stateRoot,
+      receiptsRoot: rawBlock.receiptsRoot,
+      nonce: rawBlock.nonce,
+      // Post-Cancun fields (may be null for older blocks)
+      blobGasUsed: rawBlock.blobGasUsed ? parseInt(rawBlock.blobGasUsed, 16) : null,
+      excessBlobGas: rawBlock.excessBlobGas ? parseInt(rawBlock.excessBlobGas, 16) : null,
+      parentBeaconBlockRoot: rawBlock.parentBeaconBlockRoot || null,
     };
 
     res.json(block);
@@ -410,19 +422,30 @@ app.get('/api/transactions/:hash', async (req, res) => {
   try {
     const { hash } = req.params;
 
-    const [tx, receipt] = await Promise.all([
+    const [tx, receipt, latestBlockNumber] = await Promise.all([
       provider.getTransaction(hash),
       provider.getTransactionReceipt(hash),
+      provider.getBlockNumber(),
     ]);
 
     if (!tx) {
       return res.status(404).json({ error: 'Transaction not found' });
     }
 
+    // Fetch block data for timestamp and base fee if transaction is confirmed
+    let blockData = null;
+    if (tx.blockNumber) {
+      const blockHex = `0x${tx.blockNumber.toString(16)}`;
+      blockData = await provider.send('eth_getBlockByNumber', [blockHex, false]);
+    }
+
     // Calculate fee
     const gasUsed = receipt ? Number(receipt.gasUsed) : 0;
     const gasPrice = Number(tx.gasPrice || 0n);
     const fee = (gasUsed * gasPrice).toString();
+
+    // Calculate confirmations
+    const confirmations = tx.blockNumber ? latestBlockNumber - tx.blockNumber + 1 : 0;
 
     const transaction = {
       hash: tx.hash,
@@ -448,6 +471,17 @@ app.get('/api/transactions/:hash', async (req, res) => {
         logIndex: log.index,
       })) : [],
       contractAddress: receipt?.contractAddress || null,
+      // EIP-1559 fields (type 2 transactions)
+      maxPriorityFeePerGas: tx.maxPriorityFeePerGas ? tx.maxPriorityFeePerGas.toString() : null,
+      maxFeePerGas: tx.maxFeePerGas ? tx.maxFeePerGas.toString() : null,
+      // EIP-4844 blob transaction fields (type 3)
+      maxFeePerBlobGas: tx.maxFeePerBlobGas ? tx.maxFeePerBlobGas.toString() : null,
+      blobVersionedHashes: tx.blobVersionedHashes || null,
+      // Block data
+      timestamp: blockData ? parseInt(blockData.timestamp, 16) : null,
+      baseFeePerGas: blockData?.baseFeePerGas ? parseInt(blockData.baseFeePerGas, 16) : null,
+      blockTransactionCount: blockData?.transactions ? blockData.transactions.length : null,
+      confirmations,
     };
 
     res.json(transaction);

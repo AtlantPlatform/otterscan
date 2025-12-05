@@ -59,16 +59,16 @@ const Transaction: FC = () => {
                 <>
                   <StandardSelectionBoundary>
                     <TabGroup>
-                      <TabList className="flex space-x-2 rounded-t-lg border-l border-r border-t bg-white mx-3 lg:mx-9">
-                        <NavTab href="..">Overview</NavTab>
+                      <TabList className="flex space-x-2 rounded-t-lg border-l border-r border-t bg-white dark:bg-gray-800 dark:border-gray-700 mx-3 lg:mx-9">
+                        <NavTab href={`/tx/${txHash}`}>Overview</NavTab>
                         {txData.confirmedData?.blockNumber !== undefined && (
-                          <NavTab href="../logs">
+                          <NavTab href={`/tx/${txHash}/logs`}>
                             Logs
                             {` (${txData.confirmedData?.logs?.length ?? 0})`}
                           </NavTab>
                         )}
-                        <NavTab href="../trace">Trace</NavTab>
-                        <NavTab href="../statediff">State Diff</NavTab>
+                        <NavTab href={`/tx/${txHash}/trace`}>Trace</NavTab>
+                        <NavTab href={`/tx/${txHash}/statediff`}>State Diff</NavTab>
                       </TabList>
                     </TabGroup>
                     <Suspense fallback={null}>

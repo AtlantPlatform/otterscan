@@ -1,7 +1,9 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { useParams, Link } from "react-router";
 import { Helmet } from "react-helmet-async";
-import { formatUnits } from "ethers";
+import { formatUnits, Utf8ErrorFuncs, toUtf8String } from "ethers";
+import { faBurn } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import HeaderSSR from "../components/HeaderSSR";
 import StandardFrame from "../components/StandardFrame";
 import StandardSubtitle from "../components/StandardSubtitle";
@@ -13,6 +15,7 @@ import HexValue from "../components/HexValue";
 import PercentageBar from "../components/PercentageBar";
 import RelativePosition from "../components/RelativePosition";
 import NavBlock from "../components/NavBlock";
+import FormattedBalance from "../components/FormattedBalance";
 import { useSingleBlock, useLatestBlockNumber } from "../api/useRestBlocks";
 import { blockURL, blockTxsURL } from "../url";
 import { commify } from "../utils/utils";
@@ -37,6 +40,16 @@ const BlockSSR: FC = () => {
   const gasUsedPerc = block
     ? Number((BigInt(block.gasUsed) * 10000n) / BigInt(block.gasLimit)) / 100
     : 0;
+
+  // Decode extraData to UTF-8 string
+  const extraStr = useMemo(() => {
+    return block?.extraData ? toUtf8String(block.extraData, Utf8ErrorFuncs.replace) : "";
+  }, [block?.extraData]);
+
+  // Calculate burnt fees
+  const burntFees = block?.baseFeePerGas !== null && block?.baseFeePerGas !== undefined
+    ? BigInt(block.baseFeePerGas) * BigInt(block.gasUsed)
+    : null;
 
   const description = `Details for Ethereum block ${blockNumberOrHash}, including transaction count, miner address, gas used, and timestamp.`;
 
@@ -168,9 +181,36 @@ const BlockSSR: FC = () => {
                 {block.baseFeePerGas !== null && (
                   <InfoRow title="Base Fee">
                     <span>
-                      {(block.baseFeePerGas / 1e9).toFixed(9)} Gwei (
-                      {commify(block.baseFeePerGas)} wei)
+                      <FormattedBalance
+                        value={BigInt(block.baseFeePerGas)}
+                        decimals={9}
+                        symbol="Gwei"
+                      />{" "}
+                      (
+                      <FormattedBalance
+                        value={BigInt(block.baseFeePerGas)}
+                        decimals={0}
+                        symbol="wei"
+                      />
+                      )
                     </span>
+                  </InfoRow>
+                )}
+                {burntFees !== null && (
+                  <InfoRow title="Burnt Fees">
+                    <div className="flex items-baseline space-x-1">
+                      <span className="flex space-x-1 text-orange-500">
+                        <span title="Burnt fees">
+                          <FontAwesomeIcon icon={faBurn} size="1x" />
+                        </span>
+                        <span>
+                          <span className="line-through">
+                            <FormattedBalance value={burntFees} />
+                          </span>{" "}
+                          ETH
+                        </span>
+                      </span>
+                    </div>
                   </InfoRow>
                 )}
                 <InfoRow title="Gas Used/Limit">
@@ -184,12 +224,61 @@ const BlockSSR: FC = () => {
                     <PercentageBar perc={gasUsedPerc} />
                   </div>
                 </InfoRow>
+                {block.blobGasUsed != null && (
+                  <InfoRow title="Blob Gas Used">
+                    {commify(block.blobGasUsed)}
+                  </InfoRow>
+                )}
+                {block.excessBlobGas != null && (
+                  <InfoRow title="Excess Blob Gas">
+                    {commify(block.excessBlobGas)}
+                  </InfoRow>
+                )}
+                {block.extraData && (
+                  <InfoRow title="Extra Data">
+                    {extraStr} (Hex:{" "}
+                    <span className="break-all font-data">{block.extraData}</span>)
+                  </InfoRow>
+                )}
+                <InfoRow title="Difficulty">
+                  {commify((block.difficulty ?? 0).toString())}
+                </InfoRow>
+                <InfoRow title="Total Difficulty">
+                  {block.totalDifficulty != null
+                    ? commify(block.totalDifficulty.toString())
+                    : "N/A"}
+                </InfoRow>
                 <InfoRow title="Hash">
                   <HexValue value={block.hash} />
                 </InfoRow>
                 <InfoRow title="Parent Hash">
                   <BlockLink blockTag={block.parentHash} />
                 </InfoRow>
+                {block.parentBeaconBlockRoot && (
+                  <InfoRow title="Parent Beacon Block Root">
+                    <HexValue value={block.parentBeaconBlockRoot} />
+                  </InfoRow>
+                )}
+                {block.sha3Uncles && (
+                  <InfoRow title="Sha3Uncles">
+                    <HexValue value={block.sha3Uncles} />
+                  </InfoRow>
+                )}
+                {block.stateRoot && (
+                  <InfoRow title="State Root">
+                    <HexValue value={block.stateRoot} />
+                  </InfoRow>
+                )}
+                {block.receiptsRoot && (
+                  <InfoRow title="Receipts Root">
+                    <HexValue value={block.receiptsRoot} />
+                  </InfoRow>
+                )}
+                {block.nonce && (
+                  <InfoRow title="Nonce">
+                    <span className="font-data">{block.nonce}</span>
+                  </InfoRow>
+                )}
               </ContentFrame>
 
               {/* SEO Summary Section */}

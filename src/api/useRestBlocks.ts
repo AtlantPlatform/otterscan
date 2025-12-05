@@ -10,6 +10,7 @@ const isServer = typeof window === 'undefined';
 
 /**
  * Block data structure matching REST API response
+ * Core fields are required; detailed fields are optional (present in single block query)
  */
 export interface RestBlock {
   number: number;
@@ -22,6 +23,18 @@ export interface RestBlock {
   baseFeePerGas: number | null;
   size: number;
   parentHash: string;
+  // Additional fields for detailed block view (optional, present in /blocks/:numberOrHash)
+  extraData?: string;
+  difficulty?: number;
+  totalDifficulty?: string | null;
+  sha3Uncles?: string;
+  stateRoot?: string;
+  receiptsRoot?: string;
+  nonce?: string;
+  // Post-Cancun fields (may be null/undefined for older blocks)
+  blobGasUsed?: number | null;
+  excessBlobGas?: number | null;
+  parentBeaconBlockRoot?: string | null;
 }
 
 /**
