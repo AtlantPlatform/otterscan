@@ -1,4 +1,4 @@
-import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCube, faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useEffect, useState } from "react";
 import { useSearchParams, NavLink } from "react-router";
@@ -245,9 +245,12 @@ const RecentTransactions: React.FC = () => {
                       <span className="text-sm text-gray-600">Block</span>
                       <NavLink
                         to={`/block/${tx.blockNumber}`}
-                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                        className="flex items-center space-x-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                       >
-                        {tx.blockNumber}
+                        <span className="text-orange-500">
+                          <FontAwesomeIcon icon={faCube} size="sm" />
+                        </span>
+                        <span>{tx.blockNumber}</span>
                       </NavLink>
                     </div>
                     <div className="flex justify-between items-center">

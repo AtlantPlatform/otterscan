@@ -1,6 +1,7 @@
 import { FC, memo } from "react";
 import { Link } from "react-router";
 import SourcifyMenu from "../SourcifyMenu";
+import PriceBoxClient from "./PriceBoxClient";
 import ETHScanLogoSingle from "../ethscanlogosingle.png";
 import ETHScanLogoSingleText from "../LogoText.png";
 import ETHScanLogoSingleTextDark from "../LogoTextDark.png";
@@ -109,6 +110,11 @@ const HeaderSSR: FC = () => {
             <Link to="/tx/recent" className="text-gray-700 hover:text-blue-600 font-medium text-base">
               Transactions
             </Link>
+          </div>
+
+          {/* ETH Price - Client-side rendered */}
+          <div className="hidden xl:block">
+            <PriceBoxClient />
           </div>
 
           {/* Search Bar placeholder - SSR safe */}

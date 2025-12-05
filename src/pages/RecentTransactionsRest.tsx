@@ -1,4 +1,4 @@
-import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCube, faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { useSearchParams, NavLink } from "react-router";
@@ -160,6 +160,9 @@ const RecentTransactionsRest: React.FC = () => {
                                   to={`/block/${tx.blockNumber}`}
                                   className="flex items-baseline space-x-1 text-link-blue hover:text-link-blue-hover font-blocknum whitespace-nowrap"
                                 >
+                                  <span className="text-orange-500">
+                                    <FontAwesomeIcon className="self-center" icon={faCube} size="1x" />
+                                  </span>
                                   <span>{tx.blockNumber.toLocaleString()}</span>
                                 </NavLink>
                               </td>
@@ -239,9 +242,12 @@ const RecentTransactionsRest: React.FC = () => {
                         <span className="text-sm text-gray-600">Block</span>
                         <NavLink
                           to={`/block/${tx.blockNumber}`}
-                          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                          className="flex items-center space-x-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                         >
-                          {tx.blockNumber}
+                          <span className="text-orange-500">
+                            <FontAwesomeIcon icon={faCube} size="sm" />
+                          </span>
+                          <span>{tx.blockNumber}</span>
                         </NavLink>
                       </div>
                       <div className="flex justify-between items-center">
