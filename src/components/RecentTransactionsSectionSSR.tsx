@@ -150,10 +150,9 @@ const RecentTransactionsSectionSSR: React.FC = () => {
                       />
                       <NavLink
                         to={`/tx/${tx.hash}`}
-                        className="text-blue-600 hover:text-blue-800 font-mono text-xs"
-                        title={tx.hash}
+                        className="text-blue-600 hover:text-blue-800 font-mono"
                       >
-                        {truncateHash(tx.hash)}
+                        {tx.hash}
                       </NavLink>
                     </div>
                   </td>

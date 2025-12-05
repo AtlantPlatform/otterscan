@@ -127,12 +127,15 @@ const RecentBlocksSectionSSR: React.FC = () => {
               return (
                 <tr key={block.hash}>
                   <td>
-                    <NavLink
-                      to={`/block/${block.number}`}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      {commify(block.number)}
-                    </NavLink>
+                    <div className="flex items-center space-x-2">
+                      <FontAwesomeIcon icon={faCube} className="text-orange-500" />
+                      <NavLink
+                        to={`/block/${block.number}`}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        {commify(block.number)}
+                      </NavLink>
+                    </div>
                   </td>
                   <td className="text-gray-600" title={formattedTime}>
                     {formattedTime}
@@ -148,10 +151,9 @@ const RecentBlocksSectionSSR: React.FC = () => {
                   <td>
                     <NavLink
                       to={`/address/${block.miner}`}
-                      className="text-blue-600 hover:text-blue-800 font-mono text-xs"
-                      title={block.miner}
+                      className="text-blue-600 hover:text-blue-800 font-mono"
                     >
-                      {truncateAddress(block.miner)}
+                      {block.miner}
                     </NavLink>
                   </td>
                   <td>
