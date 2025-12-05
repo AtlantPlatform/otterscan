@@ -4,7 +4,7 @@ import { StaticRouter } from 'react-router';
 import { HelmetProvider, HelmetServerState } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider, dehydrate } from '@tanstack/react-query';
 import AppSSR from './AppSSR';
-import { recentBlocksQueryOptions, paginatedBlocksQueryOptions } from './api/useRestBlocks';
+import { recentBlocksQueryOptions, paginatedBlocksQueryOptions, singleBlockQueryOptions } from './api/useRestBlocks';
 import { recentTransactionsQueryOptions, paginatedTransactionsQueryOptions } from './api/useRestTransactions';
 
 interface RenderResult {
@@ -31,6 +31,12 @@ function getUrlPath(url: string): string {
   } catch {
     return url.split('?')[0] || url;
   }
+}
+
+// Extract block number or hash from block page URL
+function getBlockNumberOrHash(urlPath: string): string | null {
+  const match = urlPath.match(/^\/block\/([^/]+)/);
+  return match ? match[1] : null;
 }
 
 export async function render(url: string, _ssrManifest?: string): Promise<RenderResult> {
@@ -67,6 +73,13 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
       // Recent transactions page - prefetch paginated transactions (30 items)
       console.log('[SSR] Prefetching transactions page data...');
       await queryClient.prefetchQuery(paginatedTransactionsQueryOptions(pageNumber, 30));
+    } else if (urlPath.startsWith('/block/')) {
+      // Block detail page - prefetch single block data
+      const blockNumberOrHash = getBlockNumberOrHash(urlPath);
+      if (blockNumberOrHash) {
+        console.log('[SSR] Prefetching block data for:', blockNumberOrHash);
+        await queryClient.prefetchQuery(singleBlockQueryOptions(blockNumberOrHash));
+      }
     }
   } catch (error) {
     // Log but don't fail SSR if prefetch fails - client can refetch

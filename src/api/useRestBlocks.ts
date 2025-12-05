@@ -229,3 +229,45 @@ export const useRecentBlocks = (count: number = 5) => {
     error: error as Error | undefined,
   };
 };
+
+/**
+ * Query options for single block - can be used for both useQuery and prefetchQuery
+ * This enables SSR data prefetching for block pages
+ */
+export const singleBlockQueryOptions = (blockNumberOrHash: string) =>
+  queryOptions({
+    queryKey: ['block', blockNumberOrHash],
+    queryFn: () => blocksAPI.getBlock(blockNumberOrHash),
+    staleTime: 60000, // 1 minute - blocks are immutable
+  });
+
+/**
+ * Hook to get a single block using React Query (SSR-compatible)
+ * On server: reads from QueryClient cache (synchronous, set by prefetchQuery), query disabled
+ * On client: uses useQuery for data fetching and updates (hydrated from SSR state)
+ * Used by BlockSSR page component
+ */
+export const useSingleBlock = (blockNumberOrHash: string | undefined) => {
+  const queryClient = useQueryClient();
+  const queryKey = ['block', blockNumberOrHash];
+
+  // On server, directly read from cache (synchronous)
+  const cachedData = blockNumberOrHash
+    ? queryClient.getQueryData<RestBlock>(queryKey)
+    : undefined;
+
+  // Use useQuery for client-side fetching and updates
+  const { data, isLoading, isFetching, error } = useQuery({
+    ...singleBlockQueryOptions(blockNumberOrHash ?? ''),
+    enabled: !isServer && !!blockNumberOrHash,
+  });
+
+  // Use same data source for both server and client initial render
+  const resultData = cachedData ?? data;
+
+  return {
+    block: resultData ?? null,
+    isLoading: !resultData && (isServer ? true : (isLoading || isFetching)),
+    error: error as Error | undefined,
+  };
+};

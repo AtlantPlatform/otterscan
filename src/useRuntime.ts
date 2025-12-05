@@ -29,6 +29,25 @@ export type OtterscanRuntime = {
 };
 
 /**
+ * Convert relative URLs to absolute URLs for ethers.js
+ * ethers.js doesn't support relative URLs, so we need to prepend the origin
+ */
+const resolveRpcUrl = (rpcURL?: string): string | undefined => {
+  if (rpcURL === undefined) {
+    return undefined;
+  }
+  if (rpcURL.startsWith("/")) {
+    const baseUrl = typeof window !== 'undefined'
+      ? window.location.origin
+      : process.env.VITE_BASE_URL || 'http://localhost:3000';
+    const absoluteURL = `${baseUrl}${rpcURL}`;
+    console.log(`Converting relative URL to absolute: ${absoluteURL}`);
+    return absoluteURL;
+  }
+  return rpcURL;
+};
+
+/**
  * Create an OtterscanRuntime based on a previously loaded configuration.
  *
  * If the config specifies a hardcoded chain ID, just create the runtime
@@ -45,9 +64,10 @@ export const createRuntime = async (
   // Hardcoded config
   if (effectiveConfig.experimentalFixedChainId !== undefined) {
     const network = Network.from(effectiveConfig.experimentalFixedChainId);
+    const rpcURL = resolveRpcUrl(effectiveConfig.rpcURL);
     return {
       config: effectiveConfig,
-      provider: new JsonRpcProvider(effectiveConfig.rpcURL, network, {
+      provider: new JsonRpcProvider(rpcURL, network, {
         staticNetwork: network,
       }),
     };

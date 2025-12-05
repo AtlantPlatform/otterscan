@@ -1,15 +1,19 @@
-import { FC, lazy, Suspense, useMemo, useState } from "react";
+import { FC, lazy, Suspense, useMemo, useState, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Routes, Route } from "react-router";
 import ErrorFallback from "./components/ErrorFallback";
 import ClientOnly from "./components/ClientOnly";
 import { SourcifySource } from "./sourcify/useSourcify";
 import { AppConfig, AppConfigContext } from "./useAppConfig";
+import { ChainInfoContext, populateChainInfo } from "./useChainInfo";
+import { loadOtterscanConfig } from "./useConfig";
+import { createRuntime, RuntimeContext, OtterscanRuntime } from "./useRuntime";
 import WarningHeader from "./WarningHeader";
 import HomeSSR from "./HomeSSR";
 // SSR-safe pages - imported directly (not lazy) so they render during SSR
 import RecentBlocksRest from "./pages/RecentBlocksRest";
 import RecentTransactionsRest from "./pages/RecentTransactionsRest";
+import BlockSSR from "./execution/BlockSSR";
 
 // Lazy loaded components - all require RuntimeContext so are client-only
 const Home = lazy(() => import("./Home"));
@@ -76,6 +80,62 @@ const AppConfigProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 /**
+ * RuntimeProvider for client-only routes.
+ * Loads config and creates runtime on the client side, then provides the contexts.
+ */
+const RuntimeProvider: FC<{ children: React.ReactNode; fallback?: React.ReactNode }> = ({
+  children,
+  fallback = <SSRSkeleton />
+}) => {
+  const [runtime, setRuntime] = useState<OtterscanRuntime | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const initRuntime = async () => {
+      try {
+        const config = loadOtterscanConfig();
+        const rt = await populateChainInfo(createRuntime(config));
+        if (!cancelled) {
+          setRuntime(rt);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      }
+    };
+
+    initRuntime();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (error) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center">
+        <div className="text-red-500">Error loading application: {error.message}</div>
+      </div>
+    );
+  }
+
+  if (!runtime) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <RuntimeContext.Provider value={runtime}>
+      <ChainInfoContext.Provider value={runtime.config.chainInfo}>
+        {children}
+      </ChainInfoContext.Provider>
+    </RuntimeContext.Provider>
+  );
+};
+
+/**
  * SSR loading skeleton - rendered during SSR while waiting for hydration.
  * This provides a basic page structure that gets replaced on the client.
  */
@@ -106,13 +166,15 @@ const AppSSR: FC = () => {
             <Route path="/" element={<HomeSSR />} />
             <Route path="/blocks/recent" element={<RecentBlocksRest />} />
             <Route path="/tx/recent" element={<RecentTransactionsRest />} />
+            <Route path="/block/:blockNumberOrHash" element={<BlockSSR />} />
 
-            {/* All other routes require RuntimeContext and lazy loading, wrap in Suspense + ClientOnly */}
+            {/* All other routes require RuntimeContext and lazy loading, wrap in Suspense + ClientOnly + RuntimeProvider */}
             <Route path="/*" element={
               <Suspense fallback={<SSRSkeleton />}>
                 <ClientOnly fallback={<SSRSkeleton />}>
-                  <WarningHeader />
-                  <Routes>
+                  <RuntimeProvider>
+                    <WarningHeader />
+                    <Routes>
                     <Route path="/special/liveBlocks" element={<LiveBlocks />} />
                     <Route path="/*" element={<Main />}>
                       <Route path="block/:blockNumberOrHash" element={<Block />} />
@@ -145,7 +207,8 @@ const AppSSR: FC = () => {
                       <Route path="broadcastTx" element={<BroadcastTransactionPage />} />
                       <Route path="*" element={<PageNotFound />} />
                     </Route>
-                  </Routes>
+                    </Routes>
+                  </RuntimeProvider>
                 </ClientOnly>
               </Suspense>
             } />
