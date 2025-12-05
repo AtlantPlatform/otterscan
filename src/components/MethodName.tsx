@@ -12,8 +12,7 @@ const MethodName: React.FC<MethodNameProps> = ({ data, to = undefined }) => {
 
   return (
     <div
-      className="flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs"
-      style={{ backgroundColor: '#e9e5cd', color: '#c5a03f' }}
+      className="method-badge flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs"
     >
       <p
         className="truncate"
