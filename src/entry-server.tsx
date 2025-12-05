@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider, dehydrate } from '@tanstack/react-que
 import AppSSR from './AppSSR';
 import { recentBlocksQueryOptions, paginatedBlocksQueryOptions, singleBlockQueryOptions } from './api/useRestBlocks';
 import { recentTransactionsQueryOptions, paginatedTransactionsQueryOptions, singleTransactionQueryOptions, blockTransactionsQueryOptions } from './api/useRestTransactions';
+import { singleAddressQueryOptions } from './api/useRestAddresses';
 import { PAGE_SIZE } from './params';
 
 interface RenderResult {
@@ -49,6 +50,12 @@ function getBlockNumberFromTxsUrl(urlPath: string): number | null {
 // Extract transaction hash from transaction page URL
 function getTxHash(urlPath: string): string | null {
   const match = urlPath.match(/^\/tx\/([^/]+)/);
+  return match ? match[1] : null;
+}
+
+// Extract address from address page URL
+function getAddress(urlPath: string): string | null {
+  const match = urlPath.match(/^\/address\/([^/]+)/);
   return match ? match[1] : null;
 }
 
@@ -106,6 +113,13 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
       if (txHash) {
         console.log('[SSR] Prefetching transaction data for:', txHash);
         await queryClient.prefetchQuery(singleTransactionQueryOptions(txHash));
+      }
+    } else if (urlPath.startsWith('/address/')) {
+      // Address page - prefetch address data
+      const address = getAddress(urlPath);
+      if (address) {
+        console.log('[SSR] Prefetching address data for:', address);
+        await queryClient.prefetchQuery(singleAddressQueryOptions(address));
       }
     }
   } catch (error) {
