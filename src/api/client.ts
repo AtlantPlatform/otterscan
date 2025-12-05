@@ -243,6 +243,36 @@ export const addressesAPI = {
   }> {
     return apiFetch(`/addresses/${address}/creator`);
   },
+
+  /**
+   * Get transactions for an address
+   */
+  async getTransactions(
+    address: string,
+    page = 1,
+    limit = 25
+  ): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    transactions: Array<{
+      hash: string;
+      from: string;
+      to: string;
+      value: string;
+      type: number;
+      status: number | null;
+      gasUsed: number;
+      fee: string;
+      blockNumber: number;
+      timestamp: number;
+      data: string;
+      index: number;
+    }>;
+    hasMore: boolean;
+  }> {
+    return apiFetch(`/addresses/${address}/transactions?page=${page}&limit=${limit}`);
+  },
 };
 
 /**

@@ -60,3 +60,73 @@ export const useSingleAddress = (address: string | undefined) => {
     error: error as Error | undefined,
   };
 };
+
+/**
+ * Address transaction data structure
+ */
+export interface AddressTransaction {
+  hash: string;
+  from: string;
+  to: string;
+  value: string;
+  type: number;
+  status: number | null;
+  gasUsed: number;
+  fee: string;
+  blockNumber: number;
+  timestamp: number;
+  data: string;
+  index: number;
+}
+
+/**
+ * Query options for address transactions - can be used for both useQuery and prefetchQuery
+ */
+export const addressTransactionsQueryOptions = (address: string, page = 1, limit = 25) =>
+  queryOptions({
+    queryKey: ['addressTransactions', address.toLowerCase(), page, limit],
+    queryFn: () => addressesAPI.getTransactions(address, page, limit),
+    staleTime: 15000, // 15 seconds - transactions can arrive frequently
+  });
+
+/**
+ * Hook to get address transactions using React Query (SSR-compatible)
+ */
+export const useAddressTransactions = (address: string | undefined, page = 1, limit = 25) => {
+  const queryClient = useQueryClient();
+  const normalizedAddress = address?.toLowerCase();
+  const queryKey = ['addressTransactions', normalizedAddress, page, limit];
+
+  // On server, directly read from cache (synchronous)
+  const cachedData = normalizedAddress
+    ? queryClient.getQueryData<{
+        total: number;
+        page: number;
+        limit: number;
+        transactions: AddressTransaction[];
+        hasMore: boolean;
+      }>(queryKey)
+    : undefined;
+
+  // Debug logging
+  if (!isServer) {
+    console.log('[useAddressTransactions] queryKey:', queryKey, 'cachedData:', cachedData ? cachedData.transactions.length + ' txs' : 'none');
+  }
+
+  // Use useQuery for client-side fetching and updates
+  const { data, isLoading, isFetching, error } = useQuery({
+    ...addressTransactionsQueryOptions(normalizedAddress ?? '', page, limit),
+    enabled: !isServer && !!normalizedAddress,
+  });
+
+  // Use same data source for both server and client initial render
+  const resultData = cachedData ?? data;
+
+  return {
+    transactions: resultData?.transactions ?? [],
+    total: resultData?.total ?? 0,
+    hasMore: resultData?.hasMore ?? false,
+    isLoading: !resultData && (isServer ? true : (isLoading || isFetching)),
+    error: error as Error | undefined,
+  };
+};

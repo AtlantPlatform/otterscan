@@ -172,7 +172,20 @@ const AppSSR: FC = () => {
             <Route path="/block/:blockNumberOrHash" element={<BlockSSR />} />
             <Route path="/block/:blockNumber/txs" element={<BlockTransactionsSSR />} />
             <Route path="/tx/:txhash" element={<TransactionSSR />} />
-            <Route path="/address/:addressOrName" element={<AddressSSR />} />
+            <Route path="/address/:addressOrName" element={<AddressSSR />}>
+              <Route index element={<AddressTransactionResults />} />
+              <Route path="txs/:direction" element={<AddressTransactionResults />} />
+              <Route path="erc20" element={<AddressERC20Results />} />
+              <Route path="erc721" element={<AddressERC721Results />} />
+              <Route path="tokens" element={<AddressTokens />} />
+              <Route path="withdrawals" element={<AddressWithdrawals />} />
+              <Route path="blocksRewarded" element={<BlocksRewarded />} />
+              <Route path="contract" element={<AddressContract />} />
+              <Route path="readContract" element={<AddressReadContract />} />
+              <Route path="proxyLogicContract" element={<ProxyContract />} />
+              <Route path="readContractAsProxy" element={<ProxyReadContract />} />
+              <Route path="*" element={null} />
+            </Route>
 
             {/* All other routes require RuntimeContext and lazy loading, wrap in Suspense + ClientOnly + RuntimeProvider */}
             <Route path="/*" element={

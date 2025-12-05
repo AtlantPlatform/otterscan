@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider, dehydrate } from '@tanstack/react-que
 import AppSSR from './AppSSR';
 import { recentBlocksQueryOptions, paginatedBlocksQueryOptions, singleBlockQueryOptions } from './api/useRestBlocks';
 import { recentTransactionsQueryOptions, paginatedTransactionsQueryOptions, singleTransactionQueryOptions, blockTransactionsQueryOptions } from './api/useRestTransactions';
-import { singleAddressQueryOptions } from './api/useRestAddresses';
+import { singleAddressQueryOptions, addressTransactionsQueryOptions } from './api/useRestAddresses';
 import { PAGE_SIZE } from './params';
 
 interface RenderResult {
@@ -115,11 +115,14 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
         await queryClient.prefetchQuery(singleTransactionQueryOptions(txHash));
       }
     } else if (urlPath.startsWith('/address/')) {
-      // Address page - prefetch address data
+      // Address page - prefetch address data and transactions
       const address = getAddress(urlPath);
       if (address) {
-        console.log('[SSR] Prefetching address data for:', address);
-        await queryClient.prefetchQuery(singleAddressQueryOptions(address));
+        console.log('[SSR] Prefetching address data and transactions for:', address);
+        await Promise.allSettled([
+          queryClient.prefetchQuery(singleAddressQueryOptions(address)),
+          queryClient.prefetchQuery(addressTransactionsQueryOptions(address, 1, 25)),
+        ]);
       }
     }
   } catch (error) {

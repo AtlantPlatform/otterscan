@@ -559,6 +559,90 @@ app.get('/api/addresses/:address/code', async (req, res) => {
 });
 
 /**
+ * GET /api/addresses/:address/transactions
+ * Get recent transactions for an address (Otterscan-specific)
+ * Query params: page (default 1), limit (default 25)
+ */
+app.get('/api/addresses/:address/transactions', async (req, res) => {
+  try {
+    const { address } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 25, 100);
+
+    // Use Otterscan-specific API to search transactions before a given block
+    // For the first page, we start from the latest block
+    // ots_searchTransactionsBefore returns transactions in reverse chronological order
+    const latestBlockNumber = await provider.getBlockNumber();
+
+    // For pagination, we need to track the last block we searched from
+    // For simplicity, we'll use a rough offset calculation
+    const results = await provider.send('ots_searchTransactionsBefore', [
+      address,
+      page === 1 ? latestBlockNumber : latestBlockNumber - ((page - 1) * 10000),
+      limit
+    ]);
+
+    if (!results || !results.txs) {
+      return res.json({
+        total: 0,
+        page,
+        limit,
+        transactions: [],
+        hasMore: false,
+      });
+    }
+
+    // Get transaction receipts for status info
+    const receipts = await Promise.all(
+      results.txs.map(tx => provider.send('eth_getTransactionReceipt', [tx.hash]))
+    );
+
+    // Transform transactions to match our format
+    const transactions = results.txs.map((tx, i) => {
+      const receipt = receipts[i];
+      const gasUsed = receipt ? parseInt(receipt.gasUsed, 16) : 0;
+      const gasPrice = tx.gasPrice ? parseInt(tx.gasPrice, 16) :
+        (tx.maxFeePerGas ? parseInt(tx.maxFeePerGas, 16) : 0);
+
+      return {
+        hash: tx.hash,
+        from: tx.from,
+        to: tx.to,
+        value: tx.value,
+        type: parseInt(tx.type || '0x0', 16),
+        status: receipt ? parseInt(receipt.status, 16) : null,
+        gasUsed,
+        fee: (gasUsed * gasPrice).toString(),
+        blockNumber: parseInt(tx.blockNumber, 16),
+        timestamp: parseInt(tx.timestamp || '0x0', 16),
+        data: tx.input || tx.data || '0x',
+        index: parseInt(tx.transactionIndex || '0x0', 16),
+      };
+    });
+
+    res.json({
+      total: results.fullCount || transactions.length,
+      page,
+      limit,
+      transactions,
+      hasMore: results.txs.length >= limit,
+      firstPage: results.firstPage || false,
+      lastPage: results.lastPage || false,
+    });
+  } catch (error) {
+    console.error('Error getting address transactions:', error);
+    // Return empty result if Otterscan API not available
+    res.json({
+      total: 0,
+      page: 1,
+      limit: 25,
+      transactions: [],
+      hasMore: false,
+    });
+  }
+});
+
+/**
  * GET /api/addresses/:address/creator
  * Get contract creator (Otterscan-specific)
  */
