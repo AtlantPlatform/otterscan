@@ -151,7 +151,7 @@ const RecentTransactionsRest: React.FC = () => {
                                 </NavLink>
                               </td>
                               <td className="min-w-32 max-w-32">
-                                <div className={`${isSimpleTransfer ? "bg-amber-100" : "bg-blue-50"} flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs`}>
+                                <div className="method-badge flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs">
                                   <p className="truncate">{methodLabel}</p>
                                 </div>
                               </td>
@@ -231,7 +231,7 @@ const RecentTransactionsRest: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Method</span>
-                        <div className={`text-xs px-2 py-1 rounded ${tx.data === "0x" ? "bg-amber-100" : "bg-blue-50"}`}>
+                        <div className="method-badge text-xs px-2 py-1 rounded">
                           {tx.data === "0x" ? "transfer" : (extract4Bytes(tx.data) ?? "-")}
                         </div>
                       </div>

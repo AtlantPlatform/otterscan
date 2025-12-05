@@ -12,14 +12,11 @@ const MethodName: React.FC<MethodNameProps> = ({ data, to = undefined }) => {
 
   return (
     <div
-      className={`${
-        isSimpleTransfer ? "bg-amber-100" : "bg-blue-50"
-      } flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs`}
+      className="flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs"
+      style={{ backgroundColor: '#e9e5cd', color: '#c5a03f' }}
     >
       <p
-        className={`truncate ${
-          fromVerifiedContract ? "text-verified-contract" : ""
-        } table-cell-text`}
+        className="truncate"
         title={methodTitle}
       >
         {methodName}

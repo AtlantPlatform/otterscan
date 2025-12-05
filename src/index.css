@@ -15,6 +15,11 @@
 
     --color-table-row-hover: 243, 244, 246;
   }
+
+  .method-badge {
+    background-color: #f4f4f5; /* gray-100 */
+    color: #71717a; /* gray-500 */
+  }
   .test-theme {
     --color-button-fill: 14, 165, 233; /* sky-500 */
     --color-button-hover-fill: 56, 189, 248; /* sky-400 */
@@ -41,7 +46,8 @@
   }
 
   .dark-mode.dark {
-    --color-button-fill: 22, 51, 95; /* gray-100 */
+    --color-button-fill: 22, 51, 95; /* dark blue */
+    --color-button-text: 255, 255, 255; /* white */
     background: #151F45;
     filter: none !important;
     color: #fff;
@@ -121,6 +127,11 @@
 
     .table-cell-text {
       color: #31439B;
+    }
+
+    .method-badge {
+      background-color: #d4d4c8 !important;
+      color: #8b6914 !important;
     }
 
     .address-link {
