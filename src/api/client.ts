@@ -8,11 +8,15 @@
 // Note: This function is called at module load time
 const isServer = typeof window === 'undefined';
 
-// Server-side: always use absolute URL to API server
-// Client-side: use relative URL (proxied by Express)
+// Server-side: use SSR_API_URL env var (set at runtime), fallback to localhost for dev
+// Client-side: use relative URL (proxied by Express server)
+const SSR_API_URL = isServer
+  ? (process.env.SSR_API_URL || 'http://localhost:3001')
+  : '';
+
 const API_BASE = isServer
-  ? 'http://localhost:3001/api'  // Direct API server URL for SSR
-  : '/api';                       // Relative URL for browser (proxied)
+  ? `${SSR_API_URL}/api`  // Direct API server URL for SSR (configurable)
+  : '/api';               // Relative URL for browser (proxied)
 
 if (isServer) {
   console.log('[API Client] Running on server, API base:', API_BASE);
