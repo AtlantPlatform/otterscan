@@ -2,6 +2,7 @@ import { FC, memo } from "react";
 import { Link } from "react-router";
 import SourcifyMenu from "../SourcifyMenu";
 import PriceBoxClient from "./PriceBoxClient";
+import SearchBoxClient from "./SearchBoxClient";
 import ETHScanLogoSingle from "../ethscanlogosingle.png";
 import ETHScanLogoSingleText from "../LogoText.png";
 import ETHScanLogoSingleTextDark from "../LogoTextDark.png";
@@ -52,21 +53,8 @@ const HeaderSSR: FC = () => {
             <SourcifyMenu />
           </div>
 
-          {/* Search Bar placeholder - SSR safe */}
-          <div className="flex w-full">
-            <input
-              className="flex-1 min-w-0 rounded-l border-b border-l border-t px-2 py-1 text-sm focus:outline-none"
-              type="text"
-              placeholder="Search by address / txn hash / block / ENS"
-              readOnly
-            />
-            <button
-              className="rounded-r border-b border-r border-t bg-skin-button-fill px-2 py-1 text-sm text-skin-button hover:bg-skin-button-hover-fill focus:outline-none flex-shrink-0"
-              type="button"
-            >
-              Search
-            </button>
-          </div>
+          {/* Search Bar - Client-side hydrated */}
+          <SearchBoxClient className="w-full" />
         </div>
 
         {/* Desktop Header Layout */}
@@ -117,21 +105,8 @@ const HeaderSSR: FC = () => {
             <PriceBoxClient />
           </div>
 
-          {/* Search Bar placeholder - SSR safe */}
-          <div className="flex flex-1 max-w-md">
-            <input
-              className="flex-1 min-w-0 rounded-l border-b border-l border-t px-2 py-1 text-sm focus:outline-none"
-              type="text"
-              placeholder="Search by address / txn hash / block / ENS"
-              readOnly
-            />
-            <button
-              className="rounded-r border-b border-r border-t bg-skin-button-fill px-2 py-1 text-sm text-skin-button hover:bg-skin-button-hover-fill focus:outline-none"
-              type="button"
-            >
-              Search
-            </button>
-          </div>
+          {/* Search Bar - Client-side hydrated */}
+          <SearchBoxClient className="flex-1 max-w-md" />
 
           {/* External Site Icons */}
           <div className="flex items-center gap-x-2">
