@@ -127,11 +127,9 @@ start_frontend() {
         echo -e "  Starting in ${YELLOW}development${NC} mode..."
         VITE_API_URL="http://localhost:$API_PORT" node server.js > /tmp/otterscan-frontend.log 2>&1 &
     else
-        # Production mode - build first if needed, then run preview
-        if [ ! -d "dist/client" ] || [ ! -d "dist/server" ]; then
-            echo -e "  Building frontend..."
-            npm run build
-        fi
+        # Production mode - always rebuild to pick up source changes
+        echo -e "  Building frontend..."
+        npm run build
 
         echo -e "  Starting in ${GREEN}production${NC} mode..."
         NODE_ENV=production PORT="$FRONTEND_PORT" VITE_API_URL="http://localhost:$API_PORT" node server.js > /tmp/otterscan-frontend.log 2>&1 &

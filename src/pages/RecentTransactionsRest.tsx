@@ -31,14 +31,77 @@ const RecentTransactionsRest: React.FC = () => {
   // Use default symbol for SSR compatibility (ChainInfo context not available on server)
   const symbol = DEFAULT_SYMBOL;
 
+  const structuredJSON = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ethscan.org/search?q={query}",
+          "query-input": "required name=query"
+        }
+      },
+      {
+        "@type": "Organization",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/"
+      },
+      {
+        "@type": "Dataset",
+        "name": "Recent Ethereum Transactions Dataset",
+        "description": "A real-time dataset of the most recent Ethereum transactions, including transaction hash, sender and receiver addresses, ETH value, gas fees, block number, and timestamps.",
+        "url": "https://ethscan.org/tx/recent",
+        "includedInDataCatalog": {
+          "@type": "DataCatalog",
+          "name": "Ethscan Ethereum Blockchain Data"
+        },
+        "variableMeasured": [
+          { "@type": "PropertyValue", "name": "Transaction Hash" },
+          { "@type": "PropertyValue", "name": "Value (ETH)" },
+          { "@type": "PropertyValue", "name": "Gas Fee" },
+          { "@type": "PropertyValue", "name": "Block Number" },
+          { "@type": "PropertyValue", "name": "Timestamp" }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ethscan.org/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Recent Ethereum Transactions",
+            "item": "https://ethscan.org/tx/recent"
+          }
+        ]
+      }
+    ]
+  });
+
   return (
     <div className="min-h-screen overflow-x-hidden">
       <HeaderSSR />
       <StandardFrame>
         <Helmet>
-          <title>Recent Transactions | Ethscan</title>
-          <meta name="description" content="View the latest Ethereum transactions with real-time updates on transaction hashes, values, gas prices, and contract interactions." />
+          <title>Recent Ethereum Transactions | Ethscan</title>
+          <meta name="description" content="View the most recent Ethereum transactions in real time. Track transaction hashes, wallet addresses, values, gas fees, and block confirmations with Ethscan." />
           <link rel="canonical" href="https://ethscan.org/tx/recent" />
+          {/* OpenGraph */}
+          <meta property="og:title" content="Recent Ethereum Transactions | Ethscan" />
+          <meta property="og:description" content="Track the latest Ethereum transactions in real time. View transaction hashes, addresses, ETH values, gas fees, and confirmations on Ethscan." />
+          <meta property="og:url" content="https://ethscan.org/tx/recent" />
+          {/* Twitter */}
+          <meta name="twitter:title" content="Recent Ethereum Transactions | Ethscan" />
+          <meta name="twitter:description" content="Track the latest Ethereum transactions in real time. View transaction hashes, addresses, ETH values, gas fees, and confirmations on Ethscan." />
+          <script type="application/ld+json">{structuredJSON}</script>
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">

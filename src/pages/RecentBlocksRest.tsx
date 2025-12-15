@@ -26,6 +26,60 @@ const RecentBlocksRest: React.FC = () => {
   // Use React Query hook for SSR-compatible data fetching
   const { blocks, total: totalBlocks, isLoading } = usePaginatedBlocks(pageNumber, BLOCKS_PER_PAGE);
 
+  const structuredJSON = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ethscan.org/search?q={query}",
+          "query-input": "required name=query"
+        }
+      },
+      {
+        "@type": "Organization",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/"
+      },
+      {
+        "@type": "Dataset",
+        "name": "Recent Ethereum Blocks Dataset",
+        "description": "A real-time dataset of the most recent Ethereum blocks on the blockchain, including block height, gas used, base fee, and timestamp.",
+        "url": "https://ethscan.org/blocks/recent",
+        "includedInDataCatalog": {
+          "@type": "DataCatalog",
+          "name": "Ethscan Ethereum Explorer Data"
+        },
+        "variableMeasured": [
+          { "@type": "PropertyValue", "name": "Block Number" },
+          { "@type": "PropertyValue", "name": "Gas Used" },
+          { "@type": "PropertyValue", "name": "Base Fee" },
+          { "@type": "PropertyValue", "name": "Timestamp" }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ethscan.org/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Recent Ethereum Blocks",
+            "item": "https://ethscan.org/blocks/recent"
+          }
+        ]
+      }
+    ]
+  });
+
   const BlockRow: React.FC<{ block: RestBlock }> = ({ block }) => {
     const gasTarget = block.gasLimit / ELASTICITY_MULTIPLIER;
     const gasUsedPercent = ((block.gasUsed - gasTarget) / gasTarget) * 100;
@@ -75,9 +129,18 @@ const RecentBlocksRest: React.FC = () => {
       <HeaderSSR />
       <StandardFrame>
         <Helmet>
-          <title>Recent Blocks | Ethscan</title>
-          <meta name="description" content="View the latest Ethereum blocks with live updates on gas usage, base fees, transaction counts, and miner information." />
+          <title>Recent Ethereum Blocks | Ethscan</title>
+          <meta name="description" content="View the most recent Ethereum blocks with real-time data on block number, gas used, base fee, and timestamps on Ethscan's Ethereum block explorer." />
           <link rel="canonical" href="https://ethscan.org/blocks/recent" />
+          {/* OpenGraph */}
+          <meta property="og:title" content="Recent Ethereum Blocks | Ethscan" />
+          <meta property="og:description" content="View the most recent Ethereum blocks with real-time data on block number, gas used, base fee, and timestamps on Ethscan's Ethereum block explorer." />
+          <meta property="og:url" content="https://ethscan.org/blocks/recent" />
+          {/* Twitter */}
+          <meta name="twitter:title" content="Recent Ethereum Blocks | Ethscan" />
+          <meta name="twitter:description" content="Explore the latest Ethereum blocks with real-time metrics including block height, gas used, base fee, and timestamp." />
+          <meta name="twitter:card" content="summary_large_image" />
+          <script type="application/ld+json">{structuredJSON}</script>
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">

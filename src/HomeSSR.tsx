@@ -12,21 +12,115 @@ import RecentTransactionsSectionSSR from "./components/RecentTransactionsSection
 const HomeSSR: FC = () => {
   const structuredJSON = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "url": "https://ethscan.org",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://ethscan.org/search?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ethscan.org/search?q={query}",
+          "query-input": "required name=query"
+        }
+      },
+      {
+        "@type": "Organization",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/"
+      },
+      {
+        "@type": "Dataset",
+        "name": "Ethereum Blockchain Real-Time Data",
+        "description": "Real-time listing of Ethereum blocks and transactions including block number, timestamps, transaction counts, gas usage and more.",
+        "url": "https://ethscan.org/"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ethscan.org/"
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Ethereum?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ethereum is a decentralized blockchain platform that enables smart contracts and decentralized applications (DApps)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I search for a transaction?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Enter the transaction hash (a 66-character string starting with '0x') in the search bar to find related transactions, blocks, or addresses."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a transaction hash?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A transaction hash is a unique identifier for each blockchain transaction — a 66-character hexadecimal string starting with '0x'."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is gas in Ethereum?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Gas measures the computational effort required to execute operations on Ethereum; users pay gas fees to process transactions."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What's the difference between an EOA and a smart contract?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "An Externally Owned Account (EOA) is controlled by a private key and initiates transactions, while a smart contract is code deployed on the blockchain that executes automatically."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I verify a smart contract?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Smart contract verification involves submitting source code to match deployed bytecode on the blockchain so users can read and verify contract logic."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are internal transactions?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Internal transactions are value transfers or contract calls inside a smart contract execution that aren't recorded directly on the blockchain but can be traced."
+            }
+          }
+        ]
+      }
+    ]
   });
 
   return (
     <div className="min-h-screen overflow-x-hidden">
       <Helmet>
-        <title>Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan</title>
-        <meta name="description" content="Explore Ethereum blockchain data in real-time. Search transactions, blocks, addresses, and smart contracts with Ethscan's comprehensive blockchain explorer." />
+        <title>Ethereum Block Explorer - Search Blocks, Transactions & Addresses | Ethscan</title>
+        <meta name="description" content="Explore the Ethereum blockchain with Ethscan - real-time access to blocks, transactions, wallet addresses, smart contracts and on-chain data." />
         <link rel="canonical" href="https://ethscan.org/" />
+        {/* OpenGraph */}
+        <meta property="og:title" content="Ethereum Block Explorer - Search Blocks, Transactions & Addresses | Ethscan" />
+        <meta property="og:description" content="Explore the Ethereum blockchain with Ethscan - real-time access to blocks, transactions, wallet addresses, and smart contracts." />
+        {/* Twitter */}
+        <meta name="twitter:title" content="Ethereum Block Explorer - Search Blocks, Transactions & Addresses | Ethscan" />
+        <meta name="twitter:description" content="Explore the Ethereum blockchain with Ethscan - real-time access to blocks, transactions, wallet addresses, and smart contracts." />
         <script type="application/ld+json">{structuredJSON}</script>
       </Helmet>
 
