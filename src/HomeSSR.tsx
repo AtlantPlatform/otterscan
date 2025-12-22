@@ -118,6 +118,7 @@ const HomeSSR: FC = () => {
         {/* OpenGraph */}
         <meta property="og:title" content="Ethereum Block Explorer - Search Blocks, Transactions & Addresses | Ethscan" />
         <meta property="og:description" content="Explore the Ethereum blockchain with Ethscan - real-time access to blocks, transactions, wallet addresses, and smart contracts." />
+        <meta property="og:url" content="https://ethscan.org/" />
         {/* Twitter */}
         <meta name="twitter:title" content="Ethereum Block Explorer - Search Blocks, Transactions & Addresses | Ethscan" />
         <meta name="twitter:description" content="Explore the Ethereum blockchain with Ethscan - real-time access to blocks, transactions, wallet addresses, and smart contracts." />

@@ -51,54 +51,114 @@ const BlockSSR: FC = () => {
     ? BigInt(block.baseFeePerGas) * BigInt(block.gasUsed)
     : null;
 
-  const description = `Details for Ethereum block ${blockNumberOrHash}, including transaction count, miner address, gas used, and timestamp.`;
-
-  const payloadSchemaWebPage = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "url": `https://ethscan.org/block/${blockNumberOrHash}`,
-    "name": `Ethereum Block ${blockNumberOrHash}`,
-    "description": description,
-    "mainEntity": {
-      "@type": "DigitalDocument",
-      "identifier": `${blockNumberOrHash}`,
-      "name": `Ethereum Block ${blockNumberOrHash}`,
-      "description": `Ethereum blockchain block containing ${block?.transactionCount || 0} transactions`,
-      "dateCreated": block?.timestamp ? new Date(block.timestamp * 1000).toISOString() : '',
-      "creator": {
-        "@type": "Organization",
-        "identifier": block?.miner || ''
-      }
+  // FAQ content for both schema and UI display
+  const faqItems = [
+    {
+      question: "What is a block in the Ethereum blockchain?",
+      answer: "A block is a package of data that contains a list of transactions, a timestamp, and other metadata, secured and added to the Ethereum blockchain."
+    },
+    {
+      question: "How can I find details about a specific Ethereum block?",
+      answer: "Enter the block number or hash in the Ethscan search bar to view detailed information, including transactions and miner data."
+    },
+    {
+      question: "What is the role of the miner in a block?",
+      answer: "Miners validate and confirm transactions, grouping them into blocks and securing the Ethereum blockchain by solving computational challenges."
     }
-  });
+  ];
 
-  const payloadSchemaFaqPage = JSON.stringify({
+  const payloadSchemaGraph = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
+    "@graph": [
       {
-        "@type": "Question",
-        "name": "What is a block in the Ethereum blockchain?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "A block is a package of data that contains a list of transactions, a timestamp, and other metadata, secured and added to the Ethereum blockchain."
+        "@type": "WebSite",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ethscan.org/search?q={query}",
+          "query-input": "required name=query"
         }
       },
       {
-        "@type": "Question",
-        "name": "How can I find details about a specific Ethereum block?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Enter the block number or hash in the Ethscan search bar to view detailed information, including transactions and miner data."
-        }
+        "@type": "Organization",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/"
       },
       {
-        "@type": "Question",
-        "name": "What is the role of the miner in a block?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Miners validate and confirm transactions, grouping them into blocks and securing the Ethereum blockchain by solving computational challenges."
-        }
+        "@type": "Dataset",
+        "name": `Ethereum Block ${blockNumberOrHash}`,
+        "description": `Detailed dataset for Ethereum block ${blockNumberOrHash} including block timestamp, transaction count, gas usage, base fee, miner, and block reward.`,
+        "url": `https://ethscan.org/block/${blockNumberOrHash}`,
+        "includedInDataCatalog": {
+          "@type": "DataCatalog",
+          "name": "Ethscan Ethereum Blockchain Data"
+        },
+        "variableMeasured": [
+          {
+            "@type": "PropertyValue",
+            "name": "Block Number",
+            "value": `${blockNumberOrHash}`
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Timestamp"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Transactions Count"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Gas Used"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Gas Limit"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Base Fee"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Block Reward"
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ethscan.org/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Recent Ethereum Blocks",
+            "item": "https://ethscan.org/blocks/recent"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": `Block ${blockNumberOrHash}`,
+            "item": `https://ethscan.org/block/${blockNumberOrHash}`
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": faqItems.map(item => ({
+          "@type": "Question",
+          "name": item.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item.answer
+          }
+        }))
       }
     ]
   });
@@ -108,11 +168,20 @@ const BlockSSR: FC = () => {
       <HeaderSSR />
       <StandardFrame>
         <Helmet>
-          <title>Ethereum Block {blockNumberOrHash} - Transactions, Gas Used, and Miner Details | Ethscan</title>
-          <meta name="description" content={`View details for Ethereum block ${blockNumberOrHash} including all transactions, gas used, miner address, base fee, and timestamp information.`} />
+          <title>Ethereum Block {blockNumberOrHash} - Block Details & Transactions | Ethscan</title>
+          <meta name="description" content={`View Ethereum block ${blockNumberOrHash} on Ethscan. See block timestamp, transactions, gas usage, base fee, block reward, and full Ethereum block details.`} />
           <link rel="canonical" href={`https://ethscan.org/block/${blockNumberOrHash}`} />
-          <script type="application/ld+json">{payloadSchemaWebPage}</script>
-          <script type="application/ld+json">{payloadSchemaFaqPage}</script>
+
+          {/* OpenGraph */}
+          <meta property="og:title" content={`Ethereum Block ${blockNumberOrHash} - Block Details & Transactions | Ethscan`} />
+          <meta property="og:description" content={`Explore Ethereum block ${blockNumberOrHash} with full details including timestamp, transactions, gas usage, base fee, and block reward on Ethscan.`} />
+          <meta property="og:url" content={`https://ethscan.org/block/${blockNumberOrHash}`} />
+
+          {/* Twitter */}
+          <meta name="twitter:title" content={`Ethereum Block ${blockNumberOrHash} - Block Details & Transactions | Ethscan`} />
+          <meta name="twitter:description" content={`Explore Ethereum block ${blockNumberOrHash} with full details including timestamp, transactions, gas usage, base fee, and block reward on Ethscan.`} />
+
+          <script type="application/ld+json">{payloadSchemaGraph}</script>
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">
@@ -291,6 +360,21 @@ const BlockSSR: FC = () => {
                     {block.baseFeePerGas !== null && ` The base fee was ${(block.baseFeePerGas / 1e9).toFixed(9)} Gwei.`}
                     {' '}The block hash is {block.hash} and the parent block is #{block.number - 1}.
                   </p>
+                </div>
+              </div>
+
+              {/* FAQ Section */}
+              <div className="px-3 lg:px-9 mt-6">
+                <div className="h-64 overflow-y-auto p-6 bg-gray-800 rounded-lg">
+                  <h2 className="text-xl font-bold mb-4 text-gray-100">Frequently Asked Questions</h2>
+                  <div className="prose prose-sm max-w-none text-gray-300 space-y-6">
+                    {faqItems.map((item, index) => (
+                      <div key={index}>
+                        <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-100">{item.question}</h3>
+                        <p>{item.answer}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </>
