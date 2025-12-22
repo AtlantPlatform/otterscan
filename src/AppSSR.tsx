@@ -15,6 +15,9 @@ import RecentBlocksRest from "./pages/RecentBlocksRest";
 import RecentTransactionsRest from "./pages/RecentTransactionsRest";
 import BlockSSR from "./execution/BlockSSR";
 import TransactionSSR from "./execution/TransactionSSR";
+import TransactionLogsSSR from "./execution/TransactionLogsSSR";
+import TransactionTraceSSR from "./execution/TransactionTraceSSR";
+import TransactionStateDiffSSR from "./execution/TransactionStateDiffSSR";
 import BlockTransactionsSSR from "./execution/BlockTransactionsSSR";
 import AddressSSR from "./execution/AddressSSR";
 
@@ -172,6 +175,9 @@ const AppSSR: FC = () => {
             <Route path="/block/:blockNumberOrHash" element={<BlockSSR />} />
             <Route path="/block/:blockNumber/txs" element={<BlockTransactionsSSR />} />
             <Route path="/tx/:txhash" element={<TransactionSSR />} />
+            <Route path="/tx/:txhash/logs" element={<TransactionLogsSSR />} />
+            <Route path="/tx/:txhash/trace" element={<TransactionTraceSSR />} />
+            <Route path="/tx/:txhash/statediff" element={<TransactionStateDiffSSR />} />
             <Route path="/address/:addressOrName" element={<AddressSSR />}>
               <Route index element={<AddressTransactionResults />} />
               <Route path="txs/:direction" element={<AddressTransactionResults />} />
