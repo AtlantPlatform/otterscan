@@ -44,49 +44,124 @@ const TransactionSSR: FC = () => {
     );
   }
 
-  const description = `View details for Ethereum transaction ${txHash} including gas fees, sender, recipient, value transferred, and execution status.`;
+  const description = `View full details of Ethereum transaction ${txHash}. Track status, block, addresses, value, gas fees, and execution data on Ethscan.`;
 
-  const payloadSchemaWebPage = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "url": `https://ethscan.org/tx/${txHash}`,
-    "name": `Ethereum Transaction ${txHash.substring(0, 16)}...`,
-    "description": description,
-    "mainEntity": {
-      "@type": "DigitalDocument",
-      "identifier": txHash,
-      "name": `Ethereum Transaction`,
-      "description": tx ? `Transaction from ${tx.from} to ${tx.to || 'Contract Creation'}` : 'Ethereum blockchain transaction',
+  // FAQ content for both schema and UI display
+  const faqItems = [
+    {
+      question: "What is an Ethereum transaction?",
+      answer: "An Ethereum transaction is a cryptographically signed instruction from an account to transfer ETH or interact with a smart contract on the Ethereum blockchain."
+    },
+    {
+      question: "How can I track my Ethereum transaction?",
+      answer: "Enter your transaction hash in the Ethscan search bar to view real-time status, confirmation count, gas fees, and all transaction details."
+    },
+    {
+      question: "What does transaction status mean?",
+      answer: "Transaction status indicates whether the transaction was successful (Success) or failed (Reverted). Failed transactions still consume gas but don't execute the intended action."
     }
-  });
+  ];
 
-  const payloadSchemaFaqPage = JSON.stringify({
+  const payloadSchemaGraph = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
+    "@graph": [
       {
-        "@type": "Question",
-        "name": "What is an Ethereum transaction?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "An Ethereum transaction is a cryptographically signed instruction from an account to transfer ETH or interact with a smart contract on the Ethereum blockchain."
+        "@type": "WebSite",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ethscan.org/search?q={query}",
+          "query-input": "required name=query"
         }
       },
       {
-        "@type": "Question",
-        "name": "How can I track my Ethereum transaction?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Enter your transaction hash in the Ethscan search bar to view real-time status, confirmation count, gas fees, and all transaction details."
-        }
+        "@type": "Organization",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/"
       },
       {
-        "@type": "Question",
-        "name": "What does transaction status mean?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Transaction status indicates whether the transaction was successful (Success) or failed (Reverted). Failed transactions still consume gas but don't execute the intended action."
-        }
+        "@type": "Dataset",
+        "name": `Ethereum Transaction ${txHash}`,
+        "description": "Detailed dataset for a single Ethereum transaction including transaction hash, status, block number, sender and receiver addresses, ETH value, gas usage, and timestamp.",
+        "url": `https://ethscan.org/tx/${txHash}`,
+        "includedInDataCatalog": {
+          "@type": "DataCatalog",
+          "name": "Ethscan Ethereum Blockchain Data"
+        },
+        "variableMeasured": [
+          {
+            "@type": "PropertyValue",
+            "name": "Transaction Hash",
+            "value": txHash
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Transaction Status"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Block Number"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "From Address"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "To Address"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Value (ETH)"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Gas Used"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Transaction Fee"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Timestamp"
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ethscan.org/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Recent Ethereum Transactions",
+            "item": "https://ethscan.org/tx/recent"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": `Transaction ${txHash}`,
+            "item": `https://ethscan.org/tx/${txHash}`
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": faqItems.map(item => ({
+          "@type": "Question",
+          "name": item.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item.answer
+          }
+        }))
       }
     ]
   });
@@ -96,11 +171,20 @@ const TransactionSSR: FC = () => {
       <HeaderSSR />
       <StandardFrame>
         <Helmet>
-          <title>Transaction {txHash} | Ethscan</title>
+          <title>Ethereum Transaction {txHash} - Transaction Details | Ethscan</title>
           <meta name="description" content={description} />
           <link rel="canonical" href={`https://ethscan.org/tx/${txHash}`} />
-          <script type="application/ld+json">{payloadSchemaWebPage}</script>
-          <script type="application/ld+json">{payloadSchemaFaqPage}</script>
+
+          {/* OpenGraph */}
+          <meta property="og:title" content={`Ethereum Transaction ${txHash} - Transaction Details | Ethscan`} />
+          <meta property="og:description" content={`Explore Ethereum transaction ${txHash}. View status, block, addresses, value, gas fees, and execution details.`} />
+          <meta property="og:url" content={`https://ethscan.org/tx/${txHash}`} />
+
+          {/* Twitter */}
+          <meta name="twitter:title" content={`Ethereum Transaction ${txHash} - Transaction Details | Ethscan`} />
+          <meta name="twitter:description" content={`Explore Ethereum transaction ${txHash}. View status, block, addresses, value, and gas fees on Ethscan.`} />
+
+          <script type="application/ld+json">{payloadSchemaGraph}</script>
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">
@@ -344,6 +428,21 @@ const TransactionSSR: FC = () => {
               </div>
             </div>
           )}
+
+          {/* FAQ Section */}
+          <div className="px-3 lg:px-9 mt-6">
+            <div className="h-64 overflow-y-auto p-6">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+              <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+                {faqItems.map((item, index) => (
+                  <div key={index}>
+                    <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">{item.question}</h3>
+                    <p>{item.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </StandardFrame>
     </div>
