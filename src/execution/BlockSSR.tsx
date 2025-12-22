@@ -365,12 +365,12 @@ const BlockSSR: FC = () => {
 
               {/* FAQ Section */}
               <div className="px-3 lg:px-9 mt-6">
-                <div className="h-64 overflow-y-auto p-6 bg-gray-800 rounded-lg">
-                  <h2 className="text-xl font-bold mb-4 text-gray-100">Frequently Asked Questions</h2>
-                  <div className="prose prose-sm max-w-none text-gray-300 space-y-6">
+                <div className="h-64 overflow-y-auto p-6">
+                  <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+                  <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
                     {faqItems.map((item, index) => (
                       <div key={index}>
-                        <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-100">{item.question}</h3>
+                        <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">{item.question}</h3>
                         <p>{item.answer}</p>
                       </div>
                     ))}

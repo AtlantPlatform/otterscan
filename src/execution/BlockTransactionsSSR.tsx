@@ -54,55 +54,111 @@ const BlockTransactionsSSR: React.FC = () => {
     data: tx.data || '0x',
   }));
 
-  const titleToSet = `Transactions in Ethereum Block ${blockNumber}`;
-  const description = `Explore all ${total} transactions in Ethereum block ${blockNumber}. View transaction hashes, sender and recipient addresses, values, and gas fees.`;
+  // FAQ content for both schema and UI display
+  const faqItems = [
+    {
+      question: "What are Ethereum block transactions?",
+      answer: "Ethereum block transactions are individual transactions that have been confirmed and included in a specific block on the Ethereum blockchain."
+    },
+    {
+      question: "How many transactions can be included in an Ethereum block?",
+      answer: "The number of transactions in an Ethereum block varies depending on gas usage and block gas limits rather than a fixed transaction count."
+    },
+    {
+      question: "Why do some Ethereum blocks have more transactions than others?",
+      answer: "Blocks differ in transaction count because each transaction consumes gas, and blocks are limited by total gas usage rather than the number of transactions."
+    },
+    {
+      question: "How can I view details of a specific transaction?",
+      answer: "Click on a transaction hash to open its transaction details page, where you can see gas fees, sender and receiver addresses, and execution status."
+    }
+  ];
 
-  const payloadSchemaWebPage = JSON.stringify({
+  const payloadSchemaGraph = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "ItemList",
-    "url": `https://ethscan.org/block/${blockNumber}/txs`,
-    "name": titleToSet,
-    "description": description,
-    "numberOfItems": total,
-    "itemListElement": transformedTxs.slice(0, 10).map((item: any, index: number) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "item": {
-        "@type": "DigitalDocument",
-        "identifier": item.hash,
-        "name": `Transaction ${item.hash.substring(0, 10)}...`,
-        "description": `Ethereum transaction with value ${formatEther(item.value || 0n)} ETH`
-      }
-    }))
-  });
-
-  const payloadSchemaFaqPage = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
+    "@graph": [
       {
-        "@type": "Question",
-        "name": "What is an Ethereum transaction?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "An Ethereum transaction is a transfer of data or value between addresses on the Ethereum blockchain, often including smart contract interactions."
+        "@type": "WebSite",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ethscan.org/search?q={query}",
+          "query-input": "required name=query"
         }
       },
       {
-        "@type": "Question",
-        "name": "How can I check the details of a transaction on Ethscan?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Enter the transaction hash in the Ethscan search bar to view details like sender, recipient, and gas fees."
-        }
+        "@type": "Organization",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/"
       },
       {
-        "@type": "Question",
-        "name": "What do gas fees in a transaction mean?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Gas fees are the costs paid to execute a transaction on the Ethereum network. They compensate validators for the computing energy required to process and validate transactions."
-        }
+        "@type": "Dataset",
+        "name": `Transactions in Ethereum Block ${blockNumber}`,
+        "description": `A dataset listing all transactions included in Ethereum block ${blockNumber}, including transaction hashes, sender and receiver addresses, ETH values, gas fees, and execution status.`,
+        "url": `https://ethscan.org/block/${blockNumber}/txs`,
+        "includedInDataCatalog": {
+          "@type": "DataCatalog",
+          "name": "Ethscan Ethereum Blockchain Data"
+        },
+        "variableMeasured": [
+          {
+            "@type": "PropertyValue",
+            "name": "Transaction Hash"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Value (ETH)"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Gas Fee"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Transaction Status"
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ethscan.org/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Recent Ethereum Blocks",
+            "item": "https://ethscan.org/blocks/recent"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": `Block ${blockNumber}`,
+            "item": `https://ethscan.org/block/${blockNumber}`
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Transactions",
+            "item": `https://ethscan.org/block/${blockNumber}/txs`
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": faqItems.map(item => ({
+          "@type": "Question",
+          "name": item.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item.answer
+          }
+        }))
       }
     ]
   });
@@ -112,11 +168,20 @@ const BlockTransactionsSSR: React.FC = () => {
       <HeaderSSR />
       <StandardFrame>
         <Helmet>
-          <title>{titleToSet} | Ethscan</title>
-          <meta name="description" content={description} />
+          <title>{`Ethereum Block ${blockNumber} Transactions - Full Transaction List | Ethscan`}</title>
+          <meta name="description" content={`View all transactions included in Ethereum block ${blockNumber}. Explore transaction hashes, wallet addresses, ETH values, gas fees, and execution details on Ethscan.`} />
           <link rel="canonical" href={`https://ethscan.org/block/${blockNumber}/txs`} />
-          <script type="application/ld+json">{payloadSchemaWebPage}</script>
-          <script type="application/ld+json">{payloadSchemaFaqPage}</script>
+
+          {/* OpenGraph */}
+          <meta property="og:title" content={`Ethereum Block ${blockNumber} Transactions - Full Transaction List | Ethscan`} />
+          <meta property="og:description" content={`Explore all transactions in Ethereum block ${blockNumber}. View transaction hashes, addresses, ETH values, gas fees, and execution details on Ethscan.`} />
+          <meta property="og:url" content={`https://ethscan.org/block/${blockNumber}/txs`} />
+
+          {/* Twitter */}
+          <meta name="twitter:title" content={`Ethereum Block ${blockNumber} Transactions - Full Transaction List | Ethscan`} />
+          <meta name="twitter:description" content={`Explore all transactions in Ethereum block ${blockNumber}. View transaction hashes, addresses, ETH values, gas fees, and execution details on Ethscan.`} />
+
+          <script type="application/ld+json">{payloadSchemaGraph}</script>
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">
@@ -386,22 +451,28 @@ const BlockTransactionsSSR: React.FC = () => {
               />
             </div>
           )}
-        </div>
 
-        {/* FAQ Section */}
-        <div className="px-3 lg:px-9 py-6 max-w-7xl mx-auto">
-          <div className="mt-12 space-y-6 min-h-[600px]">
-            <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+          {/* Description Text */}
+          <div className="px-3 lg:px-9 mt-6">
+            <div className="p-4">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                This page lists all transactions included in Ethereum block {blockNumber.toLocaleString()}. Each transaction is confirmed on the Ethereum mainnet and can be explored in detail.
+              </p>
+            </div>
+          </div>
 
-              <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is an Ethereum transaction?</h3>
-              <p>An Ethereum transaction is a transfer of data or value between addresses on the Ethereum blockchain, often including smart contract interactions.</p>
-
-              <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I check the details of a transaction on Ethscan?</h3>
-              <p>Enter the transaction hash in the Ethscan search bar to view details like sender, recipient, and gas fees.</p>
-
-              <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What do gas fees in a transaction mean?</h3>
-              <p>Gas fees are the costs paid to execute a transaction on the Ethereum network. They compensate validators for the computing energy required to process and validate transactions.</p>
+          {/* FAQ Section */}
+          <div className="px-3 lg:px-9 mt-6">
+            <div className="h-64 overflow-y-auto p-6">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+              <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+                {faqItems.map((item, index) => (
+                  <div key={index}>
+                    <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">{item.question}</h3>
+                    <p>{item.answer}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
