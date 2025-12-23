@@ -238,51 +238,95 @@ const AddressSSR: FC = () => {
   const isContract = addressData?.isContract ?? false;
   const txCount = addressData?.transactionCount ?? 0;
 
-  const description = `View Ethereum address ${addressOrName} details including current balance${addressData ? ` (${formattedBalance} ETH)` : ''}, transaction history, token holdings, and ${isContract ? 'smart contract information' : 'account activity'}.`;
+  const title = `Ethereum Address ${addressOrName} | Wallet & Transactions | Ethscan`;
+  const description = `View details for Ethereum address ${addressOrName}. Explore wallet balance, transactions, token transfers, and on-chain activity using Ethscan.`;
+  const ogDescription = `Explore Ethereum address ${addressOrName}. View wallet balance, transactions, token transfers, and on-chain activity on Ethscan.`;
+  const twitterDescription = `Explore Ethereum address ${addressOrName}. View wallet balance, transactions, and token transfers on Ethscan.`;
+  const canonicalUrl = `https://ethscan.org/address/${addressOrName}`;
 
-  const payloadSchemaWebPage = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "url": `https://ethscan.org/address/${addressOrName}`,
-    "name": `Ethereum Address ${addressOrName.substring(0, 10)}...`,
-    "description": description,
-    "mainEntity": {
-      "@type": "DigitalDocument",
-      "identifier": addressOrName,
-      "name": `Ethereum Address`,
-      "description": addressData
-        ? `Ethereum ${isContract ? 'contract' : 'account'} with balance of ${formattedBalance} ETH`
-        : 'Ethereum blockchain address',
+  // FAQ content for UI display
+  const faqItems = [
+    {
+      question: "What is an Ethereum address?",
+      answer: "An Ethereum address is a unique 42-character hexadecimal identifier (starting with '0x') used to send and receive ETH and interact with smart contracts on the Ethereum blockchain."
+    },
+    {
+      question: "How can I check the balance of an Ethereum address?",
+      answer: "You can view the balance of any Ethereum address on Ethscan by entering the address in the search bar. The balance shows the amount of ETH held by the address."
+    },
+    {
+      question: "What is the difference between an EOA and a smart contract?",
+      answer: "An Externally Owned Account (EOA) is controlled by a private key and can initiate transactions. A smart contract is code deployed on the blockchain that executes automatically when triggered by transactions."
     }
-  });
+  ];
 
-  const payloadSchemaFaqPage = JSON.stringify({
+  const payloadSchemaGraph = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
+    "@graph": [
       {
-        "@type": "Question",
-        "name": "What is an Ethereum address?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "An Ethereum address is a unique 42-character hexadecimal identifier (starting with '0x') used to send and receive ETH and interact with smart contracts on the Ethereum blockchain."
+        "@type": "WebSite",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ethscan.org/search?q={query}",
+          "query-input": "required name=query"
         }
       },
       {
-        "@type": "Question",
-        "name": "How can I check the balance of an Ethereum address?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "You can view the balance of any Ethereum address on Ethscan by entering the address in the search bar. The balance shows the amount of ETH held by the address."
-        }
+        "@type": "Organization",
+        "name": "Ethscan",
+        "url": "https://ethscan.org/"
       },
       {
-        "@type": "Question",
-        "name": "What is the difference between an EOA and a smart contract?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "An Externally Owned Account (EOA) is controlled by a private key and can initiate transactions. A smart contract is code deployed on the blockchain that executes automatically when triggered by transactions."
-        }
+        "@type": "Dataset",
+        "name": `Ethereum Address ${addressOrName}`,
+        "description": "A dataset representing on-chain activity for a specific Ethereum address, including wallet balance, transactions, token transfers, and smart contract interactions.",
+        "url": canonicalUrl,
+        "includedInDataCatalog": {
+          "@type": "DataCatalog",
+          "name": "Ethscan Ethereum Blockchain Data"
+        },
+        "variableMeasured": [
+          {
+            "@type": "PropertyValue",
+            "name": "Address",
+            "value": addressOrName
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "ETH Balance"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Transaction Count"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Token Transfers"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "Internal Transactions"
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://ethscan.org/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": addressOrName,
+            "item": canonicalUrl
+          }
+        ]
       }
     ]
   });
@@ -291,11 +335,20 @@ const AddressSSR: FC = () => {
     <>
       {/* SEO metadata - rendered during SSR */}
       <Helmet>
-        <title>Address {addressOrName} | Ethscan</title>
+        <title>{title}</title>
         <meta name="description" content={description} />
-        <link rel="canonical" href={`https://ethscan.org/address/${addressOrName}`} />
-        <script type="application/ld+json">{payloadSchemaWebPage}</script>
-        <script type="application/ld+json">{payloadSchemaFaqPage}</script>
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* OpenGraph */}
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+
+        {/* Twitter */}
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={twitterDescription} />
+
+        <script type="application/ld+json">{payloadSchemaGraph}</script>
       </Helmet>
 
       {/* Client-side: Full AddressMainPage with RuntimeProvider */}
@@ -429,14 +482,18 @@ const AddressSSR: FC = () => {
                   )}
                 </div>
 
-                {/* FAQ Section for SEO */}
-                <div className="px-3 lg:px-9 mt-8">
-                  <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-                    <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
-                    <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">What is an Ethereum address?</h3>
-                    <p>An Ethereum address is a unique 42-character hexadecimal identifier (starting with '0x') used to send and receive ETH and interact with smart contracts on the Ethereum blockchain.</p>
-                    <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">How can I check the balance of an Ethereum address?</h3>
-                    <p>You can view the balance of any Ethereum address on Ethscan by entering the address in the search bar. The balance shows the amount of ETH held by the address.</p>
+                {/* FAQ Section */}
+                <div className="px-3 lg:px-9 mt-6">
+                  <div className="h-64 overflow-y-auto p-6">
+                    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+                    <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+                      {faqItems.map((item, index) => (
+                        <div key={index}>
+                          <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">{item.question}</h3>
+                          <p>{item.answer}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

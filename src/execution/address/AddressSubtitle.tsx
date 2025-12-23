@@ -43,9 +43,9 @@ const AddressSubtitle: FC<AddressSubtitleProps> = ({
 
   return (
     <StandardSubtitle>
-      <h1 className="flex flex-col lg:flex-row lg:items-baseline lg:space-x-2 space-y-2 lg:space-y-0">
+      <h1 className="flex flex-col lg:flex-row lg:items-center lg:space-x-2 space-y-2 lg:space-y-0">
         {/* Main address info */}
-        <div className="flex flex-col sm:flex-row sm:items-baseline space-y-2 sm:space-y-0 sm:space-x-2">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
           <div className="flex items-center space-x-2">
             <Blockies
               className="self-center rounded flex-shrink-0"

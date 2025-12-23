@@ -98,9 +98,18 @@ const AddressMainPage: React.FC = () => {
     <div className="min-h-screen overflow-x-hidden">
       <StandardFrame>
         <Helmet>
-          <title>Ethereum Address {addressOrName} | Balance and Transactions</title>
-          <meta name="description" content={`View Ethereum address ${addressOrName} details including current balance${balance ? ` (${formatEther(balance)} ETH)` : ''}, transaction history, token holdings, and smart contract information.`} />
+          <title>Ethereum Address {addressOrName} | Wallet & Transactions | Ethscan</title>
+          <meta name="description" content={`View details for Ethereum address ${addressOrName}. Explore wallet balance, transactions, token transfers, and on-chain activity using Ethscan.`} />
           <link rel="canonical" href={`https://ethscan.org/address/${addressOrName}`} />
+
+          {/* OpenGraph */}
+          <meta property="og:title" content={`Ethereum Address ${addressOrName} | Wallet & Transactions | Ethscan`} />
+          <meta property="og:description" content={`Explore Ethereum address ${addressOrName}. View wallet balance, transactions, token transfers, and on-chain activity on Ethscan.`} />
+          <meta property="og:url" content={`https://ethscan.org/address/${addressOrName}`} />
+
+          {/* Twitter */}
+          <meta name="twitter:title" content={`Ethereum Address ${addressOrName} | Wallet & Transactions | Ethscan`} />
+          <meta name="twitter:description" content={`Explore Ethereum address ${addressOrName}. View wallet balance, transactions, and token transfers on Ethscan.`} />
         </Helmet>
 
         <div className="py-6 max-w-7xl mx-auto">
@@ -210,6 +219,27 @@ const AddressMainPage: React.FC = () => {
                       This page displays the address balance, transaction history, token transfers, and {hasCode ? 'contract information including source code, ABI, and read/write functions' : 'all associated blockchain activities'}.
                       View detailed analytics including ERC20/ERC721 token transfers, withdrawals, and blocks rewarded for this address.
                     </p>
+                  </div>
+                </div>
+
+                {/* FAQ Section */}
+                <div className="px-3 lg:px-9 mt-6">
+                  <div className="h-64 overflow-y-auto p-6">
+                    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+                    <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+                      <div>
+                        <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">What is an Ethereum address?</h3>
+                        <p>An Ethereum address is a unique 42-character hexadecimal identifier (starting with '0x') used to send and receive ETH and interact with smart contracts on the Ethereum blockchain.</p>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">How can I check the balance of an Ethereum address?</h3>
+                        <p>You can view the balance of any Ethereum address on Ethscan by entering the address in the search bar. The balance shows the amount of ETH held by the address.</p>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">What is the difference between an EOA and a smart contract?</h3>
+                        <p>An Externally Owned Account (EOA) is controlled by a private key and can initiate transactions. A smart contract is code deployed on the blockchain that executes automatically when triggered by transactions.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </>
