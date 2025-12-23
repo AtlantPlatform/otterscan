@@ -261,7 +261,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
         )}
         <InfoRow title="From / Nonce">
           <div className="flex flex-wrap gap-y-2 divide-x-2 divide-dotted divide-gray-300">
-            <TransactionAddressWithCopy address={txData.from}/>
+            <TransactionAddressWithCopy address={txData.from} miner={false}/>
             <div className="ml-3 flex items-baseline pl-3">
               <Nonce value={txData.nonce}/>
               <NavNonce sender={txData.from} nonce={txData.nonce}/>
@@ -270,7 +270,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
         </InfoRow>
         <InfoRow title={txData.to ? "Interacted With (To)" : "Contract Created"}>
           {txData.to ? (
-            <TransactionAddressWithCopy address={txData.to} showCodeIndicator/>
+            <TransactionAddressWithCopy address={txData.to} showCodeIndicator miner={false}/>
           ) : txData.confirmedData === undefined ? (
             <span className="italic text-gray-400">
             Pending contract creation
@@ -278,6 +278,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
           ) : (
             <TransactionAddressWithCopy
               address={txData.confirmedData?.createdContractAddress!}
+              miner={false}
             />
           )}
           {internalOps && internalOps.length > 0 && (

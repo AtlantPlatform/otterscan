@@ -30,7 +30,12 @@ const TransactionAddress: FC<TransactionAddressProps> = ({
     creation || address === txData?.confirmedData?.createdContractAddress;
 
   const { provider } = useContext(RuntimeContext);
-  const block = useBlockDataFromTransaction(provider, txData);
+  // Only fetch block data if miner prop is not explicitly set - avoids unnecessary
+  // eth_getBlockByNumber calls that can fail for old blocks outside snapshot range
+  const block = useBlockDataFromTransaction(
+    provider,
+    miner === undefined ? txData : undefined,
+  );
 
   const blockNumber = useBlockNumberContext();
   const hasCode = useHasCode(

@@ -138,7 +138,7 @@ const Trace: React.FC<TraceProps> = ({ txData, txHash }) => {
         {traces ? (
           <>
             <div className="rounded border px-1 py-0.5 hover:border-gray-500 font-sans">
-              <TransactionAddress address={txData.from} />
+              <TransactionAddress address={txData.from} miner={false} />
             </div>
             <div className="ml-5 space-y-3 self-stretch">
               {traces.map((t, i, a) => (

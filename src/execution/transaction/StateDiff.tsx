@@ -87,6 +87,7 @@ const buildStateDiffTree = (
                     <TransactionAddress
                       address={getAddress(group.title)}
                       showCodeIndicator={true}
+                      miner={false}
                     />
                   </div>
                 </div>
