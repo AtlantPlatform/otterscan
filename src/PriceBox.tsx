@@ -21,22 +21,34 @@ async function blockNearestToDate(
   date: Date,
   maxBlockNumber?: number,
 ): Promise<number | null> {
-  let low = 0;
-  let high = maxBlockNumber ?? (await provider.getBlockNumber());
+  // Start from a recent block to avoid fetching old blocks that may not be
+  // available on nodes with limited snapshot history
+  const latestBlock = maxBlockNumber ?? (await provider.getBlockNumber());
+  // Assume ~12 second blocks, go back at most 2 days worth of blocks
+  const blocksPerDay = Math.floor(86400 / 12);
+  const minBlock = Math.max(0, latestBlock - blocksPerDay * 2);
+
+  let low = minBlock;
+  let high = latestBlock;
 
   while (low < high) {
     const mid = Math.floor((low + high) / 2);
-    const block = await provider.getBlock(mid);
+    try {
+      const block = await provider.getBlock(mid);
 
-    if (!block || !block.timestamp) {
+      if (!block || !block.timestamp) {
+        return null;
+      }
+
+      const blockDate = new Date(block.timestamp * 1000);
+      if (blockDate < date) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    } catch (e) {
+      // Block fetch failed (node may not have historical data)
       return null;
-    }
-
-    const blockDate = new Date(block.timestamp * 1000);
-    if (blockDate < date) {
-      low = mid + 1;
-    } else {
-      high = mid;
     }
   }
   // We'll use the earlier block number
