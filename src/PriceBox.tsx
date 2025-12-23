@@ -144,20 +144,15 @@ const PriceBox: React.FC = () => {
           } font-sans text-xs text-gray-800`}
         >
           <span
+            className="whitespace-nowrap"
             title={`${symbol}/USD last updated at: ${latestPriceTimestamp?.toString()}`}
           >
             {symbol}: $<span className="font-balance">{latestPrice}</span>
-            {oneDayPriceChange ? (
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: "auto" }}
-                transition={{ duration: 0.4, ease: "circOut" }}
-                className={`inline-block overflow-clip ml-0.5 ${oneDayPriceChange.startsWith("+") ? "text-green-500" : "text-red-500"}`}
-              >
-                {" "}
+            {oneDayPriceChange && (
+              <span className={`ml-1 ${oneDayPriceChange.startsWith("+") ? "text-green-500" : "text-red-500"}`}>
                 ({oneDayPriceChange}%)
-              </motion.div>
-            ) : null}
+              </span>
+            )}
           </span>
           {latestGasData && (
             <>
