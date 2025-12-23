@@ -1,13 +1,11 @@
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formatEther } from "ethers";
-import React, { useContext } from "react";
+import React from "react";
 import DecoratedAddressLink from "../execution/components/DecoratedAddressLink";
 import TransactionAddress from "../execution/components/TransactionAddress";
 import { InternalOperation, TransactionData } from "../types";
 import { useChainInfo } from "../useChainInfo";
-import { useBlockDataFromTransaction } from "../useErigonHooks";
-import { RuntimeContext } from "../useRuntime";
 import AddressHighlighter from "./AddressHighlighter";
 
 type InternalSelfDestructProps = {
@@ -19,12 +17,12 @@ const InternalSelfDestruct: React.FC<InternalSelfDestructProps> = ({
   txData,
   internalOp,
 }) => {
-  const { provider } = useContext(RuntimeContext);
-  const block = useBlockDataFromTransaction(provider, txData);
+  // Skip block fetch to avoid eth_getBlockByNumber errors for old blocks
+  // Miner highlighting is a nice-to-have, not essential
+  const toMiner = false;
   const {
     nativeCurrency: { symbol },
   } = useChainInfo();
-  const toMiner = block?.miner !== undefined && internalOp.to === block.miner;
 
   return (
     <>
