@@ -20,6 +20,7 @@ import TransactionTraceSSR from "./execution/TransactionTraceSSR";
 import TransactionStateDiffSSR from "./execution/TransactionStateDiffSSR";
 import BlockTransactionsSSR from "./execution/BlockTransactionsSSR";
 import AddressSSR from "./execution/AddressSSR";
+import BroadcastTransactionSSR from "./execution/BroadcastTransactionSSR";
 
 // Lazy loaded components - all require RuntimeContext so are client-only
 const Home = lazy(() => import("./Home"));
@@ -192,6 +193,7 @@ const AppSSR: FC = () => {
               <Route path="readContractAsProxy" element={<ProxyReadContract />} />
               <Route path="*" element={null} />
             </Route>
+            <Route path="/broadcastTx" element={<BroadcastTransactionSSR />} />
 
             {/* All other routes require RuntimeContext and lazy loading, wrap in Suspense + ClientOnly + RuntimeProvider */}
             <Route path="/*" element={
