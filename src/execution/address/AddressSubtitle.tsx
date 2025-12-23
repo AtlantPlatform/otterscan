@@ -45,24 +45,20 @@ const AddressSubtitle: FC<AddressSubtitleProps> = ({
     <StandardSubtitle>
       <h1 className="flex flex-col lg:flex-row lg:items-center lg:space-x-2 space-y-2 lg:space-y-0">
         {/* Main address info */}
-        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-          <div className="flex items-center space-x-2">
-            <Blockies
-              className="self-center rounded flex-shrink-0"
-              seed={address.toLowerCase()}
-              scale={3}
-            />
-            <span className="flex-shrink-0">Address</span>
-          </div>
-          <div className="flex items-center space-x-2 min-w-0">
-            <span
-              className="font-address text-sm sm:text-base text-gray-500 break-all font-mono"
-              data-test="address"
-            >
-              {address}
-            </span>
-            <Copy value={address} rounded />
-          </div>
+        <div className="flex items-baseline space-x-2">
+          <Blockies
+            className="self-center rounded flex-shrink-0"
+            seed={address.toLowerCase()}
+            scale={3}
+          />
+          <span className="flex-shrink-0">Address</span>
+          <span
+            className="font-address text-base text-gray-500 break-all font-mono"
+            data-test="address"
+          >
+            {address}
+          </span>
+          <Copy value={address} rounded />
         </div>
 
         {/* Actions and tags */}
