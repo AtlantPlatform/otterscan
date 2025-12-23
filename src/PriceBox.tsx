@@ -158,7 +158,7 @@ const PriceBox: React.FC = () => {
             <>
               <span>|</span>
               <span
-                className="text-gray-400"
+                className="text-gray-400 whitespace-nowrap"
                 title={`Fast gas price last updated at: ${latestGasPriceTimestamp?.toString()}`}
               >
                 <FontAwesomeIcon icon={faGasPump} size="1x" />
