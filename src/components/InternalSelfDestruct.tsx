@@ -37,7 +37,7 @@ const InternalSelfDestruct: React.FC<InternalSelfDestructProps> = ({
         </div>
         {internalOp.value === 0n && (
           <div className="flex items-baseline text-gray-400">
-            (To: <TransactionAddress address={internalOp.to} />)
+            (To: <TransactionAddress address={internalOp.to} miner={false} />)
           </div>
         )}
       </div>
