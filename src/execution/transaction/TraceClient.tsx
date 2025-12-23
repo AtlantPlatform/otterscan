@@ -2,6 +2,8 @@ import React, { FC, useContext, Suspense, lazy } from "react";
 import { RuntimeContext } from "../../useRuntime";
 import { useTxData } from "../../useErigonHooks";
 import StandardSelectionBoundary from "../../selection/StandardSelectionBoundary";
+import { SelectedTransactionContext } from "../../useSelectedTransaction";
+import { BlockNumberContext } from "../../useBlockTagContext";
 
 const Trace = lazy(() => import("./Trace"));
 
@@ -28,19 +30,23 @@ const TraceClient: FC<TraceClientProps> = ({ txHash }) => {
   }
 
   return (
-    <StandardSelectionBoundary>
-      <Suspense
-        fallback={
-          <div className="mb-5 mt-4 flex flex-col items-start space-y-3 overflow-x-auto font-code text-sm">
-            <div className="h-7 w-96 rounded border px-1 py-1 hover:border-gray-500">
-              <div className="h-full w-full animate-pulse rounded bg-gray-200"></div>
-            </div>
-          </div>
-        }
-      >
-        <Trace txData={txData} txHash={txHash} />
-      </Suspense>
-    </StandardSelectionBoundary>
+    <SelectedTransactionContext.Provider value={txData}>
+      <BlockNumberContext.Provider value={txData?.confirmedData?.blockNumber}>
+        <StandardSelectionBoundary>
+          <Suspense
+            fallback={
+              <div className="mb-5 mt-4 flex flex-col items-start space-y-3 overflow-x-auto font-code text-sm">
+                <div className="h-7 w-96 rounded border px-1 py-1 hover:border-gray-500">
+                  <div className="h-full w-full animate-pulse rounded bg-gray-200"></div>
+                </div>
+              </div>
+            }
+          >
+            <Trace txData={txData} txHash={txHash} />
+          </Suspense>
+        </StandardSelectionBoundary>
+      </BlockNumberContext.Provider>
+    </SelectedTransactionContext.Provider>
   );
 };
 
