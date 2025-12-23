@@ -116,23 +116,27 @@ const feedRegistryFetcher =
         const feedRegistry = FEED_REGISTRY_MAINNET_PROTOTYPE.connect(
           provider,
         ) as Contract;
-        const [priceData, decimals, header] = await Promise.all([
+        const [priceData, decimals] = await Promise.all([
           feedRegistry.latestRoundData(tokenAddress, USD, {
             blockTag,
           }),
           feedRegistry.decimals(tokenAddress, USD, {
             blockTag,
           }),
-          provider.getBlock(blockTag),
         ]);
         const quote = BigInt(priceData.answer);
 
-        // If oracle is older than 7 days, assume it's stale
-        if (
-          header !== null &&
-          priceData.updatedAt < header.timestamp - 3600 * 24 * 7
-        ) {
-          throw new Error("Stale oracle quote");
+        // Skip stale check for historical blocks to avoid eth_getBlockByNumber
+        // errors for old blocks outside the node's snapshot range
+        if (blockTag === "latest") {
+          const header = await provider.getBlock(blockTag);
+          // If oracle is older than 7 days, assume it's stale
+          if (
+            header !== null &&
+            priceData.updatedAt < header.timestamp - 3600 * 24 * 7
+          ) {
+            throw new Error("Stale oracle quote");
+          }
         }
 
         return { price: quote, decimals, source: "Chainlink" };
