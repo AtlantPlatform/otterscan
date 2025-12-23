@@ -313,13 +313,6 @@ const StateDiff: React.FC<StateDiffProps> = ({ txData, txHash }) => {
         )}
       </div>
 
-      {/* SEO Description */}
-      <div className="mt-6 p-4 text-sm text-gray-700 dark:text-gray-300">
-        <p>
-          Ethereum state diffs show how a transaction changes blockchain state, including balances and smart contract storage.
-          This view helps analyze transaction side effects for transaction {txHash}.
-        </p>
-      </div>
     </ContentFrame>
   );
 };

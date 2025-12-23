@@ -153,13 +153,6 @@ const Trace: React.FC<TraceProps> = ({ txData, txHash }) => {
         )}
       </div>
 
-      {/* SEO Description */}
-      <div className="mt-6 p-4 text-sm text-gray-700 dark:text-gray-300">
-        <p>
-          Ethereum transaction traces show internal calls and contract interactions executed during a transaction.
-          This view helps analyze execution flow and value transfers for transaction {txHash}.
-        </p>
-      </div>
     </ContentFrame>
   );
 };
