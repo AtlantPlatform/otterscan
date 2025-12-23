@@ -454,10 +454,11 @@ export const useStateDiffTrace = (
               let change = addChangeType("storageChange", storageChange);
               if (change !== null) {
                 storageGroup.diffs.push(change);
+                group.diffs.push(storageGroup);
               }
-              group.diffs.push(storageGroup);
             }
-            return group;
+            // Only return storage group if it has non-empty slot groups
+            return group.diffs.length > 0 ? group : null;
           }
 
           let storageChanges = Object.keys(changes);
@@ -492,14 +493,17 @@ export const useStateDiffTrace = (
           };
         }
 
-        // Add each of the state changes from this acddress
+        // Add each of the state changes from this address
         for ([changeType, changes] of Object.entries(highLevelChange)) {
           let change = addChangeType(changeType, changes);
           if (change !== null) {
             sdGroup.diffs.push(change);
           }
         }
-        entries.push(sdGroup);
+        // Only add address group if it has non-empty diffs
+        if (sdGroup.diffs.length > 0) {
+          entries.push(sdGroup);
+        }
       }
       setTraceGroups(entries);
     };

@@ -69,9 +69,8 @@ const buildStateDiffTree = (
     if (isStateDiffGroup(group)) {
       result.push(
         <React.Fragment key={keyIndex++}>
-          {depth === 1 && getBranch()}
           <div className={depth > 0 ? "relative flex" : ""}>
-            {depth !== 1 && getBranch()}
+            {getBranch()}
             <div
               className={
                 depth === 0
@@ -104,7 +103,6 @@ const buildStateDiffTree = (
         </React.Fragment>,
       );
     } else {
-      result.push(getBranch(keyIndex++));
       let values: [string | null, string | null] = [group.from, group.to];
       let diffElement: null | React.ReactElement = null;
       let formatter: (value: string) => React.ReactNode | null = (
@@ -158,6 +156,7 @@ const buildStateDiffTree = (
           key={keyIndex++}
           className={`relative flex ${last ? "" : "border-l"}`}
         >
+          {getBranch()}
           <div
             className={`ml-5 py-1 ${showBorder ? "px-2 rounded border hover:border-gray-500" : ""} ${
               expanded ? "w-full" : ""
