@@ -28,7 +28,7 @@ type ContractsProps = {
 
 const Contracts: React.FC<ContractsProps> = ({ checksummedAddress, match }) => {
   const { provider } = useContext(RuntimeContext);
-  usePageTitle(`Contract | ${checksummedAddress}`);
+  usePageTitle(`Ethereum Smart Contract ${checksummedAddress} | Contract Details | Ethscan`, true);
   const { data: code } = useQuery(
     getCodeQuery(provider, checksummedAddress, "latest"),
   );

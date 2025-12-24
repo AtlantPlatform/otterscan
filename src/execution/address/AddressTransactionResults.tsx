@@ -33,9 +33,6 @@ import TransactionAddressWithCopy from "../components/TransactionAddressWithCopy
 import { AddressAwareComponentProps } from "../types";
 import PendingItem from "./PendingItem";
 import PendingPage from "./PendingPage";
-import {Helmet} from 'react-helmet-async';
-import {formatValue} from '../../components/formatter';
-import {useChainInfo} from '../../useChainInfo';
 
 const ProxyInfo: FC<AddressAwareComponentProps> = ({ address }) => {
   const { provider } = useContext(RuntimeContext);
@@ -141,66 +138,14 @@ const AddressTransactionResults: FC = () => {
     : undefined;
 
   usePageTitle(
-    `Ethereum Address ${addressOrName} - Balance, Transactions, and Analytics`,
+    `Ethereum Address ${addressOrName} | Wallet & Transactions | Ethscan`,
+    true,
   );
 
   const { data: balance } = useQuery(getBalanceQuery(provider, address));
-  const {
-    nativeCurrency: { symbol, decimals },
-  } = useChainInfo();
-  const formattedValue = formatValue(balance || 0, decimals);
-
-  const description = `Details for Ethereum address ${addressOrName} including current balance, transaction history, and analytics for activity.`
-  const payloadSchemaWebPage = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "url": `https://ethscan.org/address/${addressOrName}`,
-    "name": "Ethereum Address Details",
-    "mainEntity": {
-      "@type": "DigitalDocument",
-      "identifier": `${addressOrName}`,
-      "name": `Ethereum Address ${addressOrName}`,
-      "description": `Ethereum address with balance of ${formattedValue} ETH`
-    }
-  })
-  const payloadSchemaFaqPage = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What is an Ethereum address?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "An Ethereum address is a unique identifier used to send and receive transactions on the Ethereum blockchain. It starts with '0x' followed by 40 hexadecimal characters."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How can I check the balance of an Ethereum address?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "You can view the balance of an Ethereum address on Ethscan by searching for the address in the search bar."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What does the transaction history of an Ethereum address show?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "The transaction history shows all incoming and outgoing transactions associated with the address, including amounts and timestamps."
-        }
-      }
-    ]
-  })
 
   return (
     <ContentFrame tabs marginSize="none">
-      <Helmet>
-        <meta name="description" content={description}/>
-        <script type="application/ld+json">{payloadSchemaWebPage}</script>
-        <script type="application/ld+json">{payloadSchemaFaqPage}</script>
-      </Helmet>
       <StandardSelectionBoundary>
         <BlockNumberContext.Provider value="latest">
           <InfoRow title="Balance">

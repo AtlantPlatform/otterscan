@@ -17,7 +17,7 @@ const Trace: React.FC<TraceProps> = ({ txData, txHash }) => {
   const { provider } = useContext(RuntimeContext);
   const traces = useTraceTransaction(provider, txData.transactionHash);
 
-  usePageTitle(`Ethereum Transaction Trace ${txHash} | Internal Calls | Ethscan`);
+  usePageTitle(`Ethereum Transaction Trace ${txHash} | Internal Calls | Ethscan`, true);
 
   const title = `Ethereum Transaction Trace ${txHash} | Internal Calls | Ethscan`;
   const description = `View the full execution trace for Ethereum transaction ${txHash}. Analyze internal calls, contract interactions, and value transfers on Ethscan.`;

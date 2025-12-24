@@ -28,7 +28,7 @@ const Logs: FC<LogsProps> = ({ logs, txHash }) => {
     }, 200);
   }, [logs]);
 
-  usePageTitle(`Ethereum Transaction Logs ${txHash} | Smart Contract Events | Ethscan`);
+  usePageTitle(`Ethereum Transaction Logs ${txHash} | Smart Contract Events | Ethscan`, true);
 
   const title = `Ethereum Transaction Logs ${txHash} | Smart Contract Events | Ethscan`;
   const description = `View smart contract event logs for Ethereum transaction ${txHash}. Explore emitted events, topics, and decoded log data on Ethscan.`;

@@ -31,9 +31,7 @@ const Block: React.FC = () => {
     latestBlockNumber = undefined;
   }
 
-  const titleToSet = `Ethereum Block ${blockNumberOrHash} - Transactions, Gas Used, and Miner Details`
-
-  usePageTitle(titleToSet);
+  usePageTitle(`Ethereum Block ${blockNumberOrHash} - Block Details & Transactions | Ethscan`, true);
 
   // useBlockPageTitle(blockNumberOrHash);
 

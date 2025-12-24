@@ -64,7 +64,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
   const { provider } = useContext(RuntimeContext);
   const block = useBlockDataFromTransaction(provider, txData);
 
-  usePageTitle(`Transaction ${txData.transactionHash}`);
+  usePageTitle(`Ethereum Transaction ${txData.transactionHash} - Transaction Details | Ethscan`, true);
 
   const hasEIP1559 =
     block?.baseFeePerGas !== undefined && block?.baseFeePerGas !== null;

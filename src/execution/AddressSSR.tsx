@@ -1,5 +1,5 @@
 import { FC, Suspense, lazy, useState, useEffect, useMemo } from "react";
-import { useParams } from "react-router";
+import { useParams, useLocation } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { formatEther } from "ethers";
 import HeaderSSR from "../components/HeaderSSR";
@@ -217,8 +217,14 @@ const AddressRuntimeProvider: FC<{ children: React.ReactNode }> = ({ children })
  */
 const AddressSSR: FC = () => {
   const { addressOrName } = useParams();
+  const location = useLocation();
   const { address: addressData } = useSingleAddress(addressOrName);
   const { transactions, total: txTotal, hasMore } = useAddressTransactions(addressOrName, 1, 25);
+
+  // Detect subroutes for page-specific SEO
+  const isContractPage = location.pathname.endsWith('/contract');
+  const isReadContractPage = location.pathname.endsWith('/readContract');
+  const isContractSubroute = isContractPage || isReadContractPage;
 
   if (!addressOrName) {
     return (
@@ -238,11 +244,141 @@ const AddressSSR: FC = () => {
   const isContract = addressData?.isContract ?? false;
   const txCount = addressData?.transactionCount ?? 0;
 
-  const title = `Ethereum Address ${addressOrName} | Wallet & Transactions | Ethscan`;
-  const description = `View details for Ethereum address ${addressOrName}. Explore wallet balance, transactions, token transfers, and on-chain activity using Ethscan.`;
-  const ogDescription = `Explore Ethereum address ${addressOrName}. View wallet balance, transactions, token transfers, and on-chain activity on Ethscan.`;
-  const twitterDescription = `Explore Ethereum address ${addressOrName}. View wallet balance, transactions, and token transfers on Ethscan.`;
-  const canonicalUrl = `https://ethscan.org/address/${addressOrName}`;
+  // Generate page-specific SEO content
+  const getSeoContent = () => {
+    if (isContractPage) {
+      const pageUrl = `https://ethscan.org/address/${addressOrName}/contract`;
+      const title = `Ethereum Smart Contract ${addressOrName} | Contract Details | Ethscan`;
+      const description = `View Ethereum smart contract details for address ${addressOrName}. Explore verified source code, ABI, functions, and on-chain contract data on Ethscan.`;
+      const ogDescription = `Explore Ethereum smart contract details including verified source code, ABI, and functions for address ${addressOrName} on Ethscan.`;
+
+      const schemaGraph = JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Ethscan",
+            "url": "https://ethscan.org/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://ethscan.org/search?q={query}",
+              "query-input": "required name=query"
+            }
+          },
+          {
+            "@type": "Organization",
+            "name": "Ethscan",
+            "url": "https://ethscan.org/"
+          },
+          {
+            "@type": "WebPage",
+            "url": pageUrl,
+            "name": `Ethereum Smart Contract ${addressOrName}`,
+            "description": "Ethereum smart contract details including verified source code, ABI, and functions."
+          },
+          {
+            "@type": "Dataset",
+            "name": `Ethereum Smart Contract at ${addressOrName}`,
+            "description": "A dataset describing an Ethereum smart contract, including verified source code, ABI, compiler details, and callable functions.",
+            "url": pageUrl,
+            "includedInDataCatalog": {
+              "@type": "DataCatalog",
+              "name": "Ethscan Ethereum Blockchain Data"
+            },
+            "variableMeasured": [
+              { "@type": "PropertyValue", "name": "Contract Address", "value": addressOrName },
+              { "@type": "PropertyValue", "name": "Contract Verification Status" },
+              { "@type": "PropertyValue", "name": "Contract ABI" },
+              { "@type": "PropertyValue", "name": "Compiler Version" },
+              { "@type": "PropertyValue", "name": "Contract Functions" }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ethscan.org/" },
+              { "@type": "ListItem", "position": 2, "name": "Address", "item": `https://ethscan.org/address/${addressOrName}` },
+              { "@type": "ListItem", "position": 3, "name": "Contract", "item": pageUrl }
+            ]
+          }
+        ]
+      });
+
+      return { title, description, ogDescription, pageUrl, schemaGraph };
+    }
+
+    if (isReadContractPage) {
+      const pageUrl = `https://ethscan.org/address/${addressOrName}/readContract`;
+      const title = `Read Ethereum Smart Contract ${addressOrName} | Read-Only Functions | Ethscan`;
+      const description = `Read data from Ethereum smart contract ${addressOrName}. Call read-only functions and query on-chain contract state using Ethscan.`;
+      const ogDescription = `Query read-only functions and on-chain state for Ethereum smart contract ${addressOrName} using Ethscan.`;
+
+      const schemaGraph = JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Ethscan",
+            "url": "https://ethscan.org/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://ethscan.org/search?q={query}",
+              "query-input": "required name=query"
+            }
+          },
+          {
+            "@type": "Organization",
+            "name": "Ethscan",
+            "url": "https://ethscan.org/"
+          },
+          {
+            "@type": "WebPage",
+            "url": pageUrl,
+            "name": `Read Ethereum Smart Contract ${addressOrName}`,
+            "description": "Read-only interaction with an Ethereum smart contract, allowing users to query public state and view functions."
+          },
+          {
+            "@type": "Dataset",
+            "name": `Ethereum Smart Contract Read-Only Interface for ${addressOrName}`,
+            "description": "A dataset describing read-only Ethereum smart contract functions and their return values, enabling users to query on-chain state without submitting transactions.",
+            "url": pageUrl,
+            "includedInDataCatalog": {
+              "@type": "DataCatalog",
+              "name": "Ethscan Ethereum Blockchain Data"
+            },
+            "variableMeasured": [
+              { "@type": "PropertyValue", "name": "Contract Address", "value": addressOrName },
+              { "@type": "PropertyValue", "name": "Read-Only Functions" },
+              { "@type": "PropertyValue", "name": "Public Variables" },
+              { "@type": "PropertyValue", "name": "Return Values" }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ethscan.org/" },
+              { "@type": "ListItem", "position": 2, "name": "Address", "item": `https://ethscan.org/address/${addressOrName}` },
+              { "@type": "ListItem", "position": 3, "name": "Read Contract", "item": pageUrl }
+            ]
+          }
+        ]
+      });
+
+      return { title, description, ogDescription, pageUrl, schemaGraph };
+    }
+
+    // Default: main address page (uses existing logic below)
+    return null;
+  };
+
+  const contractSeoContent = getSeoContent();
+
+  // Main address page SEO (only used when not on contract subroutes)
+  const title = contractSeoContent?.title ?? `Ethereum Address ${addressOrName} | Wallet & Transactions | Ethscan`;
+  const description = contractSeoContent?.description ?? `View details for Ethereum address ${addressOrName}. Explore wallet balance, transactions, token transfers, and on-chain activity using Ethscan.`;
+  const ogDescription = contractSeoContent?.ogDescription ?? `Explore Ethereum address ${addressOrName}. View wallet balance, transactions, token transfers, and on-chain activity on Ethscan.`;
+  const twitterDescription = contractSeoContent?.ogDescription ?? `Explore Ethereum address ${addressOrName}. View wallet balance, transactions, and token transfers on Ethscan.`;
+  const canonicalUrl = contractSeoContent?.pageUrl ?? `https://ethscan.org/address/${addressOrName}`;
 
   // FAQ content for UI display
   const faqItems = [
@@ -327,6 +463,17 @@ const AddressSSR: FC = () => {
             "item": canonicalUrl
           }
         ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": faqItems.map(item => ({
+          "@type": "Question",
+          "name": item.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item.answer
+          }
+        }))
       }
     ]
   });
@@ -348,7 +495,10 @@ const AddressSSR: FC = () => {
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={twitterDescription} />
 
-        <script type="application/ld+json">{payloadSchemaGraph}</script>
+        {/* Use contract schema if on contract page, otherwise use address schema */}
+        <script type="application/ld+json">
+          {contractSeoContent?.schemaGraph ?? payloadSchemaGraph}
+        </script>
       </Helmet>
 
       {/* Client-side: Full AddressMainPage with RuntimeProvider */}
@@ -482,20 +632,40 @@ const AddressSSR: FC = () => {
                   )}
                 </div>
 
-                {/* FAQ Section */}
-                <div className="px-3 lg:px-9 mt-6">
-                  <div className="h-64 overflow-y-auto p-6">
-                    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
-                    <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
-                      {faqItems.map((item, index) => (
-                        <div key={index}>
-                          <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">{item.question}</h3>
-                          <p>{item.answer}</p>
-                        </div>
-                      ))}
+                {/* Descriptive text for Contract page */}
+                {isContractPage && (
+                  <div className="px-3 lg:px-9 mt-4">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      This page shows verified details for an Ethereum smart contract, including source code, ABI, and callable functions.
+                    </p>
+                  </div>
+                )}
+
+                {/* Descriptive text for Read Contract page */}
+                {isReadContractPage && (
+                  <div className="px-3 lg:px-9 mt-4">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      This page lets you read public state and view functions of an Ethereum smart contract without sending a transaction.
+                    </p>
+                  </div>
+                )}
+
+                {/* FAQ Section - only on main address pages, not on contract subroutes */}
+                {!isContractSubroute && (
+                  <div className="px-3 lg:px-9 mt-6">
+                    <div className="h-64 overflow-y-auto p-6">
+                      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
+                      <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+                        {faqItems.map((item, index) => (
+                          <div key={index}>
+                            <h3 className="text-lg font-semibold mt-0 mb-3 text-gray-900 dark:text-gray-100">{item.question}</h3>
+                            <p>{item.answer}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </StandardFrame>
           </div>

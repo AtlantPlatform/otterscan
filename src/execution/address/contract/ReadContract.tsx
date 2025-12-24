@@ -29,7 +29,7 @@ const ReadContract: React.FC<ContractsProps> = ({
   match,
 }) => {
   const [showNonViewReturns, setShowNonViewReturns] = useState<boolean>(false);
-  usePageTitle(`Read Contract | ${checksummedAddress}`);
+  usePageTitle(`Read Ethereum Smart Contract ${checksummedAddress} | Read-Only Functions | Ethscan`, true);
 
   const viewFunctions = match?.metadata.output.abi.filter((fn) =>
     isReadFunction(fn),

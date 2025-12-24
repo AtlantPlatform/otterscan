@@ -34,7 +34,7 @@ const BroadcastTransactionPage: React.FC = () => {
     }
   }
 
-  usePageTitle(`Broadcast Ethereum Transaction | Send Raw Signed TX`);
+  usePageTitle(`Broadcast Ethereum Transaction | Send Raw Signed TX – Ethscan`, true);
 
   // FAQ content for both schema and UI display
   const faqItems = [

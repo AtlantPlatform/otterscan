@@ -37,10 +37,9 @@ const BlockTransactions: React.FC = () => {
   const txs = data?.txs;
   const totalTxs = data?.total;
 
-  const titleToSet = `Transactions in Ethereum Block ${blockNumber}`
   const description = `Explore all transactions in Ethereum block ${blockNumber}. View transaction hashes, sender and recipient addresses, and gas fees.`
 
-  usePageTitle(titleToSet)
+  usePageTitle(`Ethereum Block ${blockNumber} Transactions - Full Transaction List | Ethscan`, true);
   // useBlockTransactionsPageTitle(
   //   blockNumber,
   //   pageNumber,

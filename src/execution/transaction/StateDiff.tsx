@@ -186,7 +186,7 @@ const StateDiff: React.FC<StateDiffProps> = ({ txData, txHash }) => {
   const { provider } = useContext(RuntimeContext);
   const traces = useStateDiffTrace(provider, txData.transactionHash);
 
-  usePageTitle(`Ethereum Transaction State Diff ${txHash} | State Changes | Ethscan`);
+  usePageTitle(`Ethereum Transaction State Diff ${txHash} | State Changes | Ethscan`, true);
 
   const title = `Ethereum Transaction State Diff ${txHash} | State Changes | Ethscan`;
   const description = `View state changes caused by Ethereum transaction ${txHash}. Analyze balance updates, storage changes, and contract state differences on Ethscan.`;
