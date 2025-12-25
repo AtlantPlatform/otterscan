@@ -1,10 +1,10 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { SitemapConfig } from './types.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 export function getSitemapConfig(): SitemapConfig {
+  // Use process.cwd() for reliable paths regardless of module location
+  const appRoot = process.cwd();
+
   return {
     baseUrl: process.env.SITEMAP_BASE_URL || 'https://ethscan.org',
     blocksCount: parseInt(process.env.SITEMAP_BLOCKS_COUNT || '20000', 10),
@@ -15,7 +15,7 @@ export function getSitemapConfig(): SitemapConfig {
     erigonRpcUrl: process.env.ERIGON_RPC_URL || 'http://localhost:8545',
     // Output to public/sitemaps in dev, dist/client/sitemaps in production
     outputDir: process.env.NODE_ENV === 'production'
-      ? path.resolve(__dirname, '../../dist/client/sitemaps')
-      : path.resolve(__dirname, '../../public/sitemaps'),
+      ? path.resolve(appRoot, 'dist/client/sitemaps')
+      : path.resolve(appRoot, 'public/sitemaps'),
   };
 }
