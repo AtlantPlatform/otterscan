@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import compression from 'compression';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { initializeSitemaps } from './src/sitemap/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === 'production';
@@ -89,9 +88,23 @@ app.use(async (req, res, next) => {
 });
 
 // Initialize sitemap generation (runs in background, doesn't block startup)
-initializeSitemaps().catch((error) => {
-  console.error('[Sitemap] Initialization failed:', error);
-});
+(async () => {
+  try {
+    let initializeSitemaps;
+    if (!isProduction) {
+      // In development, use Vite to load TypeScript module
+      const sitemapModule = await vite.ssrLoadModule('/src/sitemap/index.ts');
+      initializeSitemaps = sitemapModule.initializeSitemaps;
+    } else {
+      // In production, import the compiled JavaScript
+      const sitemapModule = await import('./dist/server/sitemap/index.js');
+      initializeSitemaps = sitemapModule.initializeSitemaps;
+    }
+    await initializeSitemaps();
+  } catch (error) {
+    console.error('[Sitemap] Initialization failed:', error);
+  }
+})();
 
 app.listen(port, () => {
   console.log(`Server started at http://localhost:${port}`);

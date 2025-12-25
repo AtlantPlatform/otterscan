@@ -34,10 +34,21 @@ async function withRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES): Promis
  * Client for fetching blockchain data from Erigon RPC
  */
 export class ErigonClient {
-  private provider: JsonRpcProvider;
+  private provider: JsonRpcProvider | null = null;
+  private rpcUrl: string;
 
   constructor(rpcUrl: string) {
-    this.provider = new JsonRpcProvider(rpcUrl);
+    this.rpcUrl = rpcUrl;
+  }
+
+  /**
+   * Get or create the provider (lazy initialization)
+   */
+  private getProvider(): JsonRpcProvider {
+    if (!this.provider) {
+      this.provider = new JsonRpcProvider(this.rpcUrl);
+    }
+    return this.provider;
   }
 
   /**
@@ -45,7 +56,7 @@ export class ErigonClient {
    */
   async getLatestBlockNumber(): Promise<number> {
     return withRetry(async () => {
-      const blockNumber = await this.provider.getBlockNumber();
+      const blockNumber = await this.getProvider().getBlockNumber();
       return blockNumber;
     });
   }
@@ -67,7 +78,7 @@ export class ErigonClient {
 
       const batchResults = await withRetry(async () => {
         const blocks = await Promise.all(
-          blockNumbers.map((n) => this.provider.getBlock(n))
+          blockNumbers.map((n) => this.getProvider().getBlock(n))
         );
         return blocks;
       });
@@ -110,7 +121,7 @@ export class ErigonClient {
           { length: batchEnd - batchStart + 1 },
           (_, i) => batchStart + i
         );
-        return Promise.all(blockNumbers.map((n) => this.provider.getBlock(n, true)));
+        return Promise.all(blockNumbers.map((n) => this.getProvider().getBlock(n, true)));
       });
 
       for (const block of blocks.sort((a, b) => (b?.number ?? 0) - (a?.number ?? 0))) {
@@ -165,7 +176,7 @@ export class ErigonClient {
           { length: batchEnd - batchStart + 1 },
           (_, i) => batchStart + i
         );
-        return Promise.all(blockNumbers.map((n) => this.provider.getBlock(n)));
+        return Promise.all(blockNumbers.map((n) => this.getProvider().getBlock(n)));
       });
 
       for (const block of blocks) {
@@ -197,12 +208,28 @@ export class ErigonClient {
   }
 
   /**
-   * Check if the RPC connection is working
+   * Check if the RPC connection is working (with timeout)
+   * Uses direct fetch to avoid ethers.js retry noise
    */
   async checkConnection(): Promise<boolean> {
     try {
-      await this.provider.getBlockNumber();
-      return true;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(this.rpcUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'eth_blockNumber',
+          params: [],
+          id: 1,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return response.ok;
     } catch {
       return false;
     }

@@ -10,7 +10,7 @@ export function getSitemapConfig(): SitemapConfig {
     blocksCount: parseInt(process.env.SITEMAP_BLOCKS_COUNT || '20000', 10),
     txCount: parseInt(process.env.SITEMAP_TX_COUNT || '20000', 10),
     txMaxDays: parseInt(process.env.SITEMAP_TX_MAX_DAYS || '7', 10),
-    addressCount: parseInt(process.env.SITEMAP_ADDRESS_COUNT || '50000', 10),
+    addressCount: parseInt(process.env.SITEMAP_ADDRESS_COUNT || '1000', 10),
     cronInterval: parseInt(process.env.SITEMAP_CRON_INTERVAL || '5', 10),
     erigonRpcUrl: process.env.ERIGON_RPC_URL || 'http://localhost:8545',
     // Output to public/sitemaps in dev, dist/client/sitemaps in production
