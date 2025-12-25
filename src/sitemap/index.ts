@@ -44,4 +44,4 @@ export function getSitemapGenerator(): SitemapGenerator | null {
 }
 
 // Re-export types for convenience
-export type { SitemapConfig, BlockInfo, TransactionInfo } from './types.js';
+export type { SitemapConfig, BlockInfo, TransactionInfo, AddressInfo } from './types.js';

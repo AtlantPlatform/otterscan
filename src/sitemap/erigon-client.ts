@@ -1,5 +1,5 @@
 import { JsonRpcProvider, type Block, type TransactionResponse } from 'ethers';
-import type { BlockInfo, TransactionInfo } from './types.js';
+import type { BlockInfo, TransactionInfo, AddressInfo } from './types.js';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
@@ -137,6 +137,61 @@ export class ErigonClient {
 
       currentBlock = batchStart - 1;
     }
+
+    return results;
+  }
+
+  /**
+   * Fetch unique coinbase (miner/validator) addresses from recent blocks
+   * Returns deduplicated addresses with their most recent block timestamp
+   */
+  async getCoinbaseAddresses(maxCount: number): Promise<AddressInfo[]> {
+    const addressMap = new Map<string, number>(); // address -> latest timestamp
+    const latestBlockNumber = await this.getLatestBlockNumber();
+
+    let currentBlock = latestBlockNumber;
+
+    // We need to scan many more blocks than maxCount since validators repeat
+    // Scan up to 500k blocks or until we have enough unique addresses
+    const maxBlocksToScan = 500000;
+    let blocksScanned = 0;
+
+    while (addressMap.size < maxCount && currentBlock > 0 && blocksScanned < maxBlocksToScan) {
+      const batchStart = Math.max(currentBlock - BATCH_SIZE + 1, 0);
+      const batchEnd = currentBlock;
+
+      const blocks = await withRetry(async () => {
+        const blockNumbers = Array.from(
+          { length: batchEnd - batchStart + 1 },
+          (_, i) => batchStart + i
+        );
+        return Promise.all(blockNumbers.map((n) => this.provider.getBlock(n)));
+      });
+
+      for (const block of blocks) {
+        if (!block || !block.miner) continue;
+
+        const address = block.miner.toLowerCase();
+        // Keep the most recent timestamp for each address
+        if (!addressMap.has(address)) {
+          addressMap.set(address, block.timestamp);
+        }
+      }
+
+      blocksScanned += batchEnd - batchStart + 1;
+      currentBlock = batchStart - 1;
+
+      // Log progress every 10k blocks
+      if (blocksScanned % 10000 === 0) {
+        console.log(`[Sitemap] Scanned ${blocksScanned} blocks, found ${addressMap.size} unique coinbase addresses`);
+      }
+    }
+
+    // Convert to array and sort by timestamp descending
+    const results: AddressInfo[] = Array.from(addressMap.entries())
+      .map(([address, lastSeen]) => ({ address, lastSeen }))
+      .sort((a, b) => b.lastSeen - a.lastSeen)
+      .slice(0, maxCount);
 
     return results;
   }

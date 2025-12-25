@@ -12,6 +12,11 @@ export interface TransactionInfo {
   timestamp: number;
 }
 
+export interface AddressInfo {
+  address: string;
+  lastSeen: number;
+}
+
 export interface SitemapUrl {
   loc: string;
   lastmod?: string;
@@ -29,6 +34,7 @@ export interface SitemapConfig {
   blocksCount: number;
   txCount: number;
   txMaxDays: number;
+  addressCount: number;
   cronInterval: number;
   erigonRpcUrl: string;
   outputDir: string;

@@ -16,10 +16,17 @@ export function startSitemapScheduler(
   });
   console.log(`[Sitemap] Scheduled periodic generation every ${intervalMinutes} minutes`);
 
-  // Daily at 2 AM: full regeneration
+  // Daily at 2 AM: full regeneration (excludes addresses which are weekly)
   cron.schedule('0 2 * * *', async () => {
     console.log('[Sitemap] Running daily full generation...');
     await generator.runFullGeneration();
   });
   console.log('[Sitemap] Scheduled daily full generation at 2:00 AM');
+
+  // Weekly on Sunday at 3 AM: regenerate address sampling
+  cron.schedule('0 3 * * 0', async () => {
+    console.log('[Sitemap] Running weekly address sitemap regeneration...');
+    await generator.runWeeklyAddressGeneration();
+  });
+  console.log('[Sitemap] Scheduled weekly address regeneration on Sundays at 3:00 AM');
 }

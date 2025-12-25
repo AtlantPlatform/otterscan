@@ -128,6 +128,31 @@ export class SitemapGenerator {
   }
 
   /**
+   * Generate the sampled addresses sitemap (coinbase/validator addresses)
+   */
+  async generateAddressesSitemap(): Promise<void> {
+    const { baseUrl, addressCount, outputDir } = this.config;
+
+    try {
+      console.log(`[Sitemap] Fetching up to ${addressCount} unique coinbase addresses...`);
+      const addresses = await this.client.getCoinbaseAddresses(addressCount);
+
+      const entries = addresses.map((addr) => ({
+        loc: `${baseUrl}/address/${addr.address}`,
+        lastmod: formatTimestamp(addr.lastSeen),
+      }));
+
+      const xml = buildSimpleUrlset(entries);
+      await ensureOutputDir(outputDir);
+      await writeFileAtomic(path.join(outputDir, 'sitemap-addresses-sampled.xml'), xml);
+      console.log(`[Sitemap] Generated sitemap-addresses-sampled.xml with ${entries.length} addresses`);
+    } catch (error) {
+      console.error('[Sitemap] Failed to generate addresses sitemap:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Generate the sitemap index file
    */
   async generateSitemapIndex(): Promise<void> {
@@ -147,6 +172,10 @@ export class SitemapGenerator {
       {
         loc: `${baseUrl}/sitemaps/sitemap-tx-recent.xml`,
         lastmod: now,
+      },
+      {
+        loc: `${baseUrl}/sitemaps/sitemap-addresses-sampled.xml`,
+        lastmod: today,
       },
     ];
 
@@ -199,9 +228,30 @@ export class SitemapGenerator {
       await this.generateCoreSitemap();
       await this.generateBlocksSitemap();
       await this.generateTxSitemap();
+      await this.generateAddressesSitemap();
       await this.generateSitemapIndex();
     } catch (error) {
       console.error('[Sitemap] Full generation failed:', error);
+    } finally {
+      this.isGenerating = false;
+    }
+  }
+
+  /**
+   * Run weekly address sitemap regeneration
+   */
+  async runWeeklyAddressGeneration(): Promise<void> {
+    if (this.isGenerating) {
+      console.log('[Sitemap] Skipping address generation - another run in progress');
+      return;
+    }
+
+    this.isGenerating = true;
+    try {
+      await this.generateAddressesSitemap();
+      await this.updateIndexLastmod();
+    } catch (error) {
+      console.error('[Sitemap] Weekly address generation failed:', error);
     } finally {
       this.isGenerating = false;
     }
