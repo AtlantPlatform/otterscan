@@ -2,4 +2,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://ethscan.org/sitemap.xml
+Sitemap: https://ethscan.org/sitemaps/sitemap.xml

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import compression from 'compression';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import { initializeSitemaps } from './src/sitemap/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === 'production';
@@ -43,6 +44,12 @@ app.use('/api', createProxyMiddleware({
   changeOrigin: true,
 }));
 
+// Serve sitemaps from the appropriate directory
+const sitemapsDir = isProduction
+  ? path.resolve(__dirname, 'dist/client/sitemaps')
+  : path.resolve(__dirname, 'public/sitemaps');
+app.use('/sitemaps', express.static(sitemapsDir));
+
 // Serve HTML for all routes (catch-all handler)
 app.use(async (req, res, next) => {
   // Skip if not a GET request or if it's a static asset request
@@ -79,6 +86,11 @@ app.use(async (req, res, next) => {
     console.error(e.stack);
     res.status(500).end(e.stack);
   }
+});
+
+// Initialize sitemap generation (runs in background, doesn't block startup)
+initializeSitemaps().catch((error) => {
+  console.error('[Sitemap] Initialization failed:', error);
 });
 
 app.listen(port, () => {

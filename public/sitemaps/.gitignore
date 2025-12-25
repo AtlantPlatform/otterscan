@@ -1,0 +1,3 @@
+# Ignore generated sitemaps (they are dynamically created at runtime)
+*.xml
+*.xml.tmp
