@@ -49,9 +49,10 @@ const sitemapsDir = isProduction
   : path.resolve(__dirname, 'public/sitemaps');
 app.use('/sitemaps', express.static(sitemapsDir));
 
-// Redirect /sitemap.xml to /sitemaps/sitemap.xml (SEO best practice)
+// Serve root sitemap directly at /sitemap.xml
 app.get('/sitemap.xml', (req, res) => {
-  res.redirect(301, '/sitemaps/sitemap.xml');
+  const sitemapPath = path.join(sitemapsDir, 'sitemap.xml');
+  res.sendFile(sitemapPath);
 });
 
 // Serve HTML for all routes (catch-all handler)
