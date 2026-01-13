@@ -3,85 +3,49 @@ import { ProbeError } from "./ProbeError";
 import { MIN_API_LEVEL } from "./params";
 import { ConnectionStatus } from "./types";
 
-export const DEFAULT_ERIGON_URL = "http://127.0.0.1:8545";
+export const DEFAULT_RPC_URL = "http://127.0.0.1:8545";
 
 export const createAndProbeProvider = async (
-  erigonURL?: string,
+  rpcURL?: string,
 ): Promise<JsonRpcApiProvider> => {
-  if (erigonURL !== undefined) {
-    if (erigonURL === "") {
-      console.info(`Using default erigon URL: ${DEFAULT_ERIGON_URL}`);
-      erigonURL = DEFAULT_ERIGON_URL;
+  if (rpcURL !== undefined) {
+    if (rpcURL === "") {
+      console.info(`Using default API URL: ${DEFAULT_RPC_URL}`);
+      rpcURL = DEFAULT_RPC_URL;
     } else {
-      console.log(`Using configured erigon URL: ${erigonURL}`);
+      console.log(`Using configured API URL: ${rpcURL}`);
     }
   }
 
-  if (erigonURL === undefined) {
+  if (rpcURL === undefined) {
     throw new ProbeError(ConnectionStatus.NOT_ETH_NODE, "");
   }
 
+  // Convert relative URLs to absolute URLs for ethers.js
+  // ethers.js doesn't support relative URLs, so we need to prepend the origin
+  if (rpcURL.startsWith("/")) {
+    const absoluteURL = `${window.location.origin}${rpcURL}`;
+    console.log(`Converting relative URL to absolute: ${absoluteURL}`);
+    rpcURL = absoluteURL;
+  }
+
+  // First, create a temporary provider to detect the network
+  const tempProvider = new JsonRpcProvider(rpcURL);
+  const network = await tempProvider.getNetwork();
+  tempProvider.destroy();
+
+  // Now create the actual provider with the detected network
   let provider: JsonRpcApiProvider;
-  if (erigonURL?.startsWith("ws://") || erigonURL?.startsWith("wss://")) {
-    provider = new WebSocketProvider(erigonURL, undefined, {
-      staticNetwork: true,
+  if (rpcURL?.startsWith("ws://") || rpcURL?.startsWith("wss://")) {
+    provider = new WebSocketProvider(rpcURL, network, {
+      staticNetwork: network,
     });
   } else {
     // Batching takes place by default
-    provider = new JsonRpcProvider(erigonURL, undefined, {
-      staticNetwork: true,
+    provider = new JsonRpcProvider(rpcURL, network, {
+      staticNetwork: network,
     });
   }
 
-  // Check if it is at least a regular ETH node
-  const probeBlockNumber = provider.getBlockNumber();
-  const probeHeader1 = provider.send("erigon_getHeaderByNumber", ["latest"]);
-  const probeOtsAPI = provider.send("ots_getApiLevel", []).then((level) => {
-    if (level < MIN_API_LEVEL) {
-      throw new ProbeError(ConnectionStatus.NOT_OTTERSCAN_PATCHED, erigonURL);
-    }
-  });
-  // Wait for the `eth_chainId` call ethers internally makes so provider._network
-  // is available to components
-  const getNetwork = provider.getNetwork();
-
-  try {
-    await Promise.all([
-      probeBlockNumber,
-      probeHeader1,
-      probeOtsAPI,
-      getNetwork,
-    ]);
-    return provider;
-  } catch (err) {
-    // If any was rejected, then check them sequentially in order to
-    // narrow the error cause, but we need to await them individually
-    // because we don't know if all of them have been finished
-
-    try {
-      await probeBlockNumber;
-    } catch (err) {
-      console.log(err);
-      throw new ProbeError(ConnectionStatus.NOT_ETH_NODE, erigonURL);
-    }
-
-    // Check if it is an Erigon node by probing a lightweight method
-    try {
-      // Get header for block 1
-      await probeHeader1;
-    } catch (err) {
-      console.log(err);
-      throw new ProbeError(ConnectionStatus.NOT_ERIGON, erigonURL);
-    }
-
-    // Check if it has Otterscan patches by probing a lightweight method
-    try {
-      await probeOtsAPI;
-    } catch (err) {
-      console.log(err);
-      throw new ProbeError(ConnectionStatus.NOT_OTTERSCAN_PATCHED, erigonURL);
-    }
-
-    throw new Error("Must not happen", { cause: err });
-  }
+  return provider;
 };

@@ -3,7 +3,8 @@ import { defineConfig } from "vite";
 import { imagetools } from "vite-imagetools";
 import viteCompression from "vite-plugin-compression";
 
-const proxyTarget = 'https://ethscan.org/erigon/'
+// Proxy to local API server during development
+const proxyTarget = process.env.VITE_API_URL || 'http://localhost:3001'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,17 +14,52 @@ export default defineConfig({
     viteCompression({ algorithm: "brotliCompress" }),
     imagetools(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate React and core libraries
+          'vendor-react': ['react', 'react-dom', 'react-router', 'react-error-boundary'],
+          // Separate ethers (large blockchain library)
+          'vendor-ethers': ['ethers'],
+          // UI libraries
+          'vendor-ui': ['@headlessui/react', '@tanstack/react-query', 'swr'],
+          // Chart libraries (only needed on specific pages)
+          'vendor-charts': ['chart.js', 'react-chartjs-2'],
+          // QR/Camera scanner (large, only needed for specific feature)
+          'vendor-scanner': ['@zxing/browser', '@zxing/library'],
+          // Code highlighting (large, only needed on contract pages)
+          'vendor-shiki': ['shiki'],
+          // FontAwesome icons
+          'vendor-icons': [
+            '@fortawesome/fontawesome-svg-core',
+            '@fortawesome/free-brands-svg-icons',
+            '@fortawesome/free-regular-svg-icons',
+            '@fortawesome/free-solid-svg-icons',
+            '@fortawesome/react-fontawesome'
+          ],
+        },
+      },
+    },
+    // Increase chunk size warning limit since we're splitting properly
+    chunkSizeWarningLimit: 600,
+    // Enable tree-shaking for better dead code elimination
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+    },
+  },
   server: {
     proxy: {
       '^/api': {
         target: proxyTarget,
-        ws: true,
+        ws: false,
         changeOrigin: true,
-        autoRewrite: true,
-        headers: {
-          origin: proxyTarget,
-          referer: proxyTarget,
-        },
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
     },
   },

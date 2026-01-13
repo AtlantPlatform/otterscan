@@ -19,8 +19,6 @@ import { useEffect, useMemo, useState } from "react";
 import useSWR, { Fetcher } from "swr";
 import useSWRImmutable from "swr/immutable";
 import erc20 from "./abi/erc20.json";
-import L1Block from "./abi/optimism/L1Block.json";
-import { getOpFeeData, isOptimisticChain } from "./execution/op-tx-calculation";
 import { panicCodeMessages } from "./execution/panic-codes";
 import {
   ChecksummedAddress,
@@ -37,16 +35,11 @@ const TRANSFER_TOPIC =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 export interface ExtendedBlock extends BlockParams {
-  blockReward: bigint;
-  unclesReward: bigint;
-  feeReward: bigint;
   size: number;
   sha3Uncles: string;
   stateRoot: string;
   totalDifficulty?: bigint;
   transactionCount: number;
-  // Optimism-specific
-  gasUsedDepositTx?: bigint;
 }
 
 export const readBlock = async (
@@ -55,37 +48,35 @@ export const readBlock = async (
 ): Promise<ExtendedBlock | null> => {
   let blockPromise: Promise<any>;
   if (isHexString(blockNumberOrHash, 32)) {
-    blockPromise = provider.send("ots_getBlockDetailsByHash", [
+    blockPromise = provider.send("eth_getBlockByHash", [
       blockNumberOrHash,
+      false, // Don't include full transaction objects
     ]);
   } else {
     const blockNumber = parseInt(blockNumberOrHash);
     if (isNaN(blockNumber) || blockNumber < 0) {
       return null;
     }
-    blockPromise = provider.send("ots_getBlockDetails", [blockNumber]);
+    blockPromise = provider.send("eth_getBlockByNumber", [
+      "0x" + blockNumber.toString(16), // Convert to hex
+      false, // Don't include full transaction objects
+    ]);
   }
 
   const _rawBlock = await blockPromise;
   if (_rawBlock === null) {
     return null;
   }
-  const _block: BlockParams = formatter.blockParams(_rawBlock.block);
-  const _rawIssuance = _rawBlock.issuance;
+  const _block: BlockParams = formatter.blockParams(_rawBlock);
 
   const extBlock: ExtendedBlock = {
-    blockReward: formatter.bigInt(_rawIssuance.blockReward ?? 0),
-    unclesReward: formatter.bigInt(_rawIssuance.uncleReward ?? 0),
-    feeReward: formatter.bigInt(_rawBlock.totalFees),
-    size: formatter.number(_rawBlock.block.size),
-    sha3Uncles: _rawBlock.block.sha3Uncles,
-    stateRoot: _rawBlock.block.stateRoot,
+    size: formatter.number(_rawBlock.size),
+    sha3Uncles: _rawBlock.sha3Uncles,
+    stateRoot: _rawBlock.stateRoot,
     totalDifficulty:
-      _rawBlock.block.totalDifficulty &&
-      formatter.bigInt(_rawBlock.block.totalDifficulty),
-    transactionCount: formatter.number(_rawBlock.block.transactionCount),
-    // Optimism-specific; gas used by the deposit transaction
-    gasUsedDepositTx: formatter.bigInt(_rawBlock.gasUsedDepositTx ?? 0n),
+      _rawBlock.totalDifficulty &&
+      formatter.bigInt(_rawBlock.totalDifficulty),
+    transactionCount: _rawBlock.transactions ? _rawBlock.transactions.length : 0,
     ..._block,
   };
   return extBlock;
@@ -100,17 +91,38 @@ const blockTransactionsFetcher: Fetcher<
   BlockTransactionsPage,
   [JsonRpcApiProvider, number, number, number]
 > = async ([provider, blockNumber, pageNumber, pageSize]) => {
-  const result = await provider.send("ots_getBlockTransactions", [
-    blockNumber,
-    pageNumber,
-    pageSize,
-  ]);
-  const _block = formatter.blockParamsWithTransactions(result.fullblock);
-  const _receipts = result.receipts;
+  try {
+    // Use standard eth_getBlockByNumber with full transactions
+    const _block = await provider.send("eth_getBlockByNumber", [
+      "0x" + blockNumber.toString(16),
+      true, // Include full transaction objects
+    ]);
 
-  const rawTxs = _block.transactions
+    if (!_block || !_block.transactions) {
+      return { total: 0, txs: [] };
+    }
+
+  const formattedBlock = formatter.blockParamsWithTransactions(_block);
+  const totalTxs = _block.transactions.length;
+
+  // Apply pagination first to limit the number of transactions we process
+  const startIdx = pageNumber * pageSize;
+  const endIdx = Math.min(startIdx + pageSize, totalTxs);
+  const pageTransactions = _block.transactions.slice(startIdx, endIdx);
+
+  // Only get receipts for the transactions in this page
+  const receiptPromises = pageTransactions.map((tx: any) =>
+    provider.send("eth_getTransactionReceipt", [tx.hash])
+  );
+  const receipts = await Promise.all(receiptPromises);
+
+  const rawTxs = pageTransactions
     .map((t: TransactionResponseParams, i: number): ProcessedTransaction => {
-      const _rawReceipt = _receipts[i];
+      const _rawReceipt = receipts[i];
+      if (!_rawReceipt) {
+        throw new Error("blockTransactionsFetcher: receipt not found");
+      }
+
       // Empty logs on purpose because of ethers formatter requires it
       _rawReceipt.logs = [];
       const _receipt: TransactionReceiptParams =
@@ -122,55 +134,54 @@ const blockTransactionsFetcher: Fetcher<
 
       let fee: bigint;
       let effectiveGasPrice: bigint;
-      if (t.type === 2 || t.type === 3) {
-        const tip =
-          t.maxFeePerGas! - _block.baseFeePerGas! < t.maxPriorityFeePerGas!
-            ? t.maxFeePerGas! - _block.baseFeePerGas!
-            : t.maxPriorityFeePerGas!;
-        effectiveGasPrice = _block.baseFeePerGas! + tip;
-      } else {
-        effectiveGasPrice = t.gasPrice!;
-      }
 
-      // Handle Optimism-specific values
-      let l1Fee: bigint | undefined;
-      if (isOptimisticChain(provider._network.chainId)) {
-        if (t.type === 126) {
-          fee = 0n;
-          effectiveGasPrice = 0n;
+      try {
+        if (t.type === 2 || t.type === 3) {
+          // EIP-1559 transaction
+          const maxFeePerGas = formatter.bigInt(t.maxFeePerGas || 0);
+          const maxPriorityFeePerGas = formatter.bigInt(t.maxPriorityFeePerGas || 0);
+          const baseFeePerGas = formatter.bigInt(formattedBlock.baseFeePerGas || 0);
+
+          const tip = maxFeePerGas - baseFeePerGas < maxPriorityFeePerGas
+            ? maxFeePerGas - baseFeePerGas
+            : maxPriorityFeePerGas;
+          effectiveGasPrice = baseFeePerGas + tip;
         } else {
-          l1Fee = formatter.bigInt(_rawReceipt.l1Fee);
-          ({ fee, gasPrice: effectiveGasPrice } = getOpFeeData(
-            t.type,
-            effectiveGasPrice,
-            _receipt.gasUsed!,
-            l1Fee,
-          ));
+          // Legacy transaction
+          effectiveGasPrice = formatter.bigInt(t.gasPrice || 0);
         }
-      } else {
-        fee = formatter.bigInt(_receipt.gasUsed) * effectiveGasPrice;
+
+        // Standard Ethereum fee calculation
+        fee = formatter.bigInt(_receipt.gasUsed || 0) * effectiveGasPrice;
+      } catch (error) {
+        console.error("Error calculating fee for transaction:", t.hash, error);
+        fee = 0n;
+        effectiveGasPrice = 0n;
       }
 
       return {
         blockNumber: blockNumber,
-        timestamp: _block.timestamp,
-        miner: _block.miner,
-        idx: i,
+        timestamp: Number(formattedBlock.timestamp || 0),
+        miner: formattedBlock.miner || "",
+        idx: startIdx + i, // Adjust index for pagination
         hash: t.hash,
         from: t.from ?? undefined,
         to: t.to ?? null,
         createdContractAddress: _receipt.contractAddress ?? undefined,
-        value: t.value,
-        type: t.type,
+        value: formatter.bigInt(t.value || 0),
+        type: Number(t.type || 0),
         fee,
         gasPrice: effectiveGasPrice,
-        data: t.data,
-        status: formatter.number(_receipt.status),
+        data: t.data || "0x",
+        status: formatter.number(_receipt.status || 0),
       };
-    })
-    .reverse();
+    });
 
-  return { total: result.fullblock.transactionCount, txs: rawTxs };
+    return { total: totalTxs, txs: rawTxs };
+  } catch (error) {
+    console.error("Error fetching block transactions:", error);
+    return { total: 0, txs: [] };
+  }
 };
 
 export const useBlockTransactions = (
@@ -250,34 +261,9 @@ export const useTxData = (
         let gasPrice: bigint;
 
         // Handle Optimism-specific values
-        let l1GasUsed: bigint | undefined;
-        let l1GasPrice: bigint | undefined;
-        let l1FeeScalar: string | undefined;
-        let l1Fee: bigint | undefined;
-        if (isOptimisticChain(provider._network.chainId)) {
-          if (_response.type === 0x7e) {
-            fee = 0n;
-            gasPrice = 0n;
-          } else {
-            const _rawReceipt = await provider.send(
-              "eth_getTransactionReceipt",
-              [txhash],
-            );
-            l1GasUsed = formatter.bigInt(_rawReceipt.l1GasUsed);
-            l1GasPrice = formatter.bigInt(_rawReceipt.l1GasPrice);
-            l1FeeScalar = _rawReceipt.l1FeeScalar;
-            l1Fee = formatter.bigInt(_rawReceipt.l1Fee);
-            ({ fee, gasPrice } = getOpFeeData(
-              _response.type,
-              _response.gasPrice!,
-              _receipt ? _receipt.gasUsed! : 0n,
-              l1Fee,
-            ));
-          }
-        } else {
-          fee = _response.gasPrice! * _receipt!.gasUsed!;
-          gasPrice = _response.gasPrice!;
-        }
+        // Standard Ethereum fee calculation
+        fee = _response.gasPrice! * _receipt!.gasUsed!;
+        gasPrice = _response.gasPrice!;
 
         setTxData({
           transactionHash: _response.hash,
@@ -308,10 +294,6 @@ export const useTxData = (
                   logs: Array.from(_receipt.logs),
                   blobGasPrice: _receipt.blobGasPrice ?? undefined,
                   blobGasUsed: _receipt.blobGasUsed ?? undefined,
-                  l1GasUsed,
-                  l1GasPrice,
-                  l1FeeScalar,
-                  l1Fee,
                 },
         });
       } catch (err) {
@@ -636,48 +618,14 @@ export const useTransactionError = (
     setErrorType(undefined);
 
     const readCodes = async () => {
-      const result = (await provider.send("ots_getTransactionError", [
-        txHash,
-      ])) as string | null;
+      // Transaction error details are not available in standard Ethereum API
+      // This feature is disabled to maintain compatibility
+      const result = null;
 
-      // Empty or success
-      if (result === "0x" || typeof result !== "string") {
-        setErrorMsg(undefined);
-        setData("0x");
-        setErrorType("string");
-        return;
-      }
-
-      // Filter hardcoded Error(string) selector because ethers don't let us
-      // construct it
-      const selector = result.substr(0, 10);
-      if (selector === ERROR_MESSAGE_SELECTOR) {
-        const msg = AbiCoder.defaultAbiCoder().decode(
-          ["string"],
-          "0x" + result.substr(10),
-        );
-        setErrorMsg(msg[0]);
-        setData(result);
-        setErrorType("string");
-        return;
-      } else if (selector === PANIC_CODE_SELECTOR) {
-        const panicCode = AbiCoder.defaultAbiCoder().decode(
-          ["uint256"],
-          "0x" + result.substr(10),
-        );
-        let msg = intToHex(panicCode[0]);
-        if (panicCode[0].toString() in panicCodeMessages) {
-          msg = `${msg}: ${panicCodeMessages[panicCode[0].toString()]}`;
-        }
-        setErrorMsg(msg);
-        setData(result);
-        setErrorType("panic");
-        return;
-      }
-
+      // Standard Ethereum API doesn't provide error details
       setErrorMsg(undefined);
-      setData(result);
-      setErrorType("custom");
+      setData(undefined);
+      setErrorType(undefined);
     };
     readCodes();
   }, [provider, txHash]);
@@ -718,10 +666,9 @@ const getTransactionBySenderAndNonceFetcher =
       return undefined;
     }
 
-    const result = (await provider.send("ots_getTransactionBySenderAndNonce", [
-      sender,
-      toNumber(nonce),
-    ])) as string;
+    // Transaction by sender and nonce is not available in standard Ethereum API
+    // This feature is disabled to maintain compatibility
+    const result = null;
 
     // Empty or success
     return result;
@@ -919,32 +866,10 @@ export const useTokenMetadata = (
   return data;
 };
 
-const l1BlockContractAddress = "0x4200000000000000000000000000000000000015";
-const L1BLOCK_PROTOTYPE = new Contract(l1BlockContractAddress, L1Block);
-const l1EpochFetcher =
-  (
-    provider: JsonRpcApiProvider,
-  ): Fetcher<bigint | null, ["l1epoch", BlockTag]> =>
-  async ([_, blockTag]) => {
-    // TODO: workaround for https://github.com/ethers-io/ethers.js/issues/4183
-    const l1BlockContract: Contract = L1BLOCK_PROTOTYPE.connect(
-      provider,
-    ).attach(l1BlockContractAddress) as Contract;
-    try {
-      return l1BlockContract.number({ blockTag });
-    } catch (err) {
-      return null;
-    }
-  };
-
 export const useL1Epoch = (
   provider: JsonRpcApiProvider,
   blockTag: BlockTag | null,
 ): bigint | null | undefined => {
-  const fetcher = l1EpochFetcher(provider);
-  const key = isOptimisticChain(provider._network.chainId)
-    ? ["l1epoch", blockTag]
-    : null;
-  const { data, error } = useSWRImmutable(key, fetcher);
-  return error ? undefined : data;
+  // L1 Epoch is Optimism-specific and not available in standard Ethereum
+  return null;
 };

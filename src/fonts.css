@@ -1,0 +1,20 @@
+/* Font Display Swap for better performance */
+@font-face {
+  font-family: 'Roboto';
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  font-display: swap;
+}

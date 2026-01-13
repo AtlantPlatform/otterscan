@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { formatEther } from "ethers";
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { useOutletContext, useParams, useSearchParams } from "react-router";
 import ContentFrame from "../../components/ContentFrame";
@@ -140,9 +141,7 @@ const AddressTransactionResults: FC = () => {
     : undefined;
 
   usePageTitle(
-    resolvedName && resolvedNameTrusted
-      ? `${resolvedName} | Address ${addressOrName}`
-      : `Ethereum Address ${addressOrName}  - Balance, Transactions, and Analytics`,
+    `Ethereum Address ${addressOrName} - Balance, Transactions, and Analytics`,
   );
 
   const { data: balance } = useQuery(getBalanceQuery(provider, address));
@@ -158,13 +157,10 @@ const AddressTransactionResults: FC = () => {
     "url": `https://ethscan.org/address/${addressOrName}`,
     "name": "Ethereum Address Details",
     "mainEntity": {
-      "@type": "Person",
+      "@type": "DigitalDocument",
       "identifier": `${addressOrName}`,
-      "balance": {
-        "@type": "MonetaryAmount",
-        "currency": "ETH",
-        "value": `${formattedValue}`
-      }
+      "name": `Ethereum Address ${addressOrName}`,
+      "description": `Ethereum address with balance of ${formattedValue} ETH`
     }
   })
   const payloadSchemaFaqPage = JSON.stringify({
@@ -184,7 +180,7 @@ const AddressTransactionResults: FC = () => {
         "name": "How can I check the balance of an Ethereum address?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "You can view the balance of an Ethereum address on EthScan by searching for the address in the search bar."
+          "text": "You can view the balance of an Ethereum address on Ethscan by searching for the address in the search bar."
         }
       },
       {
@@ -199,7 +195,7 @@ const AddressTransactionResults: FC = () => {
   })
 
   return (
-    <ContentFrame tabs>
+    <ContentFrame tabs marginSize="none">
       <Helmet>
         <meta name="description" content={description}/>
         <script type="application/ld+json">{payloadSchemaWebPage}</script>
@@ -273,14 +269,6 @@ const AddressTransactionResults: FC = () => {
         </StandardScrollableTable>
         <NavBar address={address} page={page} controller={controller} />
       </StandardSelectionBoundary>
-      <div className="faq-section">
-        <p>1. What is an Ethereum address?
-          An Ethereum address is a unique identifier used to send and receive transactions on the Ethereum blockchain. It starts with '0x' followed by 40 hexadecimal characters.</p>
-        <p>2. How can I check the balance of an Ethereum address?
-          You can view the balance of an Ethereum address on EthScan by searching for the address in the search bar.</p>
-        <p>3. What does the transaction history of an Ethereum address show?
-          The transaction history shows all incoming and outgoing transactions associated with the address, including amounts and timestamps.</p>
-      </div>
     </ContentFrame>
   );
 };

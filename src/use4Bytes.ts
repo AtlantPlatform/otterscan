@@ -98,31 +98,7 @@ export const use4Bytes = (
     );
   }
 
-  const { config, provider } = useContext(RuntimeContext);
-  const sourcifyMatch = useSourcifyMetadata(address, provider._network.chainId);
-  let sourcifyFourBytes: FourBytesEntry | null = null;
-  if (sourcifyMatch && rawFourBytes) {
-    try {
-      const int = new Interface(sourcifyMatch.metadata.output.abi);
-      if (int.hasFunction(rawFourBytes)) {
-        const func = int.getFunction(rawFourBytes);
-        if (func) {
-          sourcifyFourBytes = {
-            name: func.name,
-            signature: func.format("sighash"),
-            fromVerifiedContract: true,
-          };
-        }
-      }
-    } catch (e: any) {}
-  }
-
-  const assetsURLPrefix = config.assetsURLPrefix;
-  const fourBytesKey = assetsURLPrefix !== undefined ? rawFourBytes : null;
-
-  const fetcher = fourBytesFetcher(assetsURLPrefix!);
-  const { data, error } = useSWRImmutable(["4bytes", fourBytesKey], fetcher);
-  return sourcifyFourBytes ? sourcifyFourBytes : error ? undefined : data;
+  return null;
 };
 
 export const useMethodSelector = (

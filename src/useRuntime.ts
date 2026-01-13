@@ -47,13 +47,13 @@ export const createRuntime = async (
     const network = Network.from(effectiveConfig.experimentalFixedChainId);
     return {
       config: effectiveConfig,
-      provider: new JsonRpcProvider(effectiveConfig.erigonURL, network, {
+      provider: new JsonRpcProvider(effectiveConfig.rpcURL, network, {
         staticNetwork: network,
       }),
     };
   }
 
-  const provider = await createAndProbeProvider(effectiveConfig.erigonURL);
+  const provider = await createAndProbeProvider(effectiveConfig.rpcURL);
   return {
     config: effectiveConfig,
     provider,

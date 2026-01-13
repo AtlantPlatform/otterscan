@@ -1,6 +1,6 @@
 import { faBurn } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Utf8ErrorFuncs, formatUnits, toUtf8String } from "ethers";
+import { Utf8ErrorFuncs, formatUnits, formatEther, toUtf8String } from "ethers";
 import { FC, useContext, useMemo } from "react";
 import { NavLink } from "react-router";
 import BlockLink from "../components/BlockLink";
@@ -10,21 +10,18 @@ import ExternalBlockLink from "../components/ExternalBlockLink";
 import FormattedBalance from "../components/FormattedBalance";
 import HexValue from "../components/HexValue";
 import InfoRow from "../components/InfoRow";
-import NativeTokenAmount from "../components/NativeTokenAmount";
 import NativeTokenPrice from "../components/NativeTokenPrice";
 import PercentageBar from "../components/PercentageBar";
 import RelativePosition from "../components/RelativePosition";
 import Timestamp from "../components/Timestamp";
-import SlotLink from "../consensus/components/SlotLink";
 import { blockTxsURL } from "../url";
 import { useChainInfo } from "../useChainInfo";
 import { useBlockData, useL1Epoch } from "../useErigonHooks";
 import { RuntimeContext } from "../useRuntime";
-import {useBlockPageTitle, usePageTitle} from "../useTitle";
 import { commify } from "../utils/utils";
-import BlockReward from "./components/BlockReward";
 import DecoratedAddressLink from "./components/DecoratedAddressLink";
 import {Helmet} from 'react-helmet-async';
+import {useFiatValue, formatFiatValue} from '../usePriceOracle';
 
 interface BlockDetailsProps {
   blockNumberOrHash: undefined | string;
@@ -42,20 +39,12 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   const { data: block, isLoading } = useBlockData(provider, blockNumberOrHash);
   // useBlockPageTitle(blockNumberOrHash);
 
-  const titleToSet = `Ethereum Block ${blockNumberOrHash} - Transactions, Gas Used, and Miner Details`
-
-  usePageTitle(titleToSet);
 
   const extraStr = useMemo(() => {
     return block && toUtf8String(block.extraData, Utf8ErrorFuncs.replace);
   }, [block]);
-  // gasUsedDepositTx: Optimism-specific; "gas used" by the deposit transaction which does
-  // not pay the basefee
-  const gasUsedWithoutDepositTx = block
-    ? block.gasUsed - (block.gasUsedDepositTx ?? 0n)
-    : 0n;
   const burntFees =
-    block?.baseFeePerGas && block.baseFeePerGas * gasUsedWithoutDepositTx;
+    block?.baseFeePerGas && block.baseFeePerGas * block.gasUsed;
   const gasUsedPerc =
     block && Number((block.gasUsed * 10000n) / block.gasLimit) / 100;
 
@@ -63,16 +52,26 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   const l1ExplorerUrl: string | undefined =
     config.opChainSettings?.l1ExplorerURL;
   const description = `Details for Ethereum block ${blockNumberOrHash}, including transaction count, miner address, gas used, and timestamp.`
+
+  // Get ETH/USD price
+  const ethPriceUSD = useFiatValue(10n ** 18n, block?.number);
+
   const payloadSchemaWebPage = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebPage",
       "url": `https://ethscan.org/block/${blockNumberOrHash}`,
+      "name": `Ethereum Block ${blockNumberOrHash}`,
+      "description": description,
       "mainEntity": {
-        "@type": "BlockchainBlock",
-        "blockNumber": `${blockNumberOrHash}`,
-        "miner": `${block?.miner}`,
-        "timestamp": `${block?.timestamp ? (new Date(block.timestamp * 1000)).toISOString() : ''}`,
-        "transactionCount": `${block?.transactionCount}`
+        "@type": "DigitalDocument",
+        "identifier": `${blockNumberOrHash}`,
+        "name": `Ethereum Block ${blockNumberOrHash}`,
+        "description": `Ethereum blockchain block containing ${block?.transactionCount || 0} transactions`,
+        "dateCreated": `${block?.timestamp ? (new Date(block.timestamp * 1000)).toISOString() : ''}`,
+        "creator": {
+          "@type": "Organization",
+          "identifier": `${block?.miner}`
+        }
       }
     }
   )
@@ -93,7 +92,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
           "name": "How can I find details about a specific Ethereum block?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Enter the block number or hash in the EthScan search bar to view detailed information, including transactions and miner data."
+            "text": "Enter the block number or hash in the Ethscan search bar to view detailed information, including transactions and miner data."
           }
         },
         {
@@ -111,7 +110,9 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
   return (
     <>
       <Helmet>
-        <meta name="description" content={description}/>
+        <title>Ethereum Block {blockNumberOrHash} - Transactions, Gas Used, and Miner Details</title>
+        <meta name="description" content={`Comprehensive details for Ethereum block ${blockNumberOrHash} including transaction list, gas metrics, base fee, miner rewards, and block timestamp.`} />
+        <link rel="canonical" href={`https://ethscan.org/block/${blockNumberOrHash}`} />
         <script type="application/ld+json">{payloadSchemaWebPage}</script>
         <script type="application/ld+json">{payloadSchemaFaqPage}</script>
       </Helmet>
@@ -124,6 +125,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
         </ContentFrame>
       )}
       {block && (
+        <>
         <ContentFrame isLoading={isLoading}>
           <InfoRow title="Block Height">
             <span className="font-bold" data-test="block-height-text">
@@ -145,12 +147,6 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
           </InfoRow>
           <InfoRow title="Mined by">
             <DecoratedAddressLink address={block.miner} miner/>
-          </InfoRow>
-          <InfoRow title="Block Reward">
-            <BlockReward block={block}/>
-          </InfoRow>
-          <InfoRow title="Uncles Reward">
-            <NativeTokenAmount value={block.unclesReward}/>
           </InfoRow>
           <InfoRow title="Size">{commify(block.size)} bytes</InfoRow>
           {block.baseFeePerGas !== null &&
@@ -234,11 +230,7 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
           </InfoRow>
           {block.parentBeaconBlockRoot && (
             <InfoRow title="Parent Beacon Block Root">
-              {config?.beaconAPI === undefined ? (
-                <HexValue value={block.parentBeaconBlockRoot}/>
-              ) : (
-                <SlotLink slot={block.parentBeaconBlockRoot}/>
-              )}
+              <HexValue value={block.parentBeaconBlockRoot}/>
             </InfoRow>
           )}
           {l1Epoch !== undefined && l1Epoch !== null && (
@@ -264,16 +256,20 @@ const BlockDetails: FC<BlockDetailsProps> = ({ blockNumberOrHash }) => {
             <span className="font-data">{block.nonce}</span>
           </InfoRow>
         </ContentFrame>
+        {/* SEO Summary Section */}
+        <div className="px-3 lg:px-9 mt-4">
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Block Summary</h2>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Ethereum block #{commify(block.number)} was mined on {new Date(block.timestamp * 1000).toLocaleString()} by {block.miner}.
+              This block contains {block.transactionCount} transaction{block.transactionCount !== 1 ? 's' : ''} with a total gas usage of {commify(formatUnits(block.gasUsed, 0))} out of {commify(formatUnits(block.gasLimit, 0))} gas limit.
+              The base fee was {block.baseFeePerGas ? formatUnits(block.baseFeePerGas, 9) : '0'} Gwei.
+              The block hash is {block.hash} and the parent block is #{block.number - 1}.
+            </p>
+          </div>
+        </div>
+        </>
       )}
-      <div className="faq-section">
-        <p>1. What is a block in the Ethereum blockchain?
-          A block is a package of data that contains a list of transactions, a timestamp, and other metadata, secured and added to the Ethereum blockchain.
-        </p>
-        <p>2. How can I find details about a specific Ethereum block?
-          Enter the block number or hash in the EthScan search bar to view detailed information, including transactions and miner data.</p>
-        <p>3. What is the role of the miner in a block?
-          Miners validate and confirm transactions, grouping them into blocks and securing the Ethereum blockchain by solving computational challenges.</p>
-      </div>
     </>
   );
 };

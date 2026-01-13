@@ -12,7 +12,41 @@
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
     <link rel="manifest" href="/manifest.json" />
-    <title>Ethscan</title>
+
+    <!-- Resource hints for better performance -->
+    <link rel="preconnect" href="https://analytics.ahrefs.com" />
+    <link rel="dns-prefetch" href="https://analytics.ahrefs.com" />
+
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+    <meta property="og:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ethscan.org" />
+    <meta property="og:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+    <meta property="og:site_name" content="Ethscan" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan" />
+    <meta name="twitter:description" content="The most trusted and popular Ethereum (ETH) blockchain explorer and crypto transaction search" />
+    <meta name="twitter:image" content="https://ethscan.org/ethscan-social-preview.jpeg" />
+
+    <title>Ethereum Blockchain Explorer: find any Ethereum transaction | Ethscan</title>
+
+    <!-- Prevent layout shift by setting theme before render -->
+    <script>
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <!-- Ahrefs Analytics -->
+    <script src="https://analytics.ahrefs.com/analytics.js" data-key="B0ZOFbq2FNMwQGlOXLmKiA" async></script>
   </head>
 
   <body>

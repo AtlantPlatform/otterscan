@@ -1,5 +1,7 @@
 import { FC, memo, useContext } from "react";
 import ETHScanLogoSingle from "./ethscanlogosingle.png";
+import ETHScanLogoSingleText from "./LogoText.png";
+import ETHScanLogoSingleTextDark from "./LogoTextDark.png";
 import { RuntimeContext } from "./useRuntime";
 
 const Logo: FC = () => {
@@ -10,12 +12,25 @@ const Logo: FC = () => {
       <img
         className="rounded-full"
         src={ETHScanLogoSingle}
-        width={96}
-        height={96}
+        width={80}
+        height={80}
         alt="Ethscan logo"
         title="Ethscan logo"
       />
-      <span data-test="logotext">Ethscan</span>
+      <img
+        className="logo-text-dark"
+        src={ETHScanLogoSingleText}
+        width={160}
+        alt="Ethscan logo text"
+        title="Ethscan logo text"
+      />
+      <img
+        className="logo-text-white"
+        src={ETHScanLogoSingleTextDark}
+        width={160}
+        alt="Ethscan logo text"
+        title="Ethscan logo text"
+      />
     </div>
   );
 };

@@ -17,28 +17,35 @@ const Trace: React.FC<TraceProps> = ({ txData, txHash }) => {
   const { provider } = useContext(RuntimeContext);
   const traces = useTraceTransaction(provider, txData.transactionHash);
 
-  usePageTitle(`Ethereum Transaction Trace - ${txHash}`);
+  usePageTitle(`Trace - Transaction ${txHash}`);
 
   const description = `Detailed execution trace for Ethereum transaction ${txHash}, including call stack and gas consumption.`
-  const payloadSchemaWebPage = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "url": `https://ethscan.org/tx/${txData.transactionHash}/trace`,
-      "mainEntity": {
-        "@type": "BlockchainTransaction",
-        "transactionHash": `${txData.transactionHash}`,
-      }
-    }
-  )
+
+  const schemaData: any = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "url": `https://ethscan.org/tx/${txData.transactionHash}/trace`,
+    "name": `Transaction Trace ${txData.transactionHash}`,
+    "description": description,
+  };
+
+  // Only include mainEntity for transactions with value > 0 ETH
+  if (txData && txData.value && txData.value > 0n) {
+    schemaData.mainEntity = {
+      "@type": "DigitalDocument",
+      "identifier": `${txData.transactionHash}`,
+      "name": `Transaction Trace ${txData.transactionHash}`,
+      "description": "Detailed execution trace including call stack and gas consumption"
+    };
+  }
+
+  const payloadSchemaWebPage = JSON.stringify(schemaData);
 
   return (
     <ContentFrame tabs>
       <Helmet>
         <meta name="description" content={description}/>
-        <script type="application/ld+json">{payloadSchemaWebPage}</script>
-      </Helmet>
-      <Helmet>
-        <meta name="description" content={description}/>
+        <link rel="canonical" href={`https://ethscan.org/tx/${txHash}/trace`} />
         <script type="application/ld+json">{payloadSchemaWebPage}</script>
       </Helmet>
       <div className="mb-5 mt-4 flex flex-col items-start space-y-3 overflow-x-auto font-code text-sm">

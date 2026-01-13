@@ -8,9 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useContext, useState } from "react";
 import Blockies from "react-blockies";
 import Copy from "../../components/Copy";
-import Faucet from "../../components/Faucet";
 import StandardSubtitle from "../../components/StandardSubtitle";
-import { useChainInfo } from "../../useChainInfo";
 import { useResolvedAddress } from "../../useResolvedAddresses";
 import { RuntimeContext } from "../../useRuntime";
 import { AddressAwareComponentProps } from "../types";
@@ -28,7 +26,6 @@ const AddressSubtitle: FC<AddressSubtitleProps> = ({
   addressOrName,
 }) => {
   const { config, provider } = useContext(RuntimeContext);
-  const { faucets } = useChainInfo();
 
   const resolvedAddress = useResolvedAddress(provider, address);
   let resolvedName = resolvedAddress
@@ -46,62 +43,71 @@ const AddressSubtitle: FC<AddressSubtitleProps> = ({
 
   return (
     <StandardSubtitle>
-      <h1 className="flex items-baseline space-x-2">
-        <Blockies
-          className="self-center rounded"
-          seed={address.toLowerCase()}
-          scale={3}
-        />
-        <span>Address</span>
-        <span
-          className="font-address text-base text-gray-500"
-          data-test="address"
-        >
-          {address}
-        </span>
-        <Copy value={address} rounded />
-        {/* Only display faucets for testnets who actually have any */}
-        {faucets && faucets.length > 0 && <Faucet address={address} rounded />}
-        {config.experimental && <AddressAttributes address={address} full />}
-        {resolvedName && resolvedNameTrusted && !editingAddressTag && (
-          <div className="rounded-lg bg-gray-200 px-2 py-1 text-sm text-gray-500 text-nowrap">
-            <FontAwesomeIcon icon={faTag} size="1x" />
-            <span className="pl-1 text-nowrap">{resolvedName}</span>
+      <h1 className="flex flex-col lg:flex-row lg:items-baseline lg:space-x-2 space-y-2 lg:space-y-0">
+        {/* Main address info */}
+        <div className="flex flex-col sm:flex-row sm:items-baseline space-y-2 sm:space-y-0 sm:space-x-2">
+          <div className="flex items-center space-x-2">
+            <Blockies
+              className="self-center rounded flex-shrink-0"
+              seed={address.toLowerCase()}
+              scale={3}
+            />
+            <span className="flex-shrink-0">Address</span>
           </div>
-        )}
-        {config.WIP_customAddressLabels && (
-          <div className="flex flex-no-wrap space-x-1">
-            {editingAddressTag && (
-              <EditableAddressTag
-                address={address}
-                defaultTag={resolvedName}
-                editedCallback={(address: string) =>
-                  setEditingAddressTag(false)
+          <div className="flex items-center space-x-2 min-w-0">
+            <span
+              className="font-address text-sm sm:text-base text-gray-500 break-all font-mono"
+              data-test="address"
+            >
+              {address}
+            </span>
+            <Copy value={address} rounded />
+          </div>
+        </div>
+
+        {/* Actions and tags */}
+        <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+          {config.experimental && <AddressAttributes address={address} full />}
+          {resolvedName && resolvedNameTrusted && !editingAddressTag && (
+            <div className="rounded-lg bg-gray-200 px-2 py-1 text-sm text-gray-500 text-nowrap">
+              <FontAwesomeIcon icon={faTag} size="1x" />
+              <span className="pl-1 text-nowrap">{resolvedName}</span>
+            </div>
+          )}
+          {config.WIP_customAddressLabels && (
+            <div className="flex flex-no-wrap space-x-1">
+              {editingAddressTag && (
+                <EditableAddressTag
+                  address={address}
+                  defaultTag={resolvedName}
+                  editedCallback={(address: string) =>
+                    setEditingAddressTag(false)
+                  }
+                />
+              )}
+              <button
+                className={`flex-no-wrap flex items-center justify-center space-x-1 self-center text-gray-500 focus:outline-none transition-shadows h-7 w-7 rounded-full bg-gray-200 text-xs transition-colors hover:bg-gray-500 hover:text-gray-200 hover:shadow`}
+                title={
+                  editingAddressTag ? "Cancel changes" : "Edit address label"
                 }
-              />
-            )}
-            <button
-              className={`flex-no-wrap flex items-center justify-center space-x-1 self-center text-gray-500 focus:outline-none transition-shadows h-7 w-7 rounded-full bg-gray-200 text-xs transition-colors hover:bg-gray-500 hover:text-gray-200 hover:shadow`}
-              title={
-                editingAddressTag ? "Cancel changes" : "Edit address label"
-              }
-              onClick={() => setEditingAddressTag(!editingAddressTag)}
-            >
-              <FontAwesomeIcon
-                icon={editingAddressTag ? faTimes : faPencil}
-                size="1x"
-              />
-            </button>
-            {/* For debugging only; we'll want to create an address label management page. */}
-            <button
-              className={`flex-no-wrap flex items-center justify-center space-x-1 self-center text-red-500 focus:outline-none transition-shadows h-7 w-7 rounded-full bg-red-200 text-xs transition-colors hover:bg-red-500 hover:text-gray-200 hover:shadow`}
-              title={"Delete all labels"}
-              onClick={clearAllLabels}
-            >
-              <FontAwesomeIcon icon={faTrash} size="1x" />
-            </button>
-          </div>
-        )}
+                onClick={() => setEditingAddressTag(!editingAddressTag)}
+              >
+                <FontAwesomeIcon
+                  icon={editingAddressTag ? faTimes : faPencil}
+                  size="1x"
+                />
+              </button>
+              {/* For debugging only; we'll want to create an address label management page. */}
+              <button
+                className={`flex-no-wrap flex items-center justify-center space-x-1 self-center text-red-500 focus:outline-none transition-shadows h-7 w-7 rounded-full bg-red-200 text-xs transition-colors hover:bg-red-500 hover:text-gray-200 hover:shadow`}
+                title={"Delete all labels"}
+                onClick={clearAllLabels}
+              >
+                <FontAwesomeIcon icon={faTrash} size="1x" />
+              </button>
+            </div>
+          )}
+        </div>
       </h1>
     </StandardSubtitle>
   );

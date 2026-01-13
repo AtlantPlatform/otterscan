@@ -362,7 +362,6 @@ const useDynamicHeader = (
   });
 
   if (error) {
-    console.error(error);
     return undefined;
   }
   return data;

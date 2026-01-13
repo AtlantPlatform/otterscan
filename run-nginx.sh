@@ -6,12 +6,12 @@ if [ "$OTTERSCAN_CONFIG" ]; then
 else
   # Build config JSON from container init params
   PARAMS=$(jq -n \
-    --arg erigonURL "$ERIGON_URL" \
+    --arg rpcURL "$ERIGON_URL" \
     --arg beaconAPI "$BEACON_API_URL" \
     --arg assetsURLPrefix "$ASSETS_URL_PREFIX" \
     --arg experimental "$OTS2" \
     '{
-      erigonURL: $erigonURL,
+      rpcURL: $rpcURL,
       beaconAPI: $beaconAPI,
       assetsURLPrefix: $assetsURLPrefix,
       experimental: $experimental,

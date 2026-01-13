@@ -1,6 +1,7 @@
 import { isHexString } from "ethers";
 import React, { useContext } from "react";
 import { useParams } from "react-router";
+import { Helmet } from "react-helmet-async";
 import NavBlock from "../components/NavBlock";
 import StandardFrame from "../components/StandardFrame";
 import StandardSubtitle from "../components/StandardSubtitle";
@@ -37,22 +38,36 @@ const Block: React.FC = () => {
   // useBlockPageTitle(blockNumberOrHash);
 
   return (
-    <StandardFrame>
-      <StandardSubtitle>
-        <h1 className="flex items-baseline space-x-1">
-          <span>Block</span>
-          <span className="text-base text-gray-500" data-test="block-number">
-            #{blockNumberOrHash}
-          </span>
-          <NavBlock
-            entityNum={blockNumber}
-            latestEntityNum={latestBlockNumber}
-            urlBuilder={blockURL}
-          />
-        </h1>
-      </StandardSubtitle>
-      <BlockDetails blockNumberOrHash={blockNumberOrHash} />
-    </StandardFrame>
+    <div className="min-h-screen overflow-x-hidden">
+      <StandardFrame>
+        <Helmet>
+          <title>Ethereum Block {blockNumberOrHash} - Transactions, Gas Used, and Miner Details | Ethscan</title>
+          <meta name="description" content={`View details for Ethereum block ${blockNumberOrHash} including all transactions, gas used, miner address, base fee, and timestamp information.`} />
+          <link rel="canonical" href={`https://ethscan.org/block/${blockNumberOrHash}`} />
+        </Helmet>
+
+        <div className="py-6 max-w-7xl mx-auto">
+          <div className="px-3 lg:px-9">
+            <StandardSubtitle>
+              <h1 className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 space-y-1 sm:space-y-0">
+                <div className="flex items-baseline space-x-1">
+                  <span>Block</span>
+                  <span className="text-base text-gray-500 break-all" data-test="block-number">
+                    #{blockNumberOrHash}
+                  </span>
+                </div>
+                <NavBlock
+                  entityNum={blockNumber}
+                  latestEntityNum={latestBlockNumber}
+                  urlBuilder={blockURL}
+                />
+              </h1>
+            </StandardSubtitle>
+          </div>
+          <BlockDetails blockNumberOrHash={blockNumberOrHash} />
+        </div>
+      </StandardFrame>
+    </div>
   );
 };
 

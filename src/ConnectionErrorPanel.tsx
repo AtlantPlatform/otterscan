@@ -19,15 +19,15 @@ const ConnectionErrorPanel: FC<ConnectionErrorPanelProps> = ({
   return (
     <div className="flex h-screen flex-col bg-gray-300 font-sans">
       <div className="min-w-lg m-auto h-60 max-w-lg text-lg text-gray-700">
-        <Step type="wait" msg="Trying to connect to Erigon node..." />
+        <Step type="wait" msg="Trying to connect to API server..." />
         <div className="flex space-x-2">
           <span className="ml-7 text-base">{nodeURL}</span>
         </div>
         {connStatus === ConnectionStatus.NOT_ETH_NODE && (
-          <Step type="error" msg="It does not seem to be an ETH node">
+          <Step type="error" msg="Cannot connect to API server">
             <p>Make sure your browser can access the URL above.</p>
             <p>
-              If you want to customize the Erigon rpcdaemon endpoint, please
+              If you want to customize the API endpoint, please
               follow these{" "}
               <a
                 href="https://github.com/wmitsuda/otterscan#run-otterscan-docker-image-from-docker-hub"
@@ -43,9 +43,9 @@ const ConnectionErrorPanel: FC<ConnectionErrorPanelProps> = ({
         )}
         {connStatus === ConnectionStatus.NOT_ERIGON && (
           <>
-            <Step type="ok" msg="It is an ETH node" />
-            <Step type="error" msg="It does not seem to be an Erigon node">
-              Make sure you rpcdaemon with Otterscan patches is up and running
+            <Step type="ok" msg="Connected to API server" />
+            <Step type="error" msg="API server cannot reach blockchain node">
+              Make sure the API server is properly configured with a valid blockchain node URL
               and the <strong>erigon_</strong> namespace is enabled according to
               the{" "}
               <a
@@ -62,12 +62,12 @@ const ConnectionErrorPanel: FC<ConnectionErrorPanelProps> = ({
         )}
         {connStatus === ConnectionStatus.NOT_OTTERSCAN_PATCHED && (
           <>
-            <Step type="ok" msg="It is an Erigon node" />
+            <Step type="ok" msg="Blockchain node detected" />
             <Step
               type="error"
-              msg="It does not seem to contain up-to-date Otterscan patches"
+              msg="Blockchain node does not have required Otterscan patches"
             >
-              Make sure you compiled rpcdaemon with compatible Otterscan patches
+              Make sure the blockchain node has compatible Otterscan patches
               and enabled <strong>ots_</strong> namespace according to the{" "}
               <a
                 href="https://github.com/wmitsuda/otterscan#install-otterscan-patches-on-top-of-erigon"

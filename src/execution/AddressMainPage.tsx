@@ -13,11 +13,13 @@ import SourcifyLogo from "../sourcify/SourcifyLogo";
 import { Match, useSourcifyMetadata } from "../sourcify/useSourcify";
 import { useWhatsabiMetadata } from "../sourcify/useWhatsabi";
 import { ChecksummedAddress } from "../types";
-import { hasCodeQuery } from "../useErigonHooks";
+import { hasCodeQuery, getBalanceQuery } from "../useErigonHooks";
+import { formatEther } from "ethers";
 import { useAddressOrENS } from "../useResolvedAddresses";
 import { RuntimeContext } from "../useRuntime";
 import AddressSubtitle from "./address/AddressSubtitle";
 import { AddressAwareComponentProps } from "./types";
+import { Helmet } from 'react-helmet-async';
 
 const ProxyTabs: React.FC<AddressAwareComponentProps> = ({ address }) => {
   const { addressOrName } = useParams();
@@ -77,6 +79,9 @@ const AddressMainPage: React.FC = () => {
   const { data: hasCode } = useQuery(
     hasCodeQuery(provider, checksummedAddress, "latest"),
   );
+  const { data: balance } = useQuery(
+    checksummedAddress ? getBalanceQuery(provider, checksummedAddress) : { queryKey: [], queryFn: () => null, enabled: false },
+  );
 
   const match = useSourcifyMetadata(
     hasCode ? checksummedAddress : undefined,
@@ -90,100 +95,129 @@ const AddressMainPage: React.FC = () => {
   );
 
   return (
-    <StandardFrame>
-      {error ? (
-        <AddressOrENSNameNotFound
-          addressOrENSName={addressOrName}
-          supportsENS={
-            provider._network.getPlugin("org.ethers.plugins.network.Ens") !==
-            null
-          }
-        />
-      ) : (
-        checksummedAddress && (
-          <>
-            <AddressSubtitle
-              addressOrName={addressOrName}
-              address={checksummedAddress}
-              isENS={isENS}
-            />
-            <TabGroup>
-              <TabList className="flex space-x-2 rounded-t-lg border-l border-r border-t bg-white">
-                <NavTab href={`/address/${addressOrName}`}>Overview</NavTab>
-                {config?.experimental && (
-                  <>
-                    <NavTab href={`/address/${addressOrName}/erc20`}>
-                      ERC20 Transfers
-                    </NavTab>
-                    <NavTab href={`/address/${addressOrName}/erc721`}>
-                      ERC721 Transfers
-                    </NavTab>
-                    <NavTab href={`/address/${addressOrName}/tokens`}>
-                      Token Balances
-                    </NavTab>
-                    <NavTab href={`/address/${addressOrName}/withdrawals`}>
-                      Withdrawals
-                    </NavTab>
-                    <NavTab href={`/address/${addressOrName}/blocksRewarded`}>
-                      Blocks Rewarded
-                    </NavTab>
-                  </>
-                )}
-                {hasCode && (
-                  <>
-                    <NavTab href={`/address/${addressOrName}/contract`}>
-                      <span
-                        className={`flex items-baseline space-x-2 ${
-                          match === undefined ? "italic opacity-50" : ""
-                        }`}
-                      >
-                        <span>Contract</span>
-                        {match === undefined ? (
-                          <span className="self-center">
-                            <FontAwesomeIcon
-                              className="animate-spin"
-                              icon={faCircleNotch}
-                            />
-                          </span>
-                        ) : match === null ? (
-                          <span className="self-center text-red-500">
-                            <FontAwesomeIcon icon={faQuestionCircle} />
-                          </span>
-                        ) : (
-                          <span className="self-center">
-                            <SourcifyLogo />
-                          </span>
-                        )}
-                      </span>
-                    </NavTab>
-                    {(match || whatsabiMatch) && (
-                      <NavTab href={`/address/${addressOrName}/readContract`}>
-                        <span className={`flex items-baseline space-x-2`}>
-                          <span>Read Contract</span>
-                        </span>
-                      </NavTab>
-                    )}
-                  </>
-                )}
-                {config?.experimental && (
-                  <ProxyTabs address={checksummedAddress} />
-                )}
-              </TabList>
-              <TabPanels>
-                <Outlet
-                  context={{
-                    address: checksummedAddress,
-                    hasCode,
-                    match,
-                    whatsabiMatch,
-                  }}
-                />
-              </TabPanels>
-            </TabGroup>
-          </>
-        )
-      )}
-    </StandardFrame>
+    <div className="min-h-screen overflow-x-hidden">
+      <StandardFrame>
+        <Helmet>
+          <title>Ethereum Address {addressOrName} | Balance and Transactions</title>
+          <meta name="description" content={`View Ethereum address ${addressOrName} details including current balance${balance ? ` (${formatEther(balance)} ETH)` : ''}, transaction history, token holdings, and smart contract information.`} />
+          <link rel="canonical" href={`https://ethscan.org/address/${addressOrName}`} />
+        </Helmet>
+
+        <div className="py-6 max-w-7xl mx-auto">
+          {error ? (
+            <div className="px-3 lg:px-9">
+              <AddressOrENSNameNotFound
+                addressOrENSName={addressOrName}
+                supportsENS={
+                  provider._network.getPlugin("org.ethers.plugins.network.Ens") !==
+                  null
+                }
+              />
+            </div>
+          ) : (
+            checksummedAddress && (
+              <>
+                <div className="px-3 lg:px-9">
+                  <AddressSubtitle
+                    addressOrName={addressOrName}
+                    address={checksummedAddress}
+                    isENS={isENS}
+                  />
+                </div>
+                <div className="mx-3 lg:mx-9">
+                  <TabGroup>
+                    <TabList className="flex space-x-2 rounded-t-lg border-l border-r border-t bg-white">
+                      <NavTab href={`/address/${addressOrName}`}>Overview</NavTab>
+                      {config?.experimental && (
+                        <>
+                          <NavTab href={`/address/${addressOrName}/erc20`}>
+                            ERC20 Transfers
+                          </NavTab>
+                          <NavTab href={`/address/${addressOrName}/erc721`}>
+                            ERC721 Transfers
+                          </NavTab>
+                          <NavTab href={`/address/${addressOrName}/tokens`}>
+                            Token Balances
+                          </NavTab>
+                          <NavTab href={`/address/${addressOrName}/withdrawals`}>
+                            Withdrawals
+                          </NavTab>
+                          <NavTab href={`/address/${addressOrName}/blocksRewarded`}>
+                            Blocks Rewarded
+                          </NavTab>
+                        </>
+                      )}
+                      {hasCode && (
+                        <>
+                          <NavTab href={`/address/${addressOrName}/contract`}>
+                            <span
+                              className={`flex items-baseline space-x-2 ${
+                                match === undefined ? "italic opacity-50" : ""
+                              }`}
+                            >
+                              <span>Contract</span>
+                              {match === undefined ? (
+                                <span className="self-center">
+                                  <FontAwesomeIcon
+                                    className="animate-spin"
+                                    icon={faCircleNotch}
+                                  />
+                                </span>
+                              ) : match === null ? (
+                                <span className="self-center text-red-500">
+                                  <FontAwesomeIcon icon={faQuestionCircle} />
+                                </span>
+                              ) : (
+                                <span className="self-center">
+                                  <SourcifyLogo />
+                                </span>
+                              )}
+                            </span>
+                          </NavTab>
+                          {(match || whatsabiMatch) && (
+                            <NavTab href={`/address/${addressOrName}/readContract`}>
+                              <span className={`flex items-baseline space-x-2`}>
+                                <span>Read Contract</span>
+                              </span>
+                            </NavTab>
+                          )}
+                        </>
+                      )}
+                      {config?.experimental && (
+                        <ProxyTabs address={checksummedAddress} />
+                      )}
+                    </TabList>
+                    <TabPanels>
+                      <Outlet
+                        context={{
+                          address: checksummedAddress,
+                          hasCode,
+                          match,
+                          whatsabiMatch,
+                        }}
+                      />
+                    </TabPanels>
+                  </TabGroup>
+                </div>
+                {/* SEO Summary Section */}
+                <div className="px-3 lg:px-9 mt-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Address Summary</h2>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Ethereum address {checksummedAddress}
+                      {balance !== undefined && balance !== null ? ` has a balance of ${formatEther(balance)} ETH` : ''}
+                      {hasCode ? ' and is a smart contract' : ' and is an externally owned account (EOA)'}.
+                      This page displays the address balance, transaction history, token transfers, and {hasCode ? 'contract information including source code, ABI, and read/write functions' : 'all associated blockchain activities'}.
+                      View detailed analytics including ERC20/ERC721 token transfers, withdrawals, and blocks rewarded for this address.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )
+          )}
+        </div>
+      </StandardFrame>
+    </div>
   );
 };
 

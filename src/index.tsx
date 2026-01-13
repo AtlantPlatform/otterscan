@@ -1,11 +1,7 @@
-import "@fontsource/fira-code/index.css";
-import "@fontsource/roboto-mono/index.css";
-import "@fontsource/roboto/index.css";
-import spaceGrotesk from "@fontsource/space-grotesk/files/space-grotesk-latin-400-normal.woff2";
-import "@fontsource/space-grotesk/index.css";
+// Using system fonts for instant loading - no custom font imports needed
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { Helmet, HelmetProvider } from "react-helmet-async";
+import { HelmetProvider } from "react-helmet-async";
 import App from "./App";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
@@ -15,16 +11,6 @@ const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <HelmetProvider>
-      <Helmet>
-        <link rel="preload" href={spaceGrotesk} as="font" type="font/woff2" />
-        <script>
-          {`if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-              document.documentElement.classList.add('dark');
-            } else {
-              document.documentElement.classList.remove('dark');
-            }`}
-        </script>
-      </Helmet>
       <App />
     </HelmetProvider>
   </React.StrictMode>,

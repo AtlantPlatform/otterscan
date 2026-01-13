@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import BlockLink from "../components/BlockLink";
 import MethodName from "../components/MethodName";
 import NativeTokenAmount from "../components/NativeTokenAmount";
-import TimestampAge from "../components/TimestampAge";
 import TransactionDirection, {
   Direction,
   Flags,
@@ -69,50 +68,16 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
             <BlockLink blockTag={tx.blockNumber} />
           </span>
         </td>
-        <td className="min-w-36 max-w-36">
-          <TimestampAge timestamp={tx.timestamp} />
-        </td>
-        <td className="max-w-[14.5rem]">
-          <span className="col-span-2 flex items-baseline justify-between space-x-2 pr-2">
-            <span className="truncate">
-              {tx.from && (
-                <TransactionAddress
-                  address={tx.from}
-                  selectedAddress={selectedAddress}
-                />
-              )}
-            </span>
-            <span>
-              <TransactionDirection
-                direction={direction}
-                flags={sendsToMiner ? Flags.MINER : undefined}
-              />
-            </span>
-          </span>
-        </td>
-        <td className="max-w-[14.5rem]">
-          <span
-            className="col-span-2 flex items-baseline"
-            title={tx.to ?? tx.createdContractAddress}
-          >
-            <span className="truncate">
-              {tx.to ? (
-                <TransactionAddress
-                  address={tx.to}
-                  selectedAddress={selectedAddress}
-                  miner={tx.miner === tx.to}
-                  showCodeIndicator
-                />
-              ) : (
-                <TransactionAddress
-                  address={tx.createdContractAddress!}
-                  selectedAddress={selectedAddress}
-                  creation
-                  showCodeIndicator
-                />
-              )}
-            </span>
-          </span>
+        <td className="min-w-36 max-w-36 text-gray-600" title={new Date(tx.timestamp * 1000).toLocaleString()}>
+          {new Date(tx.timestamp * 1000).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          })}
         </td>
         <td className="min-w-48 max-w-48">
           <NativeTokenAmount value={tx.value} />

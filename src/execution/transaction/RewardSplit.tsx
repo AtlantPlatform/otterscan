@@ -27,48 +27,52 @@ const RewardSplit: React.FC<RewardSplitProps> = ({ txData }) => {
   const feePerc = getFeePercents(feeDist);
 
   return (
-    <div className="inline-block">
-      <div className="grid grid-cols-2 items-center gap-x-2 gap-y-1 text-sm">
-        <PercentageGauge
-          perc={feePerc.burned}
-          bgColor="bg-orange-100"
-          bgColorPerc="bg-orange-500"
-          textColor="text-orange-800"
-        />
-        <div className="flex items-baseline space-x-1">
-          <span className="flex space-x-1 text-orange-500">
-            <span title="Burnt fees">
-              <FontAwesomeIcon icon={faBurn} size="1x" />
+    <div className="block">
+      <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-x-2 gap-y-2">
+          <PercentageGauge
+            perc={feePerc.burned}
+            bgColor="bg-orange-100"
+            bgColorPerc="bg-orange-500"
+            textColor="text-orange-800"
+          />
+          <div className="flex items-baseline space-x-1">
+            <span className="flex space-x-1 text-orange-500">
+              <span title="Burnt fees">
+                <FontAwesomeIcon icon={faBurn} size="1x" />
+              </span>
+              <span>
+                <span className="line-through">
+                  <FormattedBalance value={feeDist.burned} />
+                </span>{" "}
+                {symbol}
+              </span>
             </span>
-            <span>
-              <span className="line-through">
-                <FormattedBalance value={feeDist.burned} />
-              </span>{" "}
-              {symbol}
-            </span>
-          </span>
+          </div>
         </div>
-        <PercentageGauge
-          perc={feePerc.tip}
-          bgColor="bg-amber-100"
-          bgColorPerc="bg-amber-300"
-          textColor="text-amber-700"
-        />
-        <div className="flex items-baseline space-x-1">
-          <span className="flex space-x-1">
-            <span
-              className="text-amber-300 dark:text-amber-700"
-              title="Miner fees"
-            >
-              <FontAwesomeIcon icon={faCoins} size="1x" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-x-2 gap-y-2">
+          <PercentageGauge
+            perc={feePerc.tip}
+            bgColor="bg-amber-100"
+            bgColorPerc="bg-amber-300"
+            textColor="text-amber-700"
+          />
+          <div className="flex items-baseline space-x-1">
+            <span className="flex space-x-1">
+              <span
+                className="text-amber-300 dark:text-amber-700"
+                title="Miner fees"
+              >
+                <FontAwesomeIcon icon={faCoins} size="1x" />
+              </span>
+              <span>
+                <FormattedBalance value={feeDist.tip} symbol={symbol} />
+              </span>
             </span>
-            <span>
-              <FormattedBalance value={feeDist.tip} symbol={symbol} />
-            </span>
-          </span>
+          </div>
         </div>
         {feeDist.blob > 0n && (
-          <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-x-2 gap-y-2">
             <PercentageGauge
               perc={feePerc.blob}
               bgColor="bg-rose-100"
@@ -85,10 +89,10 @@ const RewardSplit: React.FC<RewardSplitProps> = ({ txData }) => {
                 </span>
               </span>
             </div>
-          </>
+          </div>
         )}
         {feePerc.opL1Fee > 0n && (
-          <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-x-2 gap-y-2">
             <PercentageGauge
               perc={feePerc.opL1Fee}
               bgColor="bg-blue-100"
@@ -105,7 +109,7 @@ const RewardSplit: React.FC<RewardSplitProps> = ({ txData }) => {
                 </span>
               </span>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
