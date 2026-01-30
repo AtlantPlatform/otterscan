@@ -7,6 +7,8 @@ import {
   buildSimpleUrlset,
   formatTimestamp,
   getTodayDate,
+  parseSimpleSitemap,
+  countSitemapUrls,
 } from './xml-builder.js';
 import type { SitemapConfig } from './types.js';
 
@@ -262,5 +264,49 @@ export class SitemapGenerator {
    */
   async checkConnection(): Promise<boolean> {
     return this.client.checkConnection();
+  }
+
+  /**
+   * Check and truncate a sitemap file to the target count if needed
+   * Returns true if the file was modified, false if it already had the correct count
+   */
+  async checkAndTruncateSitemap(filename: string, targetCount: number): Promise<boolean> {
+    const { outputDir } = this.config;
+    const filePath = path.join(outputDir, filename);
+
+    try {
+      const content = await fs.readFile(filePath, 'utf-8');
+      const currentCount = countSitemapUrls(content);
+
+      if (currentCount === targetCount) {
+        console.log(`[Sitemap] ${filename}: already has ${targetCount} URLs, no changes needed`);
+        return false;
+      }
+
+      console.log(`[Sitemap] ${filename}: has ${currentCount} URLs, truncating to ${targetCount}`);
+      const entries = parseSimpleSitemap(content);
+      const truncatedEntries = entries.slice(0, targetCount);
+      const xml = buildSimpleUrlset(truncatedEntries);
+      await writeFileAtomic(filePath, xml);
+      console.log(`[Sitemap] ${filename}: truncated to ${truncatedEntries.length} URLs`);
+      return true;
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        console.log(`[Sitemap] ${filename}: file not found, skipping`);
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Check and truncate all dynamic sitemaps to their target counts
+   */
+  async checkAndTruncateAllSitemaps(): Promise<void> {
+    const targetCount = 100;
+
+    await this.checkAndTruncateSitemap('sitemap-blocks-recent.xml', targetCount);
+    await this.checkAndTruncateSitemap('sitemap-tx-recent.xml', targetCount);
+    await this.checkAndTruncateSitemap('sitemap-addresses-sampled.xml', targetCount);
   }
 }

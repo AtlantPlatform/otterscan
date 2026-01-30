@@ -3,6 +3,30 @@ import type { SitemapUrl, SitemapEntry } from './types.js';
 const XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
 
 /**
+ * Parse a simple sitemap XML and extract URL entries (loc and lastmod)
+ */
+export function parseSimpleSitemap(xml: string): Array<{ loc: string; lastmod: string }> {
+  const entries: Array<{ loc: string; lastmod: string }> = [];
+  const urlRegex = /<url>\s*<loc>([^<]+)<\/loc>\s*<lastmod>([^<]+)<\/lastmod>\s*<\/url>/g;
+  let match;
+  while ((match = urlRegex.exec(xml)) !== null) {
+    entries.push({
+      loc: match[1],
+      lastmod: match[2],
+    });
+  }
+  return entries;
+}
+
+/**
+ * Count URLs in a sitemap XML
+ */
+export function countSitemapUrls(xml: string): number {
+  const matches = xml.match(/<url>/g);
+  return matches ? matches.length : 0;
+}
+
+/**
  * Escape special XML characters
  */
 function escapeXml(str: string): string {
