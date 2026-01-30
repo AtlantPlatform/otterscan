@@ -28,13 +28,6 @@ Disallow: /tx/*/statediff
 Disallow: /block/*/txs
 
 # ==============================
-# DISALLOW NON-INDEXABLE UI STATES
-# ==============================
-
-Disallow: /*?
-Disallow: /*&
-
-# ==============================
 # DISALLOW INTERNAL / UTILITY PATHS
 # ==============================
 
