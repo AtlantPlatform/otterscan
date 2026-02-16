@@ -1,9 +1,5 @@
 User-agent: *
 
-# ==============================
-# ALLOW CORE & INDEXABLE PAGES
-# ==============================
-
 Allow: /
 Allow: /blocks/recent
 Allow: /tx/recent
@@ -12,30 +8,6 @@ Allow: /tx/
 Allow: /address/
 Allow: /broadcastTx
 
-# ==============================
-# DISALLOW DERIVATIVE TX VIEWS
-# (no standalone search demand)
-# ==============================
-
-Disallow: /tx/*/logs
-Disallow: /tx/*/trace
-Disallow: /tx/*/statediff
-
-# ==============================
-# DISALLOW DERIVATIVE BLOCK VIEWS
-# ==============================
-
-Disallow: /block/*/txs
-
-# ==============================
-# DISALLOW INTERNAL / UTILITY PATHS
-# ==============================
-
 Disallow: /api/
-Disallow: /assets/
-
-# ==============================
-# SITEMAP DECLARATION
-# ==============================
 
 Sitemap: https://ethscan.org/sitemap.xml

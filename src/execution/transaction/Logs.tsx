@@ -127,6 +127,7 @@ const Logs: FC<LogsProps> = ({ logs, txHash }) => {
     <ContentFrame tabs>
       <Helmet>
         <title>{title}</title>
+        <meta name="robots" content="noindex,follow" />
         <meta name="description" content={description} />
         <link rel="canonical" href={pageUrl} />
 

@@ -120,6 +120,7 @@ const Trace: React.FC<TraceProps> = ({ txData, txHash }) => {
     <ContentFrame tabs>
       <Helmet>
         <title>{title}</title>
+        <meta name="robots" content="noindex,follow" />
         <meta name="description" content={description} />
         <link rel="canonical" href={pageUrl} />
 

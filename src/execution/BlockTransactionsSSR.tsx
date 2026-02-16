@@ -169,6 +169,7 @@ const BlockTransactionsSSR: React.FC = () => {
       <StandardFrame>
         <Helmet>
           <title>{`Ethereum Block ${blockNumber} Transactions - Full Transaction List | Ethscan`}</title>
+          <meta name="robots" content="noindex,follow" />
           <meta name="description" content={`View all transactions included in Ethereum block ${blockNumber}. Explore transaction hashes, wallet addresses, ETH values, gas fees, and execution details on Ethscan.`} />
           <link rel="canonical" href={`https://ethscan.org/block/${blockNumber}/txs`} />
 

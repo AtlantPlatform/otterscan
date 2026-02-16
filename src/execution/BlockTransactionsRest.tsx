@@ -137,6 +137,7 @@ const BlockTransactionsRest: React.FC = () => {
     <div className="min-h-screen overflow-x-hidden">
       <StandardFrame>
         <Helmet>
+          <meta name="robots" content="noindex,follow" />
           <meta name="description" content={`Browse all transactions in Ethereum block ${blockNumber}. View complete transaction details including hashes, addresses, values, and gas information.`} />
           <link rel="canonical" href={`https://ethscan.org/block/${blockNumber}/txs`} />
           <script type="application/ld+json">{payloadSchemaWebPage}</script>
