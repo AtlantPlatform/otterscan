@@ -38,10 +38,9 @@ export interface RestBlock {
 }
 
 /**
- * Hook to get the latest block number with auto-refresh via polling
- * Replaces provider.on("block", callback)
+ * Hook to get the latest block number with a one-time fetch on mount.
  */
-export const useLatestBlockNumber = (pollInterval: number = 4000) => {
+export const useLatestBlockNumber = () => {
   const [latestBlockNumber, setLatestBlockNumber] = useState<number>();
   const [error, setError] = useState<Error>();
 
@@ -62,26 +61,20 @@ export const useLatestBlockNumber = (pollInterval: number = 4000) => {
       }
     };
 
-    // Initial fetch
     fetchLatestBlock();
-
-    // Poll for updates
-    const interval = setInterval(fetchLatestBlock, pollInterval);
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
     };
-  }, [pollInterval]);
+  }, []);
 
   return { latestBlockNumber, error };
 };
 
 /**
- * Hook to get full block details with auto-refresh via polling
- * Replaces useLatestBlockHeader(provider)
+ * Hook to get full block details with a one-time fetch on mount.
  */
-export const useLatestBlock = (pollInterval: number = 4000) => {
+export const useLatestBlock = () => {
   const [latestBlock, setLatestBlock] = useState<RestBlock>();
   const [error, setError] = useState<Error>();
 
@@ -90,10 +83,7 @@ export const useLatestBlock = (pollInterval: number = 4000) => {
 
     const fetchLatestBlock = async () => {
       try {
-        // First get the latest block number
         const { blockNumber } = await blocksAPI.getLatest();
-
-        // Then fetch the full block details
         const block = await blocksAPI.getBlock(blockNumber);
 
         if (isMounted) {
@@ -107,17 +97,12 @@ export const useLatestBlock = (pollInterval: number = 4000) => {
       }
     };
 
-    // Initial fetch
     fetchLatestBlock();
-
-    // Poll for updates
-    const interval = setInterval(fetchLatestBlock, pollInterval);
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
     };
-  }, [pollInterval]);
+  }, []);
 
   return { latestBlock, error };
 };

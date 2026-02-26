@@ -31,12 +31,19 @@ export const slotAttestationsURL = (slotNumber: number) =>
 export const validatorURL = (validatorIndex: number) =>
   `/validator/${validatorIndex}`;
 
-export const blockURL = (blockNum: BlockTag) => `/block/${blockNum}`;
+const stripBlockTag = (blockTag: BlockTag): string => {
+  const s = blockTag.toString();
+  return s.startsWith("0x") ? s.slice(2) : s;
+};
 
-export const blockTxsURL = (blockNum: BlockTag) => `/block/${blockNum}/txs`;
+export const blockURL = (blockTag: BlockTag) =>
+  `/block/${stripBlockTag(blockTag)}`;
 
-export const blockTxURL = (blockNum: BlockTag, txIndex: number) =>
-  `/block/${blockNum}/tx/${txIndex}`;
+export const blockTxsURL = (blockTag: BlockTag) =>
+  `/block/${stripBlockTag(blockTag)}/txs`;
+
+export const blockTxURL = (blockTag: BlockTag, txIndex: number) =>
+  `/block/${stripBlockTag(blockTag)}/tx/${txIndex}`;
 
 export const transactionURL = (txHash: string) => `/tx/${txHash}`;
 
