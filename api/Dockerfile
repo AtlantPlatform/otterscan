@@ -10,6 +10,7 @@ RUN npm ci --omit=dev
 
 # Copy application code
 COPY server.js ./
+COPY lookups ./lookups/
 
 # Environment variables with defaults
 ENV ERIGON_URL=http://127.0.0.1:8545
