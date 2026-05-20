@@ -136,7 +136,7 @@ const RecentTransactionsSectionSSR: React.FC = () => {
                     </div>
                   </td>
                   <td>
-                    <MethodName data={tx.data} to={tx.to} />
+                    <MethodName data={tx.data} to={tx.to} name={(tx as any).methodName} />
                   </td>
                   <td className="text-gray-600" title={formattedTime}>
                     {formattedTime}
@@ -195,7 +195,7 @@ const RecentTransactionsSectionSSR: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Method</span>
-                <MethodName data={tx.data} to={tx.to} />
+                <MethodName data={tx.data} to={tx.to} name={(tx as any).methodName} />
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Age</span>

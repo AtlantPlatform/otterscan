@@ -3,6 +3,33 @@
  * All blockchain data is fetched through REST API endpoints
  */
 
+// Backend-resolved Transaction Action (mirrors api/lookups/resolveAction.js
+// output). Bigints cross the JSON boundary as decimal strings.
+export type TokenDescriptor = {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+};
+
+export type ResolvedAction =
+  | { kind: "eip7702"; authorizations: Array<{
+        authority: string | null;
+        address: string;
+        chainId: number;
+        nonce: number;
+      }>; }
+  | { kind: "approve"; token: TokenDescriptor; spender: string; owner: string; value: string; }
+  | { kind: "swap"; protocol: "Uniswap V2" | "Uniswap V3";
+      pool: string; tokenIn: TokenDescriptor; tokenOut: TokenDescriptor;
+      amountIn: string; amountOut: string; }
+  | { kind: "swap-partial"; protocol: "Uniswap V2" | "Uniswap V3"; pool: string; }
+  | { kind: "weth-wrap" | "weth-unwrap"; weth: string; account: string; value: string; }
+  | { kind: "call"; method: string; selector: string; from: string; to: string; }
+  | { kind: "erc20-transfer"; token: TokenDescriptor; from: string; to: string; value: string; }
+  | { kind: "erc721-transfer"; token: string; from: string; to: string; tokenId: string; isMint: boolean; }
+  | { kind: "native-transfer"; from: string; to: string; value: string; };
+
 // For SSR, we need absolute URLs pointing to the API server directly.
 // On client, relative URLs work fine (proxied by Express).
 // Note: This function is called at module load time
@@ -191,6 +218,7 @@ export const transactionsAPI = {
       nonce: number;
       authority: string | null;
     }> | null;
+    resolvedAction: ResolvedAction | null;
     // EIP-4844 blob transaction fields (type 3)
     maxFeePerBlobGas: string | null;
     blobVersionedHashes: string[] | null;

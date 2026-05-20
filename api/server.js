@@ -1,6 +1,31 @@
 import express from 'express';
 import cors from 'cors';
 import { JsonRpcProvider, encodeRlp, keccak256, recoverAddress, Signature, getBytes, hexlify, concat } from 'ethers';
+import { resolveSelectors } from './lookups/signatures.js';
+import { resolveAction } from './lookups/resolveAction.js';
+
+// Attach a pre-resolved `methodName` to each tx in `txs` by extracting the
+// 4-byte selector from `tx.data` and looking it up. Mutates in place.
+const attachMethodNames = async (txs) => {
+  if (!Array.isArray(txs) || txs.length === 0) return txs;
+  const selectors = txs.map((t) =>
+    t?.data && t.data.length >= 10
+      ? t.data.slice(2, 10).toLowerCase()
+      : null,
+  );
+  const map = await resolveSelectors(selectors);
+  for (let i = 0; i < txs.length; i++) {
+    const tx = txs[i];
+    if (!tx) continue;
+    if (tx.data === '0x') {
+      tx.methodName = null; // simple ETH transfer — UI labels this "transfer"
+      continue;
+    }
+    const sel = selectors[i];
+    tx.methodName = sel ? map.get(sel) ?? null : null;
+  }
+  return txs;
+};
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -282,6 +307,7 @@ app.get('/api/blocks/:number/transactions', async (req, res) => {
       };
     });
 
+    await attachMethodNames(transactions);
     res.json({
       total,
       page,
@@ -402,6 +428,7 @@ app.get('/api/transactions/recent', async (req, res) => {
     const avgTxsPerBlock = allTransactions.length / blocksToFetch;
     const estimatedTotal = Math.floor(latestBlockNumber * avgTxsPerBlock);
 
+    await attachMethodNames(paginatedTxs);
     res.json({
       total: estimatedTotal,
       page,
@@ -535,6 +562,7 @@ app.get('/api/transactions/:hash', async (req, res) => {
       confirmations,
     };
 
+    transaction.resolvedAction = await resolveAction(provider, transaction);
     res.json(transaction);
   } catch (error) {
     console.error('Error getting transaction:', error);
@@ -705,6 +733,7 @@ app.get('/api/addresses/:address/transactions', async (req, res) => {
       };
     });
 
+    await attachMethodNames(transactions);
     res.json({
       total: results.fullCount || transactions.length,
       page,

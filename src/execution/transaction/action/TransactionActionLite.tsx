@@ -1,8 +1,9 @@
+import { id as keccakId } from "ethers";
 import { FC, useMemo } from "react";
 import { NavLink } from "react-router";
 import useSWRImmutable from "swr/immutable";
 import FormattedBalance from "../../../components/FormattedBalance";
-import { tokensAPI } from "../../../api/client";
+import { tokensAPI, ResolvedAction, TokenDescriptor } from "../../../api/client";
 import {
   Action,
   decodeActions,
@@ -44,6 +45,9 @@ type Props = {
     nonce: number;
     authority: string | null;
   }> | null;
+  // Server-resolved action. When present, renders directly without any SWR
+  // roundtrips — labels are already in the SSR HTML.
+  resolvedAction?: ResolvedAction | null;
 };
 
 const useTokenMeta = (address: string | undefined) => {
@@ -87,26 +91,114 @@ const formatMethodName = (name: string): string => {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 };
 
-const useMethodName = (data: string | undefined) => {
+// Build "name(type1,type2,...)" from an ABI function fragment so we can
+// keccak it and match against the 4byte selector. Recurses into tuple types
+// so structs get encoded as their canonical "(t1,t2,...)" form.
+const abiTypeString = (
+  input: { type: string; components?: { type: string; components?: unknown[] }[] },
+): string => {
+  if (input.type === "tuple" && input.components) {
+    return `(${input.components.map((c) => abiTypeString(c as never)).join(",")})`;
+  }
+  if (input.type.startsWith("tuple[") && input.components) {
+    const suffix = input.type.slice("tuple".length);
+    return `(${input.components.map((c) => abiTypeString(c as never)).join(",")})${suffix}`;
+  }
+  return input.type;
+};
+
+type AbiFn = {
+  type: string;
+  name?: string;
+  inputs?: { type: string; components?: unknown[] }[];
+};
+
+const abiSelector = (fn: AbiFn): string => {
+  const sig = `${fn.name ?? ""}(${(fn.inputs ?? []).map((i) => abiTypeString(i as never)).join(",")})`;
+  return keccakId(sig).slice(0, 10);
+};
+
+// Try Sourcify (full match first, then partial) to resolve a method name
+// from the contract's verified ABI when the 4byte directory comes up empty.
+const sourcifyLookup = async (
+  contract: string,
+  selector: string,
+): Promise<string | null> => {
+  const base = "https://repo.sourcify.dev/contracts";
+  const checksummed = contract; // sourcify accepts checksummed or lowercase
+  for (const variant of ["full_match", "partial_match"]) {
+    try {
+      const res = await fetch(`${base}/${variant}/1/${checksummed}/metadata.json`);
+      if (!res.ok) continue;
+      const meta = (await res.json()) as { output?: { abi?: AbiFn[] } };
+      const abi = meta.output?.abi ?? [];
+      for (const item of abi) {
+        if (item.type !== "function" || !item.name) continue;
+        try {
+          if (abiSelector(item) === selector) return item.name;
+        } catch {
+          /* skip malformed entries */
+        }
+      }
+    } catch {
+      /* network / parse errors → try next variant */
+    }
+  }
+  return null;
+};
+
+const useMethodName = (data: string | undefined, contract?: string | null) => {
   const selector =
     data && data.length >= 10 && data.startsWith("0x")
-      ? data.slice(2, 10)
+      ? data.slice(0, 10)
       : null;
-  const { data: name } = useSWRImmutable(
-    selector ? ["sigName", selector] : null,
-    async ([_, sel]) => {
+  const key: ["methodName", string, string | null] | null = selector
+    ? ["methodName", selector, contract ? contract.toLowerCase() : null]
+    : null;
+  const { data: name } = useSWRImmutable<string | null, unknown, typeof key>(
+    key,
+    async ([_, sel, contractAddr]) => {
+      const selBare = sel.slice(2);
+      // 1. Local /signatures/ mirror (otterscan-assets / proxied to ethscan).
       try {
-        const res = await fetch(`/signatures/${sel}`);
-        if (!res.ok) return null;
-        const text = await res.text();
-        if (text.startsWith("<") || !text.includes("(")) return null;
-        return text.split(";")[0].split("(")[0];
+        const res = await fetch(`/signatures/${selBare}`);
+        if (res.ok) {
+          const text = await res.text();
+          if (!text.startsWith("<") && text.includes("(")) {
+            return text.split(";")[0].split("(")[0];
+          }
+        }
       } catch {
-        return null;
+        /* fall through */
       }
+      // 2. Live 4byte.directory — picks up selectors added after our mirror
+      //    was last synced.
+      try {
+        const res = await fetch(
+          `https://www.4byte.directory/api/v1/signatures/?hex_signature=${sel}`,
+        );
+        if (res.ok) {
+          const json = (await res.json()) as {
+            results?: { text_signature: string }[];
+          };
+          const sig = json.results?.[0]?.text_signature;
+          if (sig && sig.includes("(")) {
+            return sig.split("(")[0];
+          }
+        }
+      } catch {
+        /* fall through */
+      }
+      // 3. Sourcify-verified contract ABI (catches contract-specific names
+      //    when the contract is verified on Sourcify).
+      if (contractAddr) {
+        const sName = await sourcifyLookup(contractAddr, sel);
+        if (sName) return sName;
+      }
+      return null;
     },
   );
-  return { selector: selector ? `0x${selector}` : null, name };
+  return { selector, name };
 };
 
 const usePoolTokens = (pool: string | undefined) => {
@@ -220,6 +312,58 @@ const Eip7702Row: FC<{
   );
 };
 
+// Decode an `approve(address spender, uint256 value)` call's arguments from
+// the tx calldata.
+const decodeApprove = (
+  data: string,
+): { spender: string; value: bigint } | null => {
+  if (!data || data.length < 138 || !data.toLowerCase().startsWith("0x095ea7b3")) {
+    return null;
+  }
+  try {
+    const spender = "0x" + data.slice(10 + 24, 10 + 64);
+    const value = BigInt("0x" + data.slice(10 + 64, 10 + 128));
+    return { spender, value };
+  } catch {
+    return null;
+  }
+};
+
+// uint256 max — the conventional "infinite" approval amount.
+const UINT256_MAX = (1n << 256n) - 1n;
+
+const ApproveRow: FC<{
+  token: string;
+  spender: string;
+  value: bigint;
+  owner: string;
+}> = ({ token, spender, value, owner }) => {
+  const isUnlimited = value === UINT256_MAX;
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-1">
+      <span>Approve</span>
+      {isUnlimited ? (
+        <span className="font-semibold">unlimited</span>
+      ) : (
+        <TokenAmount token={token} amount={value} nativeIfWeth={false} />
+      )}
+      {isUnlimited && (
+        <NavLink
+          to={`/address/${token}`}
+          title={token}
+          className="font-semibold text-link-blue hover:text-link-blue-hover"
+        >
+          {addressLabel(token) ?? shortAddr(token)}
+        </NavLink>
+      )}
+      <span>for</span>
+      <AddressLink address={spender} />
+      <span>by</span>
+      <AddressLink address={owner} />
+    </span>
+  );
+};
+
 const CallRow: FC<{
   method: string;
   from: string;
@@ -296,6 +440,167 @@ const SwapRow: FC<{ action: Extract<Action, { kind: "swap" }> }> = ({
   );
 };
 
+// Render path for server-resolved actions. Every label is already on the
+// payload, so no SWR/eth_call is needed. SSR HTML already has the final
+// labels; hydration is a no-op for this branch.
+const ResolvedRow: FC<{ action: ResolvedAction }> = ({ action }) => {
+  switch (action.kind) {
+    case "eip7702": {
+      const first = action.authorizations[0];
+      const more = action.authorizations.length - 1;
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1">
+          <span className="font-semibold">EIP-7702:</span>
+          {first.authority ? (
+            <AddressLink address={first.authority} />
+          ) : (
+            <span className="text-gray-500">unknown signer</span>
+          )}
+          <span>Delegate to</span>
+          <AddressLink address={first.address} />
+          {more > 0 && <span className="text-gray-500">(+{more} more)</span>}
+        </span>
+      );
+    }
+    case "approve":
+      return (
+        <ResolvedApprove
+          token={action.token}
+          spender={action.spender}
+          owner={action.owner}
+          value={BigInt(action.value)}
+        />
+      );
+    case "swap":
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1">
+          <span>Swap</span>
+          <ResolvedTokenAmount token={action.tokenIn} amount={BigInt(action.amountIn)} />
+          <span>for</span>
+          <ResolvedTokenAmount token={action.tokenOut} amount={BigInt(action.amountOut)} />
+          <span>on</span>
+          <span className="font-semibold">{action.protocol}</span>
+        </span>
+      );
+    case "swap-partial":
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1">
+          <span>Swap on</span>
+          <span className="font-semibold">{action.protocol}</span>
+          <span className="text-gray-500">(<AddressLink address={action.pool} />)</span>
+        </span>
+      );
+    case "weth-wrap":
+    case "weth-unwrap":
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1">
+          <span>{action.kind === "weth-wrap" ? "Wrap" : "Unwrap"}</span>
+          <FormattedBalance value={BigInt(action.value)} decimals={18} />
+          <span className="font-semibold">
+            {action.kind === "weth-wrap" ? "ETH → WETH" : "WETH → ETH"}
+          </span>
+        </span>
+      );
+    case "call":
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1">
+          <span>Call</span>
+          <span className="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs dark:bg-gray-700">
+            {action.method}
+          </span>
+          <span>Function by</span>
+          <AddressLink address={action.from} />
+          <span>on</span>
+          <AddressLink address={action.to} />
+        </span>
+      );
+    case "erc20-transfer":
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1">
+          <span>Transfer</span>
+          <ResolvedTokenAmount token={action.token} amount={BigInt(action.value)} />
+          <span>from</span>
+          <AddressLink address={action.from} />
+          <span>to</span>
+          <AddressLink address={action.to} />
+        </span>
+      );
+    case "erc721-transfer":
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1">
+          <span>{action.isMint ? "Mint" : "Transfer"}</span>
+          <span className="font-semibold">NFT #{action.tokenId}</span>
+          <span>on</span>
+          <AddressLink address={action.token} />
+        </span>
+      );
+    case "native-transfer":
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1">
+          <span>Transfer</span>
+          <FormattedBalance value={BigInt(action.value)} decimals={18} />
+          <span className="font-semibold">ETH</span>
+          <span>from</span>
+          <AddressLink address={action.from} />
+          <span>to</span>
+          <AddressLink address={action.to} />
+        </span>
+      );
+  }
+};
+
+const ResolvedTokenAmount: FC<{ token: TokenDescriptor; amount: bigint }> = ({
+  token,
+  amount,
+}) => (
+  <span className="inline-flex items-baseline space-x-1">
+    <FormattedBalance value={amount} decimals={token.decimals} />
+    {token.symbol === "ETH" ? (
+      <span className="font-semibold">ETH</span>
+    ) : (
+      <NavLink
+        to={`/address/${token.address}`}
+        title={token.address}
+        className="font-semibold text-link-blue hover:text-link-blue-hover"
+      >
+        {token.symbol || shortAddr(token.address)}
+      </NavLink>
+    )}
+  </span>
+);
+
+const ResolvedApprove: FC<{
+  token: TokenDescriptor;
+  spender: string;
+  owner: string;
+  value: bigint;
+}> = ({ token, spender, owner, value }) => {
+  const isUnlimited = value === UINT256_MAX;
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-1">
+      <span>Approve</span>
+      {isUnlimited ? (
+        <>
+          <span className="font-semibold">unlimited</span>
+          <NavLink
+            to={`/address/${token.address}`}
+            title={token.address}
+            className="font-semibold text-link-blue hover:text-link-blue-hover"
+          >
+            {token.symbol || shortAddr(token.address)}
+          </NavLink>
+        </>
+      ) : (
+        <ResolvedTokenAmount token={token} amount={value} />
+      )}
+      <span>for</span>
+      <AddressLink address={spender} />
+      <span>by</span>
+      <AddressLink address={owner} />
+    </span>
+  );
+};
+
 const TransactionActionLite: FC<Props> = ({
   logs,
   value,
@@ -303,9 +608,31 @@ const TransactionActionLite: FC<Props> = ({
   to,
   data,
   authorizationList,
+  resolvedAction,
 }) => {
+  // Fast path: backend resolved everything. SSR HTML already has the labels;
+  // skip all the client-side decoders below.
+  if (resolvedAction) {
+    return (
+      <div className="flex items-baseline space-x-2 border-b border-gray-200 px-3 py-3 text-sm dark:border-gray-700">
+        <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+          Action
+        </span>
+        <div className="flex-1">
+          <ResolvedRow action={resolvedAction} />
+        </div>
+      </div>
+    );
+  }
+
   // EIP-7702 set-code txs lead with the delegation, not log decoding.
   const hasAuths = !!(authorizationList && authorizationList.length > 0);
+
+  // Detect ERC-20 approve calls on the destination token contract.
+  const approve = useMemo(
+    () => (data ? decodeApprove(data) : null),
+    [data],
+  );
   const logAction = useMemo(() => {
     if (!logs || logs.length === 0) return null;
     // decodeActions expects `Log`-shaped objects but only reads address,
@@ -313,7 +640,7 @@ const TransactionActionLite: FC<Props> = ({
     return pickPrimaryAction(decodeActions(logs as never));
   }, [logs]);
 
-  const { selector, name: methodName } = useMethodName(data);
+  const { selector, name: methodName } = useMethodName(data, to);
 
   // When the tx is a contract call that *isn't* a direct transfer/swap on
   // the called contract, surface the call itself (matching Etherscan's
@@ -322,7 +649,14 @@ const TransactionActionLite: FC<Props> = ({
   // address as `tx.to`, and that's the more informative summary.
   const showCallInstead = useMemo(() => {
     if (!selector || !to) return false;
-    if (!logAction) return true; // no log decoder matched
+    if (!logAction) return true; // no log decoder matched → use call summary
+    // If the 4byte directory definitively doesn't know this selector, prefer
+    // the log action — rendering "Call 0xabcdef12" is less informative than
+    // the transfer it produced (matches Etherscan's behaviour for unknown
+    // contract methods). `undefined` means "still loading"; let the call form
+    // render with the selector and upgrade to the name when it arrives, so
+    // there's no flicker for resolvable methods.
+    if (methodName === null) return false;
     if (logAction.kind === "swap") return false;
     if (logAction.kind === "weth-wrap" || logAction.kind === "weth-unwrap")
       return false;
@@ -339,7 +673,7 @@ const TransactionActionLite: FC<Props> = ({
       }
     }
     return true;
-  }, [selector, to, from, logAction]);
+  }, [selector, to, from, logAction, methodName]);
 
   const action = showCallInstead ? null : logAction;
 
@@ -356,7 +690,10 @@ const TransactionActionLite: FC<Props> = ({
     }
   }, [action, showCallInstead, value, from, to]);
 
-  if (!hasAuths && !action && !showCallInstead && !nativeValue) return null;
+  const showApprove = !hasAuths && !!approve && !!to && !!from;
+
+  if (!hasAuths && !showApprove && !action && !showCallInstead && !nativeValue)
+    return null;
 
   return (
     <div className="flex items-baseline space-x-2 border-b border-gray-200 px-3 py-3 text-sm dark:border-gray-700">
@@ -367,20 +704,28 @@ const TransactionActionLite: FC<Props> = ({
         {hasAuths && authorizationList && (
           <Eip7702Row authorizations={authorizationList} />
         )}
-        {!hasAuths && action?.kind === "swap" && <SwapRow action={action} />}
-        {!hasAuths && action?.kind === "erc20-transfer" && <Erc20Row action={action} />}
-        {!hasAuths && action?.kind === "erc721-transfer" && <Erc721Row action={action} />}
-        {!hasAuths && (action?.kind === "weth-wrap" || action?.kind === "weth-unwrap") && (
+        {showApprove && approve && to && from && (
+          <ApproveRow
+            token={to}
+            spender={approve.spender}
+            value={approve.value}
+            owner={from}
+          />
+        )}
+        {!hasAuths && !showApprove && action?.kind === "swap" && <SwapRow action={action} />}
+        {!hasAuths && !showApprove && action?.kind === "erc20-transfer" && <Erc20Row action={action} />}
+        {!hasAuths && !showApprove && action?.kind === "erc721-transfer" && <Erc721Row action={action} />}
+        {!hasAuths && !showApprove && (action?.kind === "weth-wrap" || action?.kind === "weth-unwrap") && (
           <WethRow action={action} />
         )}
-        {!hasAuths && showCallInstead && from && to && (
+        {!hasAuths && !showApprove && showCallInstead && from && to && (
           <CallRow
             method={methodName ? formatMethodName(methodName) : (selector ?? "")}
             from={from}
             to={to}
           />
         )}
-        {!hasAuths && !action && !showCallInstead && nativeValue !== null && from && to && (
+        {!hasAuths && !showApprove && !action && !showCallInstead && nativeValue !== null && from && to && (
           <NativeTransferRow value={nativeValue} from={from} to={to} />
         )}
       </div>

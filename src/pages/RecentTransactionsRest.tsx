@@ -214,7 +214,7 @@ const RecentTransactionsRest: React.FC = () => {
                                 </NavLink>
                               </td>
                               <td className="min-w-32 max-w-32">
-                                <MethodName data={tx.data} to={tx.to} />
+                                <MethodName data={tx.data} to={tx.to} name={tx.methodName} />
                               </td>
                               <td className="max-w-28">
                                 <NavLink
@@ -278,7 +278,7 @@ const RecentTransactionsRest: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Method</span>
-                        <MethodName data={tx.data} to={tx.to} />
+                        <MethodName data={tx.data} to={tx.to} name={tx.methodName} />
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Block</span>

@@ -14,7 +14,7 @@ import { useBlockTransactionsSSR } from "../api/useRestTransactions";
 import { useLatestBlockNumber } from "../api/useRestBlocks";
 import { blockTxsURL } from "../url";
 import { PAGE_SIZE } from "../params";
-import { extract4Bytes } from "../use4Bytes";
+import MethodName from "../components/MethodName";
 import { useTimezone } from "../useTimezone";
 import { formatTimestamp } from "../utils/timestamp";
 
@@ -55,6 +55,7 @@ const BlockTransactionsSSR: React.FC = () => {
     fee: BigInt(tx.fee || '0'),
     status: tx.status,
     data: tx.data || '0x',
+    methodName: tx.methodName ?? undefined,
   }));
 
   // FAQ content for both schema and UI display
@@ -298,10 +299,6 @@ const BlockTransactionsSSR: React.FC = () => {
                       </thead>
                       <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200">
                         {transformedTxs.map((tx: any) => {
-                          const fourBytes = extract4Bytes(tx.data);
-                          const isSimpleTransfer = tx.data === "0x";
-                          const methodLabel = isSimpleTransfer ? "transfer" : (fourBytes ?? "-");
-
                           return (
                             <tr key={tx.hash}>
                               <td className="max-w-[14.5rem]">
@@ -313,9 +310,7 @@ const BlockTransactionsSSR: React.FC = () => {
                                 </Link>
                               </td>
                               <td className="min-w-32 max-w-32">
-                                <div className="method-badge flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs">
-                                  <p className="truncate">{methodLabel}</p>
-                                </div>
+                                <MethodName data={tx.data} to={tx.to} name={tx.methodName} />
                               </td>
                               <td className="max-w-28">
                                 <Link
@@ -354,9 +349,6 @@ const BlockTransactionsSSR: React.FC = () => {
                 {/* Mobile Cards */}
                 <div className="block sm:hidden space-y-3">
                   {transformedTxs.map((tx: any) => {
-                    const fourBytes = extract4Bytes(tx.data);
-                    const isSimpleTransfer = tx.data === "0x";
-                    const methodLabel = isSimpleTransfer ? "transfer" : (fourBytes ?? "-");
                     const formattedTime = formatTimestamp(tx.timestamp, timeZone);
 
                     return (
@@ -381,9 +373,7 @@ const BlockTransactionsSSR: React.FC = () => {
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600 dark:text-gray-400">Method</span>
-                          <div className="method-badge text-xs px-2 py-1 rounded">
-                            {methodLabel}
-                          </div>
+                          <MethodName data={tx.data} to={tx.to} name={tx.methodName} />
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600 dark:text-gray-400">Block</span>

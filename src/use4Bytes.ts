@@ -55,35 +55,49 @@ const fourBytesFetcher =
     const fourBytes = key.slice(2);
     const signatureURL = fourBytesURL(assetsURLPrefix, fourBytes);
 
+    // 1. Local otterscan-assets / proxied mirror.
     try {
       const res = await fetch(signatureURL);
-      if (!res.ok) {
-        console.warn(`Signature does not exist in 4bytes DB: ${fourBytes}`);
-        return null;
+      if (res.ok) {
+        const sigs = await res.text();
+        if (!sigs.startsWith("<") && sigs.includes("(")) {
+          const sig = sigs.split(";")[0];
+          const method = sig.slice(0, sig.indexOf("("));
+          return {
+            name: method,
+            signature: sig,
+            fromVerifiedContract: false,
+          };
+        }
       }
-
-      // Get only the first occurrence, for now ignore alternative param names
-      const sigs = await res.text();
-      // Defensive: some hosts return an SPA HTML 200 for unknown selectors
-      // instead of a 404. Reject anything that isn't a plain signature string.
-      if (sigs.startsWith("<") || !sigs.includes("(")) {
-        return null;
-      }
-      const sig = sigs.split(";")[0];
-      const cut = sig.indexOf("(");
-      const method = sig.slice(0, cut);
-
-      const entry: FourBytesEntry = {
-        name: method,
-        signature: sig,
-        fromVerifiedContract: false,
-      };
-      return entry;
-    } catch (err) {
-      // Network error or something wrong with URL config;
-      // silence and don't try it again
-      return null;
+    } catch {
+      /* fall through to live 4byte.directory */
     }
+
+    // 2. Live 4byte.directory — picks up selectors added after the mirror's
+    //    last sync (e.g. niche contract methods like unlockCompressedBatch).
+    try {
+      const res = await fetch(
+        `https://www.4byte.directory/api/v1/signatures/?hex_signature=0x${fourBytes}`,
+      );
+      if (res.ok) {
+        const json = (await res.json()) as {
+          results?: { text_signature: string }[];
+        };
+        const sig = json.results?.[0]?.text_signature;
+        if (sig && sig.includes("(")) {
+          return {
+            name: sig.slice(0, sig.indexOf("(")),
+            signature: sig,
+            fromVerifiedContract: false,
+          };
+        }
+      }
+    } catch {
+      /* fall through */
+    }
+
+    return null;
   };
 
 /**

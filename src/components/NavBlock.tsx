@@ -38,7 +38,11 @@ const NavBlock: FC<NavBlockProps> = ({
       <FontAwesomeIcon icon={faChevronRight} />
     </NavButton>
     <NavButton
-      href={urlBuilder(latestEntityNum!)}
+      href={
+        latestEntityNum !== undefined
+          ? urlBuilder(latestEntityNum)
+          : urlBuilder(entityNum)
+      }
       disabled={latestEntityNum === undefined || entityNum >= latestEntityNum}
     >
       <div className="whitespace-nowrap">

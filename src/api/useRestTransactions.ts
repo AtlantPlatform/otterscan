@@ -30,6 +30,10 @@ export interface RestTransactionWithContext extends RestTransaction {
   blockNumber: number;
   timestamp: number;
   data: string; // For method detection
+  // Pre-resolved 4byte method name from the backend (null = unknown selector
+  // or simple ETH transfer). UI uses this directly when present to avoid a
+  // client roundtrip.
+  methodName?: string | null;
 }
 
 /**
