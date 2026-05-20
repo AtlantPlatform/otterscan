@@ -728,17 +728,29 @@ app.get('/api/tokens/:address', async (req, res) => {
       return res.status(404).json({ error: 'Not an ERC20 token' });
     }
 
-    // Decode string responses (simplified)
-    const decodeName = (data) => {
+    // Decode a string return value. Most ERC-20s return ABI-encoded `string`
+    // (offset+length+data); a handful of legacy tokens (USDT, MKR, ...) return
+    // `bytes32` with trailing zeros. Handle both.
+    const decodeString = (data) => {
       if (!data || data === '0x') return '';
-      // Simple UTF-8 decode, skip ABI decoding for brevity
-      return data; // In production, use proper ABI decoder
+      const hex = data.startsWith('0x') ? data.slice(2) : data;
+      // Heuristic: ABI dynamic string starts with offset=0x20 (32-byte aligned)
+      if (hex.length > 64 && hex.slice(0, 64) === '0'.repeat(62) + '20') {
+        const len = parseInt(hex.slice(64, 128), 16);
+        const bytes = hex.slice(128, 128 + len * 2);
+        return Buffer.from(bytes, 'hex').toString('utf8');
+      }
+      // Fixed bytes32: strip trailing nulls
+      const buf = Buffer.from(hex.padEnd(64, '0').slice(0, 64), 'hex');
+      let end = buf.length;
+      while (end > 0 && buf[end - 1] === 0) end--;
+      return buf.slice(0, end).toString('utf8');
     };
 
     const token = {
       address,
-      name: decodeName(nameData),
-      symbol: decodeName(symbolData),
+      name: decodeString(nameData),
+      symbol: decodeString(symbolData),
       decimals: decimalsData ? parseInt(decimalsData, 16) : 18,
     };
 

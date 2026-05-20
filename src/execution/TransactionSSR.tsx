@@ -21,6 +21,7 @@ import Copy from "../components/Copy";
 import NavTab from "../components/NavTab";
 import { useSingleTransaction } from "../api/useRestTransactions";
 import { commify } from "../utils/utils";
+import TransactionActionLite from "./transaction/action/TransactionActionLite";
 
 /**
  * SSR-safe Transaction page component.
@@ -227,6 +228,7 @@ const TransactionSSR: FC = () => {
                 </TabList>
               </TabGroup>
               <ContentFrame isLoading={isLoading}>
+              <TransactionActionLite logs={tx.logs} value={tx.value} from={tx.from} to={tx.to} />
               <InfoRow title="Transaction Hash">
                 <div className="flex items-baseline space-x-2 break-all">
                   <span className="font-hash" data-test="tx-hash">
