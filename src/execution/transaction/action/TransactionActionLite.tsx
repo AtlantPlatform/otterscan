@@ -37,6 +37,13 @@ type Props = {
   // intent (swap, plain transfer, etc.) we surface a "Call <method> on <to>"
   // summary using the 4byte directory.
   data?: string;
+  // EIP-7702 set-code transaction (type 4) authorization list.
+  authorizationList?: Array<{
+    chainId: number;
+    address: string;
+    nonce: number;
+    authority: string | null;
+  }> | null;
 };
 
 const useTokenMeta = (address: string | undefined) => {
@@ -190,6 +197,29 @@ const Erc721Row: FC<{ action: Extract<Action, { kind: "erc721-transfer" }> }> = 
   </span>
 );
 
+const Eip7702Row: FC<{
+  authorizations: NonNullable<Props["authorizationList"]>;
+}> = ({ authorizations }) => {
+  // Show the first authorization in the headline; if multiple delegations
+  // exist with the same target, append "+N more" so the user knows there's
+  // more to look at on the Authorizations tab.
+  const first = authorizations[0];
+  const more = authorizations.length - 1;
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-1">
+      <span className="font-semibold">EIP-7702:</span>
+      {first.authority ? (
+        <AddressLink address={first.authority} />
+      ) : (
+        <span className="text-gray-500">unknown signer</span>
+      )}
+      <span>Delegate to</span>
+      <AddressLink address={first.address} />
+      {more > 0 && <span className="text-gray-500">(+{more} more)</span>}
+    </span>
+  );
+};
+
 const CallRow: FC<{
   method: string;
   from: string;
@@ -266,7 +296,16 @@ const SwapRow: FC<{ action: Extract<Action, { kind: "swap" }> }> = ({
   );
 };
 
-const TransactionActionLite: FC<Props> = ({ logs, value, from, to, data }) => {
+const TransactionActionLite: FC<Props> = ({
+  logs,
+  value,
+  from,
+  to,
+  data,
+  authorizationList,
+}) => {
+  // EIP-7702 set-code txs lead with the delegation, not log decoding.
+  const hasAuths = !!(authorizationList && authorizationList.length > 0);
   const logAction = useMemo(() => {
     if (!logs || logs.length === 0) return null;
     // decodeActions expects `Log`-shaped objects but only reads address,
@@ -288,14 +327,19 @@ const TransactionActionLite: FC<Props> = ({ logs, value, from, to, data }) => {
     if (logAction.kind === "weth-wrap" || logAction.kind === "weth-unwrap")
       return false;
     if (
-      (logAction.kind === "erc20-transfer" ||
-        logAction.kind === "erc721-transfer") &&
-      logAction.token.toLowerCase() === to.toLowerCase()
+      logAction.kind === "erc20-transfer" ||
+      logAction.kind === "erc721-transfer"
     ) {
-      return false; // direct transfer on the token contract
+      // Direct transfer on the token contract (e.g. calling USDT.transfer()).
+      if (logAction.token.toLowerCase() === to.toLowerCase()) return false;
+      // Indirect transfer but the user is the source — e.g. calling a router
+      // that pulls tokens from the user. Still reads as "user sent N TOK".
+      if (from && logAction.from.toLowerCase() === from.toLowerCase()) {
+        return false;
+      }
     }
     return true;
-  }, [selector, to, logAction]);
+  }, [selector, to, from, logAction]);
 
   const action = showCallInstead ? null : logAction;
 
@@ -312,7 +356,7 @@ const TransactionActionLite: FC<Props> = ({ logs, value, from, to, data }) => {
     }
   }, [action, showCallInstead, value, from, to]);
 
-  if (!action && !showCallInstead && !nativeValue) return null;
+  if (!hasAuths && !action && !showCallInstead && !nativeValue) return null;
 
   return (
     <div className="flex items-baseline space-x-2 border-b border-gray-200 px-3 py-3 text-sm dark:border-gray-700">
@@ -320,20 +364,23 @@ const TransactionActionLite: FC<Props> = ({ logs, value, from, to, data }) => {
         Action
       </span>
       <div className="flex-1">
-        {action?.kind === "swap" && <SwapRow action={action} />}
-        {action?.kind === "erc20-transfer" && <Erc20Row action={action} />}
-        {action?.kind === "erc721-transfer" && <Erc721Row action={action} />}
-        {(action?.kind === "weth-wrap" || action?.kind === "weth-unwrap") && (
+        {hasAuths && authorizationList && (
+          <Eip7702Row authorizations={authorizationList} />
+        )}
+        {!hasAuths && action?.kind === "swap" && <SwapRow action={action} />}
+        {!hasAuths && action?.kind === "erc20-transfer" && <Erc20Row action={action} />}
+        {!hasAuths && action?.kind === "erc721-transfer" && <Erc721Row action={action} />}
+        {!hasAuths && (action?.kind === "weth-wrap" || action?.kind === "weth-unwrap") && (
           <WethRow action={action} />
         )}
-        {showCallInstead && from && to && (
+        {!hasAuths && showCallInstead && from && to && (
           <CallRow
             method={methodName ? formatMethodName(methodName) : (selector ?? "")}
             from={from}
             to={to}
           />
         )}
-        {!action && !showCallInstead && nativeValue !== null && from && to && (
+        {!hasAuths && !action && !showCallInstead && nativeValue !== null && from && to && (
           <NativeTransferRow value={nativeValue} from={from} to={to} />
         )}
       </div>

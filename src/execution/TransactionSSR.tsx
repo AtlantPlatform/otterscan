@@ -228,7 +228,7 @@ const TransactionSSR: FC = () => {
                 </TabList>
               </TabGroup>
               <ContentFrame isLoading={isLoading}>
-              <TransactionActionLite logs={tx.logs} value={tx.value} from={tx.from} to={tx.to} data={tx.data} />
+              <TransactionActionLite logs={tx.logs} value={tx.value} from={tx.from} to={tx.to} data={tx.data} authorizationList={tx.authorizationList} />
               <InfoRow title="Transaction Hash">
                 <div className="flex items-baseline space-x-2 break-all">
                   <span className="font-hash" data-test="tx-hash">

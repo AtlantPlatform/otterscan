@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { JsonRpcProvider } from 'ethers';
+import { JsonRpcProvider, encodeRlp, keccak256, recoverAddress, Signature, getBytes, hexlify, concat } from 'ethers';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -422,14 +422,63 @@ app.get('/api/transactions/:hash', async (req, res) => {
   try {
     const { hash } = req.params;
 
-    const [tx, receipt, latestBlockNumber] = await Promise.all([
+    const [tx, receipt, latestBlockNumber, rawTx] = await Promise.all([
       provider.getTransaction(hash),
       provider.getTransactionReceipt(hash),
       provider.getBlockNumber(),
+      // Raw RPC so we can pick up fields ethers <6.14 doesn't surface, e.g.
+      // EIP-7702 authorizationList.
+      provider.send('eth_getTransactionByHash', [hash]).catch(() => null),
     ]);
 
     if (!tx) {
       return res.status(404).json({ error: 'Transaction not found' });
+    }
+
+    // Decode EIP-7702 authorizationList (type-4 txs). Each entry contains the
+    // delegation target plus a signature; we recover the authority (the EOA
+    // signing the delegation) by hashing rlp([chainId, address, nonce]) with
+    // the 0x05 EIP-7702 magic byte and ecrecover'ing the signature.
+    const authorizationList = [];
+    if (rawTx?.authorizationList && Array.isArray(rawTx.authorizationList)) {
+      for (const a of rawTx.authorizationList) {
+        const chainId = a.chainId ?? '0x0';
+        const address = a.address;
+        const nonce = a.nonce ?? '0x0';
+        // RLP-encode a hex integer field: zero → empty bytes, otherwise
+        // canonical (no leading-zero byte) with even hex length.
+        const rlpInt = (v) => {
+          if (typeof v !== 'string') return '0x';
+          let h = v.startsWith('0x') ? v.slice(2) : v;
+          h = h.replace(/^0+/, '');
+          if (h.length === 0) return '0x';
+          if (h.length % 2 === 1) h = '0' + h;
+          return '0x' + h;
+        };
+        let authority = null;
+        try {
+          const rlp = encodeRlp([
+            rlpInt(chainId),
+            address,
+            rlpInt(nonce),
+          ]);
+          const digest = keccak256(concat([getBytes('0x05'), getBytes(rlp)]));
+          const sig = Signature.from({
+            r: a.r,
+            s: a.s,
+            yParity: parseInt(a.yParity ?? a.v ?? '0x0', 16),
+          });
+          authority = recoverAddress(digest, sig);
+        } catch {
+          authority = null;
+        }
+        authorizationList.push({
+          chainId: parseInt(chainId, 16),
+          address,
+          nonce: parseInt(nonce, 16),
+          authority,
+        });
+      }
     }
 
     // Fetch block data for timestamp and base fee if transaction is confirmed
@@ -477,6 +526,8 @@ app.get('/api/transactions/:hash', async (req, res) => {
       // EIP-4844 blob transaction fields (type 3)
       maxFeePerBlobGas: tx.maxFeePerBlobGas ? tx.maxFeePerBlobGas.toString() : null,
       blobVersionedHashes: tx.blobVersionedHashes || null,
+      // EIP-7702 set-code transaction fields (type 4)
+      authorizationList: authorizationList.length > 0 ? authorizationList : null,
       // Block data
       timestamp: blockData ? parseInt(blockData.timestamp, 16) : null,
       baseFeePerGas: blockData?.baseFeePerGas ? parseInt(blockData.baseFeePerGas, 16) : null,

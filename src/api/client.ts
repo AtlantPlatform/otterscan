@@ -185,6 +185,12 @@ export const transactionsAPI = {
     // EIP-1559 fields (type 2 transactions)
     maxPriorityFeePerGas: string | null;
     maxFeePerGas: string | null;
+    authorizationList: Array<{
+      chainId: number;
+      address: string;
+      nonce: number;
+      authority: string | null;
+    }> | null;
     // EIP-4844 blob transaction fields (type 3)
     maxFeePerBlobGas: string | null;
     blobVersionedHashes: string[] | null;
