@@ -1,4 +1,5 @@
 import { FC, useMemo } from "react";
+import { NavLink } from "react-router";
 import useSWRImmutable from "swr/immutable";
 import FormattedBalance from "../../../components/FormattedBalance";
 import { tokensAPI } from "../../../api/client";
@@ -32,6 +33,10 @@ type Props = {
   value?: string;
   from?: string;
   to?: string | null;
+  // Raw calldata. When present and the tx isn't a recognised log-based
+  // intent (swap, plain transfer, etc.) we surface a "Call <method> on <to>"
+  // summary using the 4byte directory.
+  data?: string;
 };
 
 const useTokenMeta = (address: string | undefined) => {
@@ -68,6 +73,35 @@ const ethCall = async (to: string, data: string): Promise<string | null> => {
   }
 };
 
+// Format a 4byte name like "execTransaction" → "Exec Transaction".
+const formatMethodName = (name: string): string => {
+  // camelCase → space-separated, with first letter capitalised.
+  const spaced = name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+};
+
+const useMethodName = (data: string | undefined) => {
+  const selector =
+    data && data.length >= 10 && data.startsWith("0x")
+      ? data.slice(2, 10)
+      : null;
+  const { data: name } = useSWRImmutable(
+    selector ? ["sigName", selector] : null,
+    async ([_, sel]) => {
+      try {
+        const res = await fetch(`/signatures/${sel}`);
+        if (!res.ok) return null;
+        const text = await res.text();
+        if (text.startsWith("<") || !text.includes("(")) return null;
+        return text.split(";")[0].split("(")[0];
+      } catch {
+        return null;
+      }
+    },
+  );
+  return { selector: selector ? `0x${selector}` : null, name };
+};
+
 const usePoolTokens = (pool: string | undefined) => {
   const { data } = useSWRImmutable(
     pool ? ["poolTokens", pool.toLowerCase()] : null,
@@ -90,6 +124,19 @@ const shortAddr = (a: string) => `${a.slice(0, 8)}…${a.slice(-6)}`;
 
 const displayAddr = (a: string) => addressLabel(a) ?? shortAddr(a);
 
+const AddressLink: FC<{ address: string; className?: string }> = ({
+  address,
+  className = "",
+}) => (
+  <NavLink
+    to={`/address/${address}`}
+    title={address}
+    className={`font-hash text-link-blue hover:text-link-blue-hover ${className}`}
+  >
+    {displayAddr(address)}
+  </NavLink>
+);
+
 const TokenAmount: FC<{
   token: string;
   amount: bigint;
@@ -100,10 +147,21 @@ const TokenAmount: FC<{
   const meta = useTokenMeta(isWeth ? undefined : token);
   const decimals = isWeth ? 18 : meta?.decimals ?? 0;
   const symbol = isWeth ? "ETH" : meta?.symbol;
+  const label = symbol ?? addressLabel(token) ?? shortAddr(token);
   return (
     <span className="inline-flex items-baseline space-x-1">
       <FormattedBalance value={amount} decimals={decimals} />
-      <span className="font-semibold">{symbol ?? addressLabel(token) ?? shortAddr(token)}</span>
+      {isWeth ? (
+        <span className="font-semibold">{label}</span>
+      ) : (
+        <NavLink
+          to={`/address/${token}`}
+          title={token}
+          className="font-semibold text-link-blue hover:text-link-blue-hover"
+        >
+          {label}
+        </NavLink>
+      )}
     </span>
   );
 };
@@ -115,9 +173,9 @@ const Erc20Row: FC<{ action: Extract<Action, { kind: "erc20-transfer" }> }> = ({
     <span>Transfer</span>
     <TokenAmount token={action.token} amount={action.value} nativeIfWeth={false} />
     <span>from</span>
-    <span className="font-hash" title={action.from}>{displayAddr(action.from)}</span>
+    <AddressLink address={action.from} />
     <span>to</span>
-    <span className="font-hash" title={action.to}>{displayAddr(action.to)}</span>
+    <AddressLink address={action.to} />
   </span>
 );
 
@@ -128,7 +186,24 @@ const Erc721Row: FC<{ action: Extract<Action, { kind: "erc721-transfer" }> }> = 
     <span>{action.isMint ? "Mint" : "Transfer"}</span>
     <span className="font-semibold">NFT #{action.tokenId.toString()}</span>
     <span>on</span>
-    <span className="font-hash" title={action.token}>{displayAddr(action.token)}</span>
+    <AddressLink address={action.token} />
+  </span>
+);
+
+const CallRow: FC<{
+  method: string;
+  from: string;
+  to: string;
+}> = ({ method, from, to }) => (
+  <span className="inline-flex flex-wrap items-baseline gap-x-1">
+    <span>Call</span>
+    <span className="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs dark:bg-gray-700">
+      {method}
+    </span>
+    <span>Function by</span>
+    <AddressLink address={from} />
+    <span>on</span>
+    <AddressLink address={to} />
   </span>
 );
 
@@ -142,9 +217,9 @@ const NativeTransferRow: FC<{
     <FormattedBalance value={value} decimals={18} />
     <span className="font-semibold">ETH</span>
     <span>from</span>
-    <span className="font-hash" title={from}>{displayAddr(from)}</span>
+    <AddressLink address={from} />
     <span>to</span>
-    <span className="font-hash" title={to}>{displayAddr(to)}</span>
+    <AddressLink address={to} />
   </span>
 );
 
@@ -169,7 +244,7 @@ const SwapRow: FC<{ action: Extract<Action, { kind: "swap" }> }> = ({
       <span className="inline-flex flex-wrap items-baseline gap-x-1">
         <span>Swap on</span>
         <span className="font-semibold">{action.protocol}</span>
-        <span className="text-gray-500">({shortAddr(action.pool)})</span>
+        <span className="text-gray-500">(<AddressLink address={action.pool} />)</span>
       </span>
     );
   }
@@ -191,18 +266,43 @@ const SwapRow: FC<{ action: Extract<Action, { kind: "swap" }> }> = ({
   );
 };
 
-const TransactionActionLite: FC<Props> = ({ logs, value, from, to }) => {
-  const action = useMemo(() => {
+const TransactionActionLite: FC<Props> = ({ logs, value, from, to, data }) => {
+  const logAction = useMemo(() => {
     if (!logs || logs.length === 0) return null;
     // decodeActions expects `Log`-shaped objects but only reads address,
     // topics, and data — the lite shape is structurally compatible.
     return pickPrimaryAction(decodeActions(logs as never));
   }, [logs]);
 
-  // Fall back to a native ETH transfer when no log-based action matched
-  // and the tx moves a non-zero value.
+  const { selector, name: methodName } = useMethodName(data);
+
+  // When the tx is a contract call that *isn't* a direct transfer/swap on
+  // the called contract, surface the call itself (matching Etherscan's
+  // "Call <Method> Function by X on Y" line). Otherwise prefer the log
+  // action — a token's own `transfer()` produces a Transfer log on the same
+  // address as `tx.to`, and that's the more informative summary.
+  const showCallInstead = useMemo(() => {
+    if (!selector || !to) return false;
+    if (!logAction) return true; // no log decoder matched
+    if (logAction.kind === "swap") return false;
+    if (logAction.kind === "weth-wrap" || logAction.kind === "weth-unwrap")
+      return false;
+    if (
+      (logAction.kind === "erc20-transfer" ||
+        logAction.kind === "erc721-transfer") &&
+      logAction.token.toLowerCase() === to.toLowerCase()
+    ) {
+      return false; // direct transfer on the token contract
+    }
+    return true;
+  }, [selector, to, logAction]);
+
+  const action = showCallInstead ? null : logAction;
+
+  // Fall back to a native ETH transfer when no log-based action matched,
+  // no contract call to show, and the tx moves a non-zero value.
   const nativeValue = useMemo(() => {
-    if (action) return null;
+    if (action || showCallInstead) return null;
     if (!value || !from || !to) return null;
     try {
       const v = BigInt(value);
@@ -210,9 +310,9 @@ const TransactionActionLite: FC<Props> = ({ logs, value, from, to }) => {
     } catch {
       return null;
     }
-  }, [action, value, from, to]);
+  }, [action, showCallInstead, value, from, to]);
 
-  if (!action && !nativeValue) return null;
+  if (!action && !showCallInstead && !nativeValue) return null;
 
   return (
     <div className="flex items-baseline space-x-2 border-b border-gray-200 px-3 py-3 text-sm dark:border-gray-700">
@@ -226,7 +326,14 @@ const TransactionActionLite: FC<Props> = ({ logs, value, from, to }) => {
         {(action?.kind === "weth-wrap" || action?.kind === "weth-unwrap") && (
           <WethRow action={action} />
         )}
-        {!action && nativeValue !== null && from && to && (
+        {showCallInstead && from && to && (
+          <CallRow
+            method={methodName ? formatMethodName(methodName) : (selector ?? "")}
+            from={from}
+            to={to}
+          />
+        )}
+        {!action && !showCallInstead && nativeValue !== null && from && to && (
           <NativeTransferRow value={nativeValue} from={from} to={to} />
         )}
       </div>
