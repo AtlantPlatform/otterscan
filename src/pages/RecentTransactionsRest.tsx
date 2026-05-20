@@ -9,6 +9,8 @@ import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
 import { RestTransactionWithContext, usePaginatedTransactions } from "../api/useRestTransactions";
 import { extract4Bytes } from "../use4Bytes";
+import { useTimezone } from "../useTimezone";
+import { formatTimestamp } from "../utils/timestamp";
 
 const TRANSACTIONS_PER_PAGE = 30;
 
@@ -27,6 +29,7 @@ const RecentTransactionsRest: React.FC = () => {
 
   // Use React Query hook for SSR-compatible data fetching
   const { transactions, total: estimatedTotal, isLoading } = usePaginatedTransactions(pageNumber, TRANSACTIONS_PER_PAGE);
+  const timeZone = useTimezone();
 
   // Use default symbol for SSR compatibility (ChainInfo context not available on server)
   const symbol = DEFAULT_SYMBOL;
@@ -229,16 +232,8 @@ const RecentTransactionsRest: React.FC = () => {
                                   <span>{tx.blockNumber.toLocaleString()}</span>
                                 </NavLink>
                               </td>
-                              <td className="min-w-36 max-w-36 text-gray-600" title={new Date(tx.timestamp * 1000).toLocaleString()}>
-                                {new Date(tx.timestamp * 1000).toLocaleString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  second: '2-digit',
-                                  hour12: false
-                                })}
+                              <td className="min-w-36 max-w-36 text-gray-600" title={formatTimestamp(tx.timestamp, timeZone)}>
+                                {formatTimestamp(tx.timestamp, timeZone)}
                               </td>
                               <td className="min-w-48 max-w-48">
                                 {valueBigInt > 0n ? (
@@ -264,16 +259,7 @@ const RecentTransactionsRest: React.FC = () => {
               {/* Mobile Cards */}
               <div className="block sm:hidden space-y-3 px-3">
                 {transactions.map((tx) => {
-                  const timestamp = new Date(tx.timestamp * 1000);
-                  const formattedTime = timestamp.toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false
-                  });
+                  const formattedTime = formatTimestamp(tx.timestamp, timeZone);
 
                   // Convert hex strings to BigInt for ethers.js formatEther
                   const valueBigInt = BigInt(tx.value);

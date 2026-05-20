@@ -5,6 +5,8 @@ import React from "react";
 import { NavLink } from "react-router";
 import { useRecentTransactions } from "../api/useRestTransactions";
 import { commify } from "../utils/utils";
+import { useTimezone } from "../useTimezone";
+import { formatTimestamp } from "../utils/timestamp";
 
 /**
  * SSR-safe version of RecentTransactionsSection.
@@ -13,6 +15,7 @@ import { commify } from "../utils/utils";
  */
 const RecentTransactionsSectionSSR: React.FC = () => {
   const { transactions: recentTransactions, isLoading } = useRecentTransactions(5);
+  const timeZone = useTimezone();
   const symbol = "ETH"; // Default symbol for SSR
 
   // Truncate hash for display
@@ -125,16 +128,7 @@ const RecentTransactionsSectionSSR: React.FC = () => {
           </thead>
           <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200">
             {recentTransactions.map((tx) => {
-              const timestamp = new Date(tx.timestamp * 1000);
-              const formattedTime = timestamp.toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-              });
+              const formattedTime = formatTimestamp(tx.timestamp, timeZone);
 
               const valueBigInt = BigInt(tx.value);
               const feeBigInt = BigInt(tx.fee);
@@ -190,16 +184,7 @@ const RecentTransactionsSectionSSR: React.FC = () => {
       {/* Mobile Cards */}
       <div className="block sm:hidden space-y-3 px-3">
         {recentTransactions.map((tx) => {
-          const timestamp = new Date(tx.timestamp * 1000);
-          const formattedTime = timestamp.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-          });
+          const formattedTime = formatTimestamp(tx.timestamp, timeZone);
 
           const valueBigInt = BigInt(tx.value);
           const feeBigInt = BigInt(tx.fee);

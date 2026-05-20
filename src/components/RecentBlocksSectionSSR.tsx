@@ -4,6 +4,8 @@ import React from "react";
 import { NavLink } from "react-router";
 import { useRecentBlocks } from "../api/useRestBlocks";
 import { commify } from "../utils/utils";
+import { useTimezone } from "../useTimezone";
+import { formatTimestamp } from "../utils/timestamp";
 
 /**
  * SSR-safe version of RecentBlocksSection.
@@ -12,6 +14,7 @@ import { commify } from "../utils/utils";
  */
 const RecentBlocksSectionSSR: React.FC = () => {
   const { blocks: recentBlocks, isLoading } = useRecentBlocks(5);
+  const timeZone = useTimezone();
 
   // Truncate address for display
   const truncateAddress = (address: string) => {
@@ -113,16 +116,7 @@ const RecentBlocksSectionSSR: React.FC = () => {
           <tbody className="[&>tr>td]:truncate [&>tr>td]:px-1 [&>tr>td:first-child]:pl-2 [&>tr>td:last-child]:pr-2 [&>tr>td]:py-3 [&>tr]:border-t [&>tr]:border-gray-200">
             {recentBlocks.map((block) => {
               const gasUsedPercent = block.gasLimit ? (block.gasUsed * 100 / block.gasLimit).toFixed(2) : "0";
-              const timestamp = new Date(block.timestamp * 1000);
-              const formattedTime = timestamp.toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-              });
+              const formattedTime = formatTimestamp(block.timestamp, timeZone);
 
               return (
                 <tr key={block.hash}>
@@ -177,16 +171,7 @@ const RecentBlocksSectionSSR: React.FC = () => {
         {recentBlocks.map((block) => {
           const gasUsedPercent = block.gasLimit ? (block.gasUsed * 100 / block.gasLimit).toFixed(2) : "0";
           const gasTarget = block.gasLimit / 2;
-          const timestamp = new Date(block.timestamp * 1000);
-          const formattedTime = timestamp.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-          });
+          const formattedTime = formatTimestamp(block.timestamp, timeZone);
 
           return (
             <div key={block.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3 min-w-0">

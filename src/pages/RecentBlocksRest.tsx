@@ -9,6 +9,8 @@ import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
 import { RestBlock, usePaginatedBlocks } from "../api/useRestBlocks";
 import { commify } from "../utils/utils";
+import { useTimezone } from "../useTimezone";
+import { formatTimestamp } from "../utils/timestamp";
 
 const ELASTICITY_MULTIPLIER = 2;
 const BLOCKS_PER_PAGE = 30;
@@ -25,6 +27,7 @@ const RecentBlocksRest: React.FC = () => {
 
   // Use React Query hook for SSR-compatible data fetching
   const { blocks, total: totalBlocks, isLoading } = usePaginatedBlocks(pageNumber, BLOCKS_PER_PAGE);
+  const timeZone = useTimezone();
 
   const structuredJSON = JSON.stringify({
     "@context": "https://schema.org",
@@ -109,16 +112,8 @@ const RecentBlocksRest: React.FC = () => {
             Gwei
           </span>
         </td>
-        <td className="text-right text-gray-400" title={new Date(block.timestamp * 1000).toLocaleString()}>
-          {new Date(block.timestamp * 1000).toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-          })}
+        <td className="text-right text-gray-400" title={formatTimestamp(block.timestamp, timeZone)}>
+          {formatTimestamp(block.timestamp, timeZone)}
         </td>
       </tr>
     );
@@ -243,16 +238,8 @@ const RecentBlocksRest: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Date/Time</span>
-                        <span className="text-sm text-gray-800" title={new Date(block.timestamp * 1000).toLocaleString()}>
-                          {new Date(block.timestamp * 1000).toLocaleString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: false
-                          })}
+                        <span className="text-sm text-gray-800" title={formatTimestamp(block.timestamp, timeZone)}>
+                          {formatTimestamp(block.timestamp, timeZone)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">

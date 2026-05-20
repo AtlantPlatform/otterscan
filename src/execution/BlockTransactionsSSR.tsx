@@ -15,6 +15,8 @@ import { useLatestBlockNumber } from "../api/useRestBlocks";
 import { blockTxsURL } from "../url";
 import { PAGE_SIZE } from "../params";
 import { extract4Bytes } from "../use4Bytes";
+import { useTimezone } from "../useTimezone";
+import { formatTimestamp } from "../utils/timestamp";
 
 /**
  * SSR-safe Block Transactions page component.
@@ -38,6 +40,7 @@ const BlockTransactionsSSR: React.FC = () => {
 
   const { transactions, total, isLoading } = useBlockTransactionsSSR(blockNumber, pageNumber, PAGE_SIZE);
   const { latestBlockNumber } = useLatestBlockNumber();
+  const timeZone = useTimezone();
 
   // Transform REST API response to expected format
   const transformedTxs = transactions.map((tx: any) => ({
@@ -325,16 +328,8 @@ const BlockTransactionsSSR: React.FC = () => {
                                   <span>{tx.blockNumber.toLocaleString()}</span>
                                 </Link>
                               </td>
-                              <td className="min-w-36 max-w-36 text-gray-600" title={new Date(tx.timestamp * 1000).toLocaleString()}>
-                                {new Date(tx.timestamp * 1000).toLocaleString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  second: '2-digit',
-                                  hour12: false
-                                })}
+                              <td className="min-w-36 max-w-36 text-gray-600" title={formatTimestamp(tx.timestamp, timeZone)}>
+                                {formatTimestamp(tx.timestamp, timeZone)}
                               </td>
                               <td className="min-w-48 max-w-48">
                                 {tx.value > 0n ? (
@@ -362,15 +357,7 @@ const BlockTransactionsSSR: React.FC = () => {
                     const fourBytes = extract4Bytes(tx.data);
                     const isSimpleTransfer = tx.data === "0x";
                     const methodLabel = isSimpleTransfer ? "transfer" : (fourBytes ?? "-");
-                    const formattedTime = new Date(tx.timestamp * 1000).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: false
-                    });
+                    const formattedTime = formatTimestamp(tx.timestamp, timeZone);
 
                     return (
                       <div key={tx.hash} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-3 min-w-0">

@@ -8,6 +8,8 @@ import { recentBlocksQueryOptions, paginatedBlocksQueryOptions, singleBlockQuery
 import { recentTransactionsQueryOptions, paginatedTransactionsQueryOptions, singleTransactionQueryOptions, blockTransactionsQueryOptions } from './api/useRestTransactions';
 import { singleAddressQueryOptions, addressTransactionsQueryOptions } from './api/useRestAddresses';
 import { PAGE_SIZE } from './params';
+import { TimezoneProvider } from './useTimezone';
+import { resolveTimeZone } from './utils/timestamp';
 
 interface RenderResult {
   html: string;
@@ -59,7 +61,14 @@ function getAddress(urlPath: string): string | null {
   return match ? match[1] : null;
 }
 
-export async function render(url: string, _ssrManifest?: string): Promise<RenderResult> {
+export async function render(
+  url: string,
+  _ssrManifest?: string,
+  timeZone?: string,
+): Promise<RenderResult> {
+  // The `tz` cookie is untrusted input; fall back to UTC if it is missing or
+  // not a valid IANA timezone (an invalid one makes toLocaleString throw).
+  const resolvedTimeZone = resolveTimeZone(timeZone);
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -144,9 +153,11 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
     <React.StrictMode>
       <HelmetProvider context={helmetContext}>
         <QueryClientProvider client={queryClient}>
-          <StaticRouter location={url}>
-            <AppSSR />
-          </StaticRouter>
+          <TimezoneProvider initialTimeZone={resolvedTimeZone}>
+            <StaticRouter location={url}>
+              <AppSSR />
+            </StaticRouter>
+          </TimezoneProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </React.StrictMode>
@@ -164,6 +175,7 @@ export async function render(url: string, _ssrManifest?: string): Promise<Render
     ${helmet?.script?.toString() ?? ''}
     <script>
       window.__REACT_QUERY_STATE__ = ${JSON.stringify(dehydratedState)};
+      window.__TZ__ = ${JSON.stringify(resolvedTimeZone)};
     </script>
   `;
 

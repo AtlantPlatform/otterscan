@@ -19,6 +19,27 @@ const ssrManifest = isProduction
   ? fs.readFileSync(path.resolve(__dirname, 'dist/client/.vite/ssr-manifest.json'), 'utf-8')
   : undefined;
 
+// Read a single cookie value out of a raw Cookie header.
+function parseCookie(cookieHeader, name) {
+  if (!cookieHeader) {
+    return undefined;
+  }
+  for (const part of cookieHeader.split(';')) {
+    const eq = part.indexOf('=');
+    if (eq === -1) {
+      continue;
+    }
+    if (part.slice(0, eq).trim() === name) {
+      try {
+        return decodeURIComponent(part.slice(eq + 1).trim());
+      } catch {
+        return undefined;
+      }
+    }
+  }
+  return undefined;
+}
+
 const app = express();
 
 // Vite dev server (development only)
@@ -79,7 +100,11 @@ app.use(async (req, res, next) => {
       render = (await import('./dist/server/entry-server.js')).render;
     }
 
-    const rendered = await render(url, ssrManifest);
+    // The browser's timezone, set by the client into the `tz` cookie. Absent
+    // on a first-ever visit; entry-server falls back to UTC. Validated there.
+    const timeZone = parseCookie(req.headers.cookie, 'tz');
+
+    const rendered = await render(url, ssrManifest, timeZone);
 
     const html = template
       .replace(`<!--app-head-->`, rendered.head ?? '')

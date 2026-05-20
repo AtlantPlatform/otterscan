@@ -19,6 +19,8 @@ import FormattedBalance from "../components/FormattedBalance";
 import { useSingleBlock, useLatestBlockNumber } from "../api/useRestBlocks";
 import { blockURL, blockTxsURL } from "../url";
 import { commify } from "../utils/utils";
+import { useTimezone } from "../useTimezone";
+import { formatTimestamp } from "../utils/timestamp";
 
 /**
  * SSR-safe Block page component.
@@ -28,6 +30,7 @@ const BlockSSR: FC = () => {
   const { blockNumberOrHash } = useParams();
   const { block, isLoading, error } = useSingleBlock(blockNumberOrHash);
   const { latestBlockNumber } = useLatestBlockNumber();
+  const timeZone = useTimezone();
 
   if (!blockNumberOrHash) {
     return <BlockNotFound blockNumberOrHash="" />;
@@ -225,7 +228,7 @@ const BlockSSR: FC = () => {
                 </InfoRow>
                 <InfoRow title="Timestamp">
                   <span>
-                    {new Date(block.timestamp * 1000).toLocaleString()}
+                    {formatTimestamp(block.timestamp, timeZone)}
                   </span>
                 </InfoRow>
                 <InfoRow title="Transactions">
@@ -355,7 +358,7 @@ const BlockSSR: FC = () => {
                 <div className="p-4">
                   <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Block Summary</h2>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    Ethereum block #{commify(block.number)} was mined on {new Date(block.timestamp * 1000).toLocaleString()} by {block.miner}.
+                    Ethereum block #{commify(block.number)} was mined on {formatTimestamp(block.timestamp, timeZone)} by {block.miner}.
                     This block contains {block.transactionCount} transaction{block.transactionCount !== 1 ? 's' : ''} with a total gas usage of {commify(formatUnits(block.gasUsed, 0))} out of {commify(formatUnits(block.gasLimit, 0))} gas limit.
                     {block.baseFeePerGas !== null && ` The base fee was ${(block.baseFeePerGas / 1e9).toFixed(9)} Gwei.`}
                     {' '}The block hash is {block.hash} and the parent block is #{block.number - 1}.

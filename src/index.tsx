@@ -7,6 +7,8 @@ import { BrowserRouter } from "react-router";
 import App from "./App";
 import AppSSR from "./AppSSR";
 import { queryClient } from "./queryClient";
+import { TimezoneProvider } from "./useTimezone";
+import { getBrowserTimeZone } from "./utils/timestamp";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
@@ -75,27 +77,35 @@ if (dehydratedState?.queries) {
   }
 }
 
-// SSR hydration uses AppSSR (same component tree as server)
+// SSR hydration uses AppSSR (same component tree as server).
+// The timezone must match what the server rendered with (window.__TZ__) so the
+// first client render is identical to the server HTML; TimezoneProvider then
+// self-corrects to the browser's real timezone after hydration.
 const AppSSRWithProviders = () => (
   <React.StrictMode>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <HydrationBoundary state={dehydratedState}>
-          <BrowserRouter>
-            <AppSSR />
-          </BrowserRouter>
+          <TimezoneProvider initialTimeZone={window.__TZ__}>
+            <BrowserRouter>
+              <AppSSR />
+            </BrowserRouter>
+          </TimezoneProvider>
         </HydrationBoundary>
       </QueryClientProvider>
     </HelmetProvider>
   </React.StrictMode>
 );
 
-// CSR fallback uses App (with createBrowserRouter)
+// CSR fallback uses App (with createBrowserRouter). No SSR HTML to match, so
+// the browser's real timezone can be used from the first render.
 const AppCSRWithProviders = () => (
   <React.StrictMode>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <TimezoneProvider initialTimeZone={getBrowserTimeZone()}>
+          <App />
+        </TimezoneProvider>
       </QueryClientProvider>
     </HelmetProvider>
   </React.StrictMode>
