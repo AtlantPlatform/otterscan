@@ -64,6 +64,17 @@ app.use('/api', createProxyMiddleware({
   changeOrigin: true,
 }));
 
+// Proxy 4byte / topic0 / chain / asset lookups to the canonical assets host.
+// Production deployments bake these into dist/client/ from otterscan-assets;
+// for local dev / non-docker prod runs we fall back to the live host.
+const assetsProxyTarget = process.env.ASSETS_PROXY_URL || 'https://ethscan.org';
+for (const route of ['/signatures', '/topic0', '/chains']) {
+  app.use(route, createProxyMiddleware({
+    target: `${assetsProxyTarget}${route}`,
+    changeOrigin: true,
+  }));
+}
+
 // Serve sitemaps from the appropriate directory
 const sitemapsDir = isProduction
   ? path.resolve(__dirname, 'dist/client/sitemaps')

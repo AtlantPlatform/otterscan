@@ -8,7 +8,7 @@ import HeaderSSR from "../components/HeaderSSR";
 import StandardFrame from "../components/StandardFrame";
 import SimplePageControl from "../search/SimplePageControl";
 import { RestTransactionWithContext, usePaginatedTransactions } from "../api/useRestTransactions";
-import { extract4Bytes } from "../use4Bytes";
+import MethodName from "../components/MethodName";
 import { useTimezone } from "../useTimezone";
 import { formatTimestamp } from "../utils/timestamp";
 
@@ -202,9 +202,6 @@ const RecentTransactionsRest: React.FC = () => {
                         {transactions.map((tx) => {
                           const valueBigInt = BigInt(tx.value);
                           const feeBigInt = BigInt(tx.fee);
-                          const fourBytes = extract4Bytes(tx.data);
-                          const isSimpleTransfer = tx.data === "0x";
-                          const methodLabel = isSimpleTransfer ? "transfer" : (fourBytes ?? "-");
 
                           return (
                             <tr key={tx.hash}>
@@ -217,9 +214,7 @@ const RecentTransactionsRest: React.FC = () => {
                                 </NavLink>
                               </td>
                               <td className="min-w-32 max-w-32">
-                                <div className="method-badge flex min-h-full max-w-max items-baseline rounded-lg px-3 py-1 text-xs">
-                                  <p className="truncate">{methodLabel}</p>
-                                </div>
+                                <MethodName data={tx.data} to={tx.to} />
                               </td>
                               <td className="max-w-28">
                                 <NavLink
@@ -283,9 +278,7 @@ const RecentTransactionsRest: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Method</span>
-                        <div className="method-badge text-xs px-2 py-1 rounded">
-                          {tx.data === "0x" ? "transfer" : (extract4Bytes(tx.data) ?? "-")}
-                        </div>
+                        <MethodName data={tx.data} to={tx.to} />
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Block</span>

@@ -64,6 +64,11 @@ const fourBytesFetcher =
 
       // Get only the first occurrence, for now ignore alternative param names
       const sigs = await res.text();
+      // Defensive: some hosts return an SPA HTML 200 for unknown selectors
+      // instead of a 404. Reject anything that isn't a plain signature string.
+      if (sigs.startsWith("<") || !sigs.includes("(")) {
+        return null;
+      }
       const sig = sigs.split(";")[0];
       const cut = sig.indexOf("(");
       const method = sig.slice(0, cut);
@@ -98,7 +103,22 @@ export const use4Bytes = (
     );
   }
 
-  return null;
+  // RuntimeContext may be absent on SSR-safe routes (e.g. /tx/recent, /), so
+  // fall back to same-origin ("" prefix → "/signatures/..."), which the dev
+  // server proxies to the canonical assets host and production serves directly
+  // from the baked-in otterscan-assets bundle.
+  const runtime = useContext(RuntimeContext);
+  const assetsURLPrefix = runtime?.config?.assetsURLPrefix ?? "";
+
+  const { data } = useSWRImmutable<
+    FourBytesEntry | null | undefined,
+    unknown,
+    FourBytesKey | null
+  >(
+    rawFourBytes !== null ? ["4bytes", rawFourBytes] : null,
+    fourBytesFetcher(assetsURLPrefix),
+  );
+  return data;
 };
 
 export const useMethodSelector = (

@@ -125,7 +125,7 @@ start_frontend() {
     if [ "$mode" = "dev" ]; then
         # Development mode - use vite dev server with SSR
         echo -e "  Starting in ${YELLOW}development${NC} mode..."
-        VITE_API_URL="http://localhost:$API_PORT" node server.js > /tmp/otterscan-frontend.log 2>&1 &
+        VITE_API_URL="http://localhost:$API_PORT" VITE_ASSETS_URL="${VITE_ASSETS_URL:-https://ethscan.org}" node server.js > /tmp/otterscan-frontend.log 2>&1 &
     else
         # Production mode - always rebuild to pick up source changes
         echo -e "  Building frontend..."

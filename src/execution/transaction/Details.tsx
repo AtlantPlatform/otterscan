@@ -50,6 +50,7 @@ import { calculateFee } from "../feeCalc";
 import NavNonce from "./NavNonce";
 import RewardSplit from "./RewardSplit";
 import TokenTransferItem from "./TokenTransferItem";
+import TransactionAction from "./action/TransactionAction";
 import InputDecoder from "./decoder/InputDecoder";
 import {Helmet} from 'react-helmet-async';
 import {formatValue} from '../../components/formatter';
@@ -180,6 +181,7 @@ const Details: FC<DetailsProps> = ({ txData }) => {
           <script type="application/ld+json">{payloadSchemaWebPage}</script>
           <script type="application/ld+json">{payloadSchemaFaqPage}</script>
         </Helmet>
+        <TransactionAction txData={txData} />
         <InfoRow title="Transaction Hash">
           <div className="flex items-baseline space-x-2 break-all">
           <span className="font-hash" data-test="tx-hash">

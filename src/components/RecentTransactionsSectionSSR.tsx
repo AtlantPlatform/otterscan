@@ -7,6 +7,7 @@ import { useRecentTransactions } from "../api/useRestTransactions";
 import { commify } from "../utils/utils";
 import { useTimezone } from "../useTimezone";
 import { formatTimestamp } from "../utils/timestamp";
+import MethodName from "./MethodName";
 
 /**
  * SSR-safe version of RecentTransactionsSection.
@@ -22,22 +23,6 @@ const RecentTransactionsSectionSSR: React.FC = () => {
   const truncateHash = (hash: string) => {
     if (!hash) return '';
     return `${hash.slice(0, 10)}...${hash.slice(-8)}`;
-  };
-
-  // Extract method name from data (simplified 4bytes lookup)
-  const getMethodDisplay = (data: string) => {
-    if (!data || data === '0x' || data.length < 10) {
-      return 'Transfer';
-    }
-    const selector = data.slice(0, 10);
-    // Common method selectors
-    const knownMethods: Record<string, string> = {
-      '0xa9059cbb': 'transfer',
-      '0x23b872dd': 'transferFrom',
-      '0x095ea7b3': 'approve',
-      '0x': 'Transfer',
-    };
-    return knownMethods[selector] || selector;
   };
 
   if (isLoading || recentTransactions.length === 0) {
@@ -151,9 +136,7 @@ const RecentTransactionsSectionSSR: React.FC = () => {
                     </div>
                   </td>
                   <td>
-                    <div className="text-xs bg-gray-100 px-2 py-1 rounded inline-block">
-                      {getMethodDisplay(tx.data)}
-                    </div>
+                    <MethodName data={tx.data} to={tx.to} />
                   </td>
                   <td className="text-gray-600" title={formattedTime}>
                     {formattedTime}
@@ -212,9 +195,7 @@ const RecentTransactionsSectionSSR: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Method</span>
-                <div className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                  {getMethodDisplay(tx.data)}
-                </div>
+                <MethodName data={tx.data} to={tx.to} />
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Age</span>

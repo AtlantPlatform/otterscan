@@ -1,4 +1,5 @@
 {
   "rpcURL": "/api/rpc",
-  "experimentalFixedChainId": 1
+  "experimentalFixedChainId": 1,
+  "assetsURLPrefix": ""
 }

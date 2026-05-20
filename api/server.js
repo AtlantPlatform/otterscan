@@ -278,7 +278,7 @@ app.get('/api/blocks/:number/transactions', async (req, res) => {
         index: start + i,
         blockNumber: blockNumber,
         timestamp: blockTimestamp,
-        data: tx.data || '0x',
+        data: tx.input || tx.data || '0x',
       };
     });
 
@@ -374,7 +374,7 @@ app.get('/api/transactions/recent', async (req, res) => {
           index: parseInt(tx.transactionIndex, 16),
           blockNumber: blockNum,
           timestamp: blockTimestamp,
-          data: tx.data || '0x',
+          data: tx.input || tx.data || '0x',
         };
       });
 
