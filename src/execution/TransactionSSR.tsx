@@ -22,6 +22,7 @@ import NavTab from "../components/NavTab";
 import { useSingleTransaction } from "../api/useRestTransactions";
 import { commify } from "../utils/utils";
 import TransactionActionLite from "./transaction/action/TransactionActionLite";
+import { buildTxMetaDescription } from "./transaction/txMetaDescription";
 
 /**
  * SSR-safe Transaction page component.
@@ -45,7 +46,15 @@ const TransactionSSR: FC = () => {
     );
   }
 
-  const description = `View full details of Ethereum transaction ${txHash}. Track status, block, addresses, value, gas fees, and execution data on Ethscan.`;
+  const description = tx
+    ? buildTxMetaDescription({
+        hash: tx.hash,
+        from: tx.from,
+        status: tx.status,
+        timestamp: tx.timestamp,
+        resolvedAction: tx.resolvedAction,
+      })
+    : `View full details of Ethereum transaction ${txHash}. Track status, block, addresses, value, gas fees, and execution data on Ethscan.`;
 
   // FAQ content for both schema and UI display
   const faqItems = [
@@ -178,12 +187,12 @@ const TransactionSSR: FC = () => {
 
           {/* OpenGraph */}
           <meta property="og:title" content={`Ethereum Transaction ${txHash} - Transaction Details | Ethscan`} />
-          <meta property="og:description" content={`Explore Ethereum transaction ${txHash}. View status, block, addresses, value, gas fees, and execution details.`} />
+          <meta property="og:description" content={description} />
           <meta property="og:url" content={`https://ethscan.org/tx/${txHash}`} />
 
           {/* Twitter */}
           <meta name="twitter:title" content={`Ethereum Transaction ${txHash} - Transaction Details | Ethscan`} />
-          <meta name="twitter:description" content={`Explore Ethereum transaction ${txHash}. View status, block, addresses, value, and gas fees on Ethscan.`} />
+          <meta name="twitter:description" content={description} />
 
           <script type="application/ld+json">{payloadSchemaGraph}</script>
         </Helmet>

@@ -9,6 +9,7 @@ import ContentFrame from "../components/ContentFrame";
 import NavTab from "../components/NavTab";
 import { useSingleTransaction } from "../api/useRestTransactions";
 import LogEntrySSR from "./transaction/LogEntrySSR";
+import { buildTxMetaDescription } from "./transaction/txMetaDescription";
 
 /**
  * SSR-safe Transaction Logs page component.
@@ -33,9 +34,16 @@ const TransactionLogsSSR: FC = () => {
   }
 
   const title = `Ethereum Transaction Logs ${txHash} | Smart Contract Events | Ethscan`;
-  const description = `View smart contract event logs for Ethereum transaction ${txHash}. Explore emitted events, topics, and decoded log data on Ethscan.`;
-  const ogDescription = `Explore smart contract event logs emitted by Ethereum transaction ${txHash}. View topics, events, and decoded log data on Ethscan.`;
-  const twitterDescription = `Explore smart contract event logs emitted by Ethereum transaction ${txHash}. View topics and decoded event data.`;
+  const fallbackDescription = `View smart contract event logs for Ethereum transaction ${txHash}. Explore emitted events, topics, and decoded log data on Ethscan.`;
+  const description = tx
+    ? buildTxMetaDescription({
+        hash: tx.hash,
+        from: tx.from,
+        status: tx.status,
+        timestamp: tx.timestamp,
+        resolvedAction: tx.resolvedAction,
+      })
+    : fallbackDescription;
   const pageUrl = `https://ethscan.org/tx/${txHash}/logs`;
 
   const payloadSchemaGraph = JSON.stringify({
@@ -137,12 +145,12 @@ const TransactionLogsSSR: FC = () => {
 
           {/* OpenGraph */}
           <meta property="og:title" content={title} />
-          <meta property="og:description" content={ogDescription} />
+          <meta property="og:description" content={description} />
           <meta property="og:url" content={pageUrl} />
 
           {/* Twitter */}
           <meta name="twitter:title" content={title} />
-          <meta name="twitter:description" content={twitterDescription} />
+          <meta name="twitter:description" content={description} />
 
           <script type="application/ld+json">{payloadSchemaGraph}</script>
         </Helmet>

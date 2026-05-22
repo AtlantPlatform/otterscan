@@ -13,6 +13,7 @@ import { RuntimeContext, createRuntime, OtterscanRuntime } from "../useRuntime";
 import { ChainInfoContext, populateChainInfo } from "../useChainInfo";
 import { loadOtterscanConfig } from "../useConfig";
 import TraceClient from "./transaction/TraceClient";
+import { buildTxMetaDescription } from "./transaction/txMetaDescription";
 
 /**
  * RuntimeProvider for client-only content.
@@ -82,9 +83,16 @@ const TransactionTraceSSR: FC = () => {
   }
 
   const title = `Ethereum Transaction Trace ${txHash} | Internal Calls | Ethscan`;
-  const description = `View the full execution trace for Ethereum transaction ${txHash}. Analyze internal calls, contract interactions, and value transfers on Ethscan.`;
-  const ogDescription = `Analyze the execution trace of Ethereum transaction ${txHash}. View internal calls, contract interactions, and value transfers.`;
-  const twitterDescription = `Analyze the execution trace of Ethereum transaction ${txHash}. View internal calls and contract interactions.`;
+  const fallbackDescription = `View the full execution trace for Ethereum transaction ${txHash}. Analyze internal calls, contract interactions, and value transfers on Ethscan.`;
+  const description = tx
+    ? buildTxMetaDescription({
+        hash: tx.hash,
+        from: tx.from,
+        status: tx.status,
+        timestamp: tx.timestamp,
+        resolvedAction: tx.resolvedAction,
+      })
+    : fallbackDescription;
   const pageUrl = `https://ethscan.org/tx/${txHash}/trace`;
 
   const payloadSchemaGraph = JSON.stringify({
@@ -192,12 +200,12 @@ const TransactionTraceSSR: FC = () => {
 
           {/* OpenGraph */}
           <meta property="og:title" content={title} />
-          <meta property="og:description" content={ogDescription} />
+          <meta property="og:description" content={description} />
           <meta property="og:url" content={pageUrl} />
 
           {/* Twitter */}
           <meta name="twitter:title" content={title} />
-          <meta name="twitter:description" content={twitterDescription} />
+          <meta name="twitter:description" content={description} />
 
           <script type="application/ld+json">{payloadSchemaGraph}</script>
         </Helmet>
