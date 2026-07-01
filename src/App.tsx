@@ -13,6 +13,7 @@ import {
   useLoaderData,
 } from "react-router";
 import ErrorFallback from "./components/ErrorFallback";
+import RouteChangeTracker from "./components/RouteChangeTracker";
 import ConnectionErrorPanel from "./ConnectionErrorPanel";
 import Home from "./Home";
 import Main from "./Main";
@@ -248,6 +249,8 @@ const Layout: FC = () => {
   return (
     // Catch all error boundary
     <ErrorBoundary FallbackComponent={ErrorFallback}>
+      {/* Report SPA navigations to GTM/GA4 */}
+      <RouteChangeTracker />
       {/* wait for config load */}
       <Await resolve={data.config}>
         {(config: OtterscanConfig) => (

@@ -3,6 +3,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Routes, Route } from "react-router";
 import ErrorFallback from "./components/ErrorFallback";
 import ClientOnly from "./components/ClientOnly";
+import RouteChangeTracker from "./components/RouteChangeTracker";
 import { SourcifySource } from "./sourcify/useSourcify";
 import { AppConfig, AppConfigContext } from "./useAppConfig";
 import { ChainInfoContext, populateChainInfo } from "./useChainInfo";
@@ -167,6 +168,8 @@ const AppSSR: FC = () => {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <AppConfigProvider>
+        {/* Report SPA navigations to GTM/GA4 */}
+        <RouteChangeTracker />
         <div className="flex h-screen flex-col">
           <Routes>
             {/* SSR-safe routes - render synchronously with prefetched data from QueryClient cache */}
